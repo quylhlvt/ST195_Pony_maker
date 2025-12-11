@@ -14,9 +14,11 @@ import com.example.basefragment.databinding.FragmentSettingBinding
 import com.example.basefragment.ui.main.quick.QuickViewModel
 import kotlin.getValue
 
-class SettingFragment : BaseFragment<FragmentSettingBinding>() {
+class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>( FragmentSettingBinding::inflate, SettingViewModel::class.java) {
+    override fun viewListener() {
 
-    private val viewModel: SettingViewModel by viewModels()
+    }
+
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -35,5 +37,8 @@ class SettingFragment : BaseFragment<FragmentSettingBinding>() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text
 //        }
+    }
+
+    override fun bindViewModel() {
     }
 }

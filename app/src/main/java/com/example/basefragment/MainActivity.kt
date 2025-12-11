@@ -1,6 +1,7 @@
 package com.example.basefragment
 
 import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +9,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.example.basefragment.core.extention.hideNavigation
+import com.example.basefragment.core.helper.SharedPreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 
@@ -17,8 +20,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        hideNavigation(true)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+//        val sharedPrefs = getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
+//        SharedPreferencesManager.sharedPreferences = sharedPrefs
+//        SharedPreferencesManager.editor = sharedPrefs.edit()
 
         // Lấy NavController từ NavHostFragment
         val navHostFragment = supportFragmentManager
@@ -40,5 +47,10 @@ class MainActivity : AppCompatActivity() {
     // Nếu bạn dùng Toolbar + NavigationIcon (mũi tên back)
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideNavigation(true)
     }
 }

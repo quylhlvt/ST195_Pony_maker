@@ -3,7 +3,19 @@
     <style name="Base.Theme.BaseFragment" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
+    <style name="single_marquee">
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+    </style>
+
+    <style name="BaseDialog" parent="Theme.AppCompat.Light.Dialog.Alert" tools:keep="@style/BaseDialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
     <style name="Theme.BaseFragment" parent="Base.Theme.BaseFragment" />
 </resources>

@@ -4,7 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.quick.QuickFragment">
-
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/img_bg_app"
+        android:scaleType="fitXY"
+        android:elevation="-1dp"
+        android:adjustViewBounds="true"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

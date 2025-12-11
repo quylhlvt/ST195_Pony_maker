@@ -9,9 +9,11 @@ import com.example.basefragment.databinding.FragmentHomeBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HomeFragment : BaseFragment<FragmentHomeBinding>() {
+class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>( FragmentHomeBinding::inflate, HomeViewModel::class.java) {
+    override fun viewListener() {
 
-    private val viewModel: HomeViewModel by viewModels()
+    }
+
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -30,5 +32,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text
 //        }
+    }
+
+    override fun bindViewModel() {
     }
 }

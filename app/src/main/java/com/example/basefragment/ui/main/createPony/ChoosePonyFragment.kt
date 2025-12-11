@@ -9,9 +9,11 @@ import com.example.basefragment.databinding.FragmentChoosePonyBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding>() {
+class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyViewModel>( FragmentChoosePonyBinding::inflate, ChoosePonyViewModel::class.java) {
+    override fun viewListener() {
 
-    private val viewModel: ChoosePonyViewModel by viewModels()
+    }
+
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -30,5 +32,8 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding>() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text
 //        }
+    }
+
+    override fun bindViewModel() {
     }
 }

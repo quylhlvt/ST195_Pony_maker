@@ -9,9 +9,12 @@ import com.example.basefragment.databinding.FragmentQuickBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class QuickFragment : BaseFragment<FragmentQuickBinding>() {
+class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>( FragmentQuickBinding::inflate, QuickViewModel::class.java) {
+    override fun viewListener() {
 
-    private val viewModel: QuickViewModel by viewModels()
+
+    }
+
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -30,5 +33,8 @@ class QuickFragment : BaseFragment<FragmentQuickBinding>() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text
 //        }
+    }
+
+    override fun bindViewModel() {
     }
 }

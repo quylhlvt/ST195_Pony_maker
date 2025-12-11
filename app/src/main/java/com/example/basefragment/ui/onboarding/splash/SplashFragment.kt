@@ -4,14 +4,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.helper.SharedPreferencesManager
+import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
 import com.example.basefragment.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SplashFragment : BaseFragment<FragmentSplashBinding>() {
+class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(FragmentSplashBinding::inflate,
+    SplashViewModel::class.java
+) {
+    override fun viewListener() {
 
-    private val viewModel: SplashViewModel by viewModels()
+    }
+
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -20,6 +30,12 @@ class SplashFragment : BaseFragment<FragmentSplashBinding>() {
     ): FragmentSplashBinding = FragmentSplashBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            kotlinx.coroutines.delay(2000)
+        goToHome()
+        }
+//        lifecycleScope.
+
 //        binding.textView.text = "Home Fragment"
 //        binding.btnTest.setOnClickListener {
 //            showSnackbar("Xin chào từ Home!")
@@ -30,5 +46,21 @@ class SplashFragment : BaseFragment<FragmentSplashBinding>() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text
 //        }
+    }
+
+    override fun bindViewModel() {
+        /// load data local và api
+//        lifecycleScope.launch {
+//            viewModel.loadLocalData()
+//
+//        }
+    }
+
+    private fun goToHome() {
+        if (!isLanuageScreen()){
+            findNavController().navigate(R.id.action_splash_to_language)
+            return
+        }
+        findNavController().navigate(R.id.action_splash_to_intro)
     }
 }
