@@ -1,66 +1,44 @@
 package com.example.basefragment
 
-import android.content.Context
-import android.graphics.Rect
+import android.app.Application
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
-import com.example.basefragment.core.extention.hideNavigation
-import com.example.basefragment.databinding.ActivityMainBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private var _binding: ActivityMainBinding? = null
-    private val binding: ActivityMainBinding? get() = _binding
+
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding?.root)
-        setupBottomNavigation()
-        hideNavigation(true)
+        setContentView(R.layout.activity_main)
+
+        // Lấy NavController từ NavHostFragment
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        // Tuỳ chọn: ẩn thanh trạng thái hoặc làm gì đó
+        // window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
     }
-    private fun setupBottomNavigation() {
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
-        val navController = navHostFragment.navController
-//        findViewById<BottomNavigationView>(R.id.navBottom)
-//            .setupWithNavController(navController)
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
-    }
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            val v = currentFocus
-            if (v is EditText) {
-                val outRect = Rect()
-                v.getGlobalVisibleRect(outRect)
-                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                    hideKeyboard()
-                    v.clearFocus()
-                }
-            }
-        }
-        return super.dispatchTouchEvent(event)
-    }
-    fun hideKeyboard() {
-        val inputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        val currentFocus = currentFocus
-        currentFocus?.let {
-            inputMethodManager?.hideSoftInputFromWindow(it.windowToken, 0)
+
+    // QUAN TRỌNG: xử lý nút Back đúng cách
+    override fun onBackPressed() {
+        if (!navController.popBackStack()) {
+            // Không còn gì trong back stack → thoát app
+            super.onBackPressed()
         }
     }
 
+    // Nếu bạn dùng Toolbar + NavigationIcon (mũi tên back)
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
+    }
 }

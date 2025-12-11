@@ -1,23 +1,23 @@
-package com.example.basefragment.ui.language
+package com.example.basefragment.ui.main.quick
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.databinding.FragmentLanguageBinding
+import com.example.basefragment.databinding.FragmentQuickBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LanguageFragment : BaseFragment<FragmentLanguageBinding>() {
+class QuickFragment : BaseFragment<FragmentQuickBinding>() {
 
-    private val viewModel: LanguageViewModel by viewModels()
+    private val viewModel: QuickViewModel by viewModels()
 
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
+    ): FragmentQuickBinding = FragmentQuickBinding.inflate(inflater, container, false)
 
     override fun initView() {
 //        binding.textView.text = "Home Fragment"

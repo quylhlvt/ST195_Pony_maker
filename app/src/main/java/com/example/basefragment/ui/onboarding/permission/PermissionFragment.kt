@@ -1,23 +1,23 @@
-package com.example.basefragment.ui.language
+package com.example.basefragment.ui.onboarding.permission
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.databinding.FragmentLanguageBinding
+import com.example.basefragment.databinding.FragmentPermissionBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LanguageFragment : BaseFragment<FragmentLanguageBinding>() {
+class PermissionFragment : BaseFragment<FragmentPermissionBinding>() {
 
-    private val viewModel: LanguageViewModel by viewModels()
+    private val viewModel: PermissionViewModel by viewModels()
 
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
+    ): FragmentPermissionBinding = FragmentPermissionBinding.inflate(inflater, container, false)
 
     override fun initView() {
 //        binding.textView.text = "Home Fragment"

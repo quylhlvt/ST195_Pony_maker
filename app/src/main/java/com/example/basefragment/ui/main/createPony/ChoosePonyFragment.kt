@@ -1,23 +1,23 @@
-package com.example.basefragment.ui.language
+package com.example.basefragment.ui.main.createPony
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.databinding.FragmentLanguageBinding
+import com.example.basefragment.databinding.FragmentChoosePonyBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LanguageFragment : BaseFragment<FragmentLanguageBinding>() {
+class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding>() {
 
-    private val viewModel: LanguageViewModel by viewModels()
+    private val viewModel: ChoosePonyViewModel by viewModels()
 
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
+    ): FragmentChoosePonyBinding = FragmentChoosePonyBinding.inflate(inflater, container, false)
 
     override fun initView() {
 //        binding.textView.text = "Home Fragment"

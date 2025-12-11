@@ -1,23 +1,23 @@
-package com.example.basefragment.ui.language
+package com.example.basefragment.ui.onboarding.splash
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.databinding.FragmentLanguageBinding
+import com.example.basefragment.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LanguageFragment : BaseFragment<FragmentLanguageBinding>() {
+class SplashFragment : BaseFragment<FragmentSplashBinding>() {
 
-    private val viewModel: LanguageViewModel by viewModels()
+    private val viewModel: SplashViewModel by viewModels()
 
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
+    ): FragmentSplashBinding = FragmentSplashBinding.inflate(inflater, container, false)
 
     override fun initView() {
 //        binding.textView.text = "Home Fragment"

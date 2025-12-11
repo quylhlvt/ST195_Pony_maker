@@ -1,9 +1,10 @@
-package com.example.basefragment.ui.permission
+package com.example.basefragment.ui.main.myPony
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-
 @HiltViewModel
-class PermissionViewModel  @Inject constructor() : ViewModel() {
+class MyPonyViewModel @Inject constructor() : ViewModel() {
+
+
 }

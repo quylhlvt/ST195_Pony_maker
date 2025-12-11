@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.fragmentbase.ui.main.home.HomeFragment"
+        tools:layout="@layout/fragment_home"
+        android:label="Home" />
+    <fragment
+        android:id="@+id/createPony"
+        android:name="com.example.fragmentbase.ui.main.createPony.ChoosePonyFragment"
+        tools:layout="@layout/fragment_choose_pony"
+        android:label="Create Pony" >
+        <action
+            android:id="@+id/action_createPony_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/quick"
+        android:name="com.example.fragmentbase.ui.main.quick.QuickFragment"
+        tools:layout="@layout/fragment_quick"
+        android:label="Quick" >
+        <action
+            android:id="@+id/action_quick_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/myPony"
+        android:name="com.example.fragmentbase.ui.main.myPony.MyPonyFragment"
+        tools:layout="@layout/fragment_my_pony"
+        android:label="My Pony" >
+        <action
+            android:id="@+id/action_my_pony_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+</navigation>

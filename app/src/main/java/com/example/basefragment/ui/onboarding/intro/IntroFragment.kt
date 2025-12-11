@@ -1,4 +1,4 @@
-package com.example.basefragment.ui.home
+package com.example.basefragment.ui.onboarding.intro
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
@@ -7,16 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.basefragment.R
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class HomeFragment : Fragment() {
+class IntroFragment : Fragment() {
 
     companion object {
-        fun newInstance() = HomeFragment()
+        fun newInstance() = IntroFragment()
     }
 
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: IntroViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +26,6 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_intro, container, false)
     }
 }

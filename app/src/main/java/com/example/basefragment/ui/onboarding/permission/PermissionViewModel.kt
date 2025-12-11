@@ -1,10 +1,11 @@
-package com.example.basefragment.ui.intro
+package com.example.basefragment.ui.onboarding.permission
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-
 @HiltViewModel
-class IntroViewModel  @Inject constructor() : ViewModel() {
+class PermissionViewModel @Inject constructor() : ViewModel() {
+
+
 }
