@@ -23,3 +23,7 @@ fun Fragment.toHome()       = nav(R.id.action_intro_to_home) // hoặc action_pe
 
 // Dùng trong PermissionFragment
 fun Fragment.toHomeFromPermission() = nav(R.id.action_permission_to_home)
+
+// Dùng trong LanguageFragment
+fun Fragment.toIntroFromLanguage() = nav(R.id.action_language_to_intro)
+fun Fragment.toHomeFromLanguage() = nav(R.id.action_language_to_home)

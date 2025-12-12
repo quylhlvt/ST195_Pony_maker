@@ -8,6 +8,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.toHomeFromPermission
 import com.example.basefragment.core.helper.SharedPreferencesManager.setPermissionScreen
 import com.example.basefragment.databinding.FragmentPermissionBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,7 +18,7 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
     override fun viewListener() {
         binding.tvContinue.onClick {
             setPermissionScreen(true)
-            findNavController().navigate(R.id.action_permission_to_home)
+            toHomeFromPermission()
         }
     }
 

@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
+import coil.load
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -17,7 +18,15 @@ import com.example.basefragment.utils.DataLocal
 import com.facebook.shimmer.ShimmerDrawable
 import java.io.File
 
-
+fun ImageView.loadImage(imgResource: Int? = null) {
+    val shimmerDrawable = ShimmerDrawable().apply {
+        setShimmer(DataLocal.shimmer)
+    }
+    this.load(imgResource) {
+        placeholder(shimmerDrawable)
+        error(shimmerDrawable)
+    }
+}
 fun loadImage(context: Context, path: String, imageView: ImageView, isLoadShimmer: Boolean = true) {
     val shimmerDrawable = ShimmerDrawable().apply {
         setShimmer(DataLocal.shimmer)

@@ -2,6 +2,7 @@
 <resources>
 
     <color name="app_color3">#AB50DB</color>
+    <color name="color_text_intro">#1F2F4F</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent">#00FFFFFF</color>

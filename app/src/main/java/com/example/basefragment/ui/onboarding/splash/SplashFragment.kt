@@ -8,8 +8,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.toIntro
+import com.example.basefragment.core.extention.toLanguage
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
+import com.example.basefragment.core.helper.SharedPreferencesManager.setLanuageScreen
 import com.example.basefragment.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -58,9 +61,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(Frag
 
     private fun goToHome() {
         if (!isLanuageScreen()){
-            findNavController().navigate(R.id.action_splash_to_language)
+            toLanguage()
             return
         }
-        findNavController().navigate(R.id.action_splash_to_intro)
+        toIntro()
     }
 }

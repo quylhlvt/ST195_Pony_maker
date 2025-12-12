@@ -27,9 +27,9 @@ object DataLocal {
     }
 
     val itemIntroList = listOf(
-        IntroModel(R.drawable.img_intro1, R.string.title_1),
-        IntroModel(R.drawable.img_intro2, R.string.title_2),
-        IntroModel(R.drawable.img_intro3, R.string.title_3)
+        IntroModel("1",R.drawable.img_intro1, R.string.title_1),
+        IntroModel("2",R.drawable.img_intro2, R.string.title_2),
+        IntroModel("3",R.drawable.img_intro3, R.string.title_3)
     )
 
     fun getBackgroundColorDefault(context: Context): ArrayList<SelectedModel> {

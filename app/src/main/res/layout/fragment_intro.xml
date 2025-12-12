@@ -39,14 +39,14 @@
             app:dotsWidthFactor="2.5"
             app:progressMode="false"
             app:selectedDotColor="@color/app_color3" />
-
-        <TextView
-            android:id="@+id/next"
+        <include
+            android:id="@+id/btnNextPager"
+            layout="@layout/bottom_bottom_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Next"
             android:padding="5dp"
-            android:textColor="@color/app_color3"
-            android:layout_gravity="end"/>
+            android:layout_gravity="end"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

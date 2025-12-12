@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
@@ -32,7 +33,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
     open fun setupPreViews() {}
     abstract fun viewListener()
-
+    protected lateinit var toast: Toast
     @Inject
     internal lateinit var sharedPreferences: SharedPreferencesManager
     abstract fun inflateBinding(
@@ -57,8 +58,10 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         super.onViewCreated(view, savedInstanceState)
         Log.v(TAG, "onViewCreated: $this")
         initView()
-        viewListener()
         observeData()
+
+        viewListener()
+
         bindViewModel()
     }
     override fun onAttach(context: Context) {
@@ -114,6 +117,17 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     fun showSnackbar(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
     }
-
+    fun showToast(content: Any) {
+        if (toast != null){
+            toast.cancel()
+        }
+        val contentString = when (content) {
+            is String -> content
+            is Int -> getString(content)
+            else -> {""}
+        }
+        toast = Toast.makeText(requireContext(), contentString, Toast.LENGTH_SHORT)
+        toast.show()
+    }
     abstract fun bindViewModel()
 }

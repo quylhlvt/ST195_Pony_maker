@@ -9,7 +9,23 @@
         android:id="@+id/homeFragment"
         android:name="com.example.basefragment.ui.main.home.HomeFragment"
         tools:layout="@layout/fragment_home"
-        android:label="Home" />
+        android:label="Home" >
+        <action
+            android:id="@+id/action_home_to_createPony"
+            app:destination="@id/createPony"
+            app:popUpTo="@id/createPony"
+           />
+        <action
+            android:id="@+id/action_home_to_quick"
+            app:destination="@id/quick"
+            app:popUpTo="@id/quick"
+           />
+        <action
+            android:id="@+id/action_home_to_myPony"
+            app:destination="@id/createPony"
+            app:popUpTo="@id/myPony"
+           />
+    </fragment>
     <fragment
         android:id="@+id/createPony"
         android:name="com.example.basefragment.ui.main.createPony.ChoosePonyFragment"
@@ -43,5 +59,6 @@
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
 
 </navigation>

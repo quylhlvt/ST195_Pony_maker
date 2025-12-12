@@ -1,3 +1,3 @@
 package com.example.basefragment.data.model.intro
 
-data class IntroModel(val image: Int, val content: Int)
+data class IntroModel(val id: String? = null,val image: Int, val content: Int)

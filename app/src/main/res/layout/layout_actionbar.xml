@@ -12,9 +12,9 @@
         android:layout_height="32dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="10dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:visibility="gone"
         android:src="@drawable/back_app"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -57,7 +57,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft"
         app:strokeColor="@color/black"
-            app:strokeJoinStyle="miter"
+        app:strokeJoinStyle="miter"
         app:strokeMiter="5dp"
         app:strokeWidth="1.3dp" />
 
@@ -123,8 +123,9 @@
         android:id="@+id/btnActionBarRightText"
         android:layout_width="70dp"
         android:layout_height="30dp"
-        android:layout_marginEnd="16dp"
         android:visibility="gone"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/frame_select_language"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarRight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnActionBarRight">

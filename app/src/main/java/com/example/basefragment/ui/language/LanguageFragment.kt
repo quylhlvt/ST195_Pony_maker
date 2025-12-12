@@ -2,6 +2,7 @@ package com.example.basefragment.ui.language
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
@@ -11,6 +12,8 @@ import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.toHomeFromLanguage
+import com.example.basefragment.core.extention.toIntroFromLanguage
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanguageKey
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
@@ -26,13 +29,12 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     FragmentLanguageBinding::inflate, LanguageViewModel::class.java
 ) {
     private val languageAdapter by lazy { LanguageAdapter(requireContext()) }
-    private var keyLanguage: String? =null
+
     override fun viewListener() {
         binding.actionBar.btnActionBarRight.onClick {
-            findNavController().navigate(R.id.action_language_to_intro)
-
+            handleDone()
         }
-
+        handleRcv()
     }
 
 
@@ -41,37 +43,40 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        initRcv()
-        keyLanguage = isLanguageKey()
-
-
         binding.actionBar.apply {
-            btnActionBarRight.apply {
-                visible()
-                setImageResource(R.drawable.select_language)
-            }
-            if (!isLanuageScreen()) {
-                tvStart.visible()
-                return
-            }
-            tvCenter.visible()
+            btnActionBarLeft.setImageResource(R.drawable.back_app)
+            btnActionBarRight.setImageResource(R.drawable.select_language)
         }
+        initRcv()
+
+        val checkFirst = isLanuageScreen()
+        val keyLanguage = isLanguageKey()
+        val currentLang = keyLanguage.ifEmpty { "en" }
+
+        viewModel.setFirstLanguage(isFirst = !checkFirst)
+        viewModel.loadLanguages(currentLang)
+//            btnActionBarRight.apply {
+//                visible()
+//                setImageResource(R.drawable.select_language)
+//            }
+//            if (!isLanuageScreen()) {
+//                tvStart.visible()
+//                return
+//            }
+//            tvCenter.visible()
+
 
 //        binding.textView.text = "Home Fragment"
 //        binding.btnTest.setOnClickListener {
 //            showSnackbar("Xin chào từ Home!")
-//        }
+//
     }
 
     override fun observeData() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                launch {
-//                viewModel.isFirstLanguage.collect { isFirst ->
-//                    binding.actionBar.tvStart.visible(isFirst)
-//                    binding.actionBar.tvCenter.visible(!isFirst)
-//                }}
+
 
                 launch {
                     viewModel.isFirstLanguage.collect { isFirst ->
@@ -85,6 +90,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
                 }
                 launch {
                     viewModel.languageList.collect { list ->
+                        Log.d("LANG", "Updating adapter with list size=${list.size}") // check log
                         languageAdapter.submitList(list)
                     }
                 }
@@ -103,8 +109,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     }
 
     override fun bindViewModel() {
-        if (isLanuageScreen()){   viewModel.setFirstLanguage(keyLanguage == null)}
-        viewModel.loadLanguages(keyLanguage?:"en")
+
 
     }
 
@@ -112,6 +117,33 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         binding.recycleLanguage.apply {
             adapter = languageAdapter
             itemAnimator = null
+        }
+    }
+    private fun handleRcv() {
+        binding.apply {
+            languageAdapter.onItemClick = { code ->
+                binding.actionBar.btnActionBarRight.visible()
+                viewModel.selectLanguage(code)
+            }
+        }
+    }
+    private fun handleDone() {
+        val code = viewModel.codeLang.value
+        if (code.isEmpty()) {
+            showToast(R.string.not_select_lang)
+            return
+        }
+        sharedPreferences.setLanguageKey(code)
+
+        if (viewModel.isFirstLanguage.value) {
+            sharedPreferences.setLanuageScreen(true)
+            Log.d("LANGa", "Set language screen = true, navigating to Intro")
+
+            toIntroFromLanguage()
+        } else {
+            Log.d("LANGa", "Navigating to Home")
+
+            toHomeFromLanguage()
         }
     }
 }

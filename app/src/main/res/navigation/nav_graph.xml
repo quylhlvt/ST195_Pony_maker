@@ -5,5 +5,6 @@
     app:startDestination="@id/nav_onboarding">
     <include app:graph="@navigation/nav_onboarding" />
     <include app:graph="@navigation/nav_main" />
+    <include app:graph="@navigation/nav_setting" />
 
 </navigation>

@@ -1,6 +1,7 @@
 package com.example.basefragment.ui.language
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basefragment.data.model.language.LanguageModel
@@ -26,6 +27,7 @@ class LanguageViewModel @Inject constructor( sharedPreferences: SharedPreference
     fun loadLanguages(currentLang: String) {
         viewModelScope.launch {
             val list = DataLocal.getLanguageList().toMutableList()
+            Log.d("LANG", "List size = ${list.size}, data = $list")
 
             val index = list.indexOfFirst { it.code == currentLang }
             if (index != -1) {
