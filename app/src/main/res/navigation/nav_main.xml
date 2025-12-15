@@ -24,7 +24,7 @@
            />
         <action
             android:id="@+id/action_home_to_myPony"
-            app:destination="@id/createPony"
+            app:destination="@id/myPony"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="false"
            />
@@ -58,7 +58,7 @@
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_quick_to_custom"
-            app:destination="@id/quick"
+            app:destination="@id/custom"
             app:popUpTo="@id/quick"
             app:popUpToInclusive="false"
             />

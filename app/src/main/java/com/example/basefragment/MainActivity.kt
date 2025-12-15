@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,6 +19,7 @@ import dagger.hilt.android.HiltAndroidApp
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
+    private val mainViewModel: ViewModelActivity by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         hideNavigation(true)

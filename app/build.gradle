@@ -6,6 +6,7 @@ plugins {
     id("kotlin-kapt")
     id ("com.google.gms.google-services")
     id ("com.google.firebase.crashlytics")
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -23,7 +24,7 @@ android {
 
         testInstrumentationRunner= "androidx.test.runner.AndroidJUnitRunner"
         def formattedDate = new Date().format('MM.dd.yyyy')
-        archivesBaseName = "ST192_PFP_OC_Maker_v${versionName}_${formattedDate}"
+        archivesBaseName = "ST195_PFP_OC_Maker_v${versionName}_${formattedDate}"
     }
 
     buildTypes {

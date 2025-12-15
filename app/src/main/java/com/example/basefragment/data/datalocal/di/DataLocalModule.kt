@@ -36,6 +36,4 @@ object DataLocalModule {
             this.editor = editor
         }
 
-
-
 }

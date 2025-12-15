@@ -90,8 +90,19 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnActionBarCenter2"
+        app:layout_constraintStart_toEndOf="@+id/btnActionBarLeft"
+        app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft" />
+    <!--    btnActionBarCenter-->
+    <ImageView
+        android:id="@+id/btnActionBarCenter2"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
+        app:layout_constraintEnd_toStartOf="@+id/btnActionBarRight"
+        app:layout_constraintStart_toEndOf="@+id/btnActionBarCenter"
         app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft" />
 
     <!--    btnActionBarNextToRight-->

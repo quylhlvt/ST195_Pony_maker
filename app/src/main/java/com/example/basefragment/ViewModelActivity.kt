@@ -3,8 +3,8 @@ package com.example.basefragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basefragment.data.datalocal.manager.AppDataManager
-import com.example.basefragment.data.model.custom.CharacterConfiguration
 import com.example.basefragment.data.model.custom.CustomModel
+import com.example.basefragment.data.usecase.GetCatalogueUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,69 +13,120 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: GetCatalogueUseCase, private val  appDataManager: AppDataManager) : ViewModel() {
 
-class ViewModelActivity  @Inject constructor(
-    private val appDataManager: AppDataManager
-) : ViewModel() {
+    // Data StateFlows - load trong init{}
+    private val _characters = MutableStateFlow<List<CustomModel>>(emptyList())
+    val characters: StateFlow<List<CustomModel>> = _characters.asStateFlow()
 
-    val characters: StateFlow<List<CustomModel>> = appDataManager.characters
-    val backgrounds: StateFlow<List<String>> = appDataManager.backgrounds
-    val stickers: StateFlow<List<String>> = appDataManager.stickers
-    val isLoading: StateFlow<Boolean> = appDataManager.isLoading
-    val loadError: StateFlow<String?> = appDataManager.loadError
+    private val _backgrounds = MutableStateFlow<List<String>>(emptyList())
+    val backgrounds: StateFlow<List<String>> = _backgrounds.asStateFlow()
 
-    // Current character configuration (dùng chung cho custom flow)
-    private val _currentConfiguration = MutableStateFlow<CharacterConfiguration?>(null)
-    val currentConfiguration: StateFlow<CharacterConfiguration?> = _currentConfiguration.asStateFlow()
+    private val _backgroundTexts = MutableStateFlow<List<String>>(emptyList())
+    val backgroundTexts: StateFlow<List<String>> = _backgroundTexts.asStateFlow()
+
+    private val _stickers = MutableStateFlow<List<String>>(emptyList())
+    val stickers: StateFlow<List<String>> = _stickers.asStateFlow()
+
+    private val _speechs = MutableStateFlow<List<String>>(emptyList())
+    val speechs: StateFlow<List<String>> = _speechs.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        // Load data ngay khi ViewModel được khởi tạo
-        loadAppData()
+        // 🔥 Load tất cả data ngay khi ViewModel được tạo
+        loadInitialData()
     }
 
     /**
-     * Load toàn bộ data của app
+     * Load data lần đầu (tự động gọi trong init)
      */
-    private fun loadAppData() {
+    private fun loadInitialData() {
         viewModelScope.launch {
-            appDataManager.loadAllAppData()
+            _isLoading.value = true
+            _error.value = null
+
+            try {
+                // Load data từ AppDataManager
+                appDataManager.loadInitialData()
+
+                // Collect data từ AppDataManager và update local StateFlows
+                launch {
+                    appDataManager.characters.collect { _characters.value = it }
+                }
+                launch {
+                    appDataManager.backgrounds.collect { _backgrounds.value = it }
+                }
+                launch {
+                    appDataManager.backgroundTexts.collect { _backgroundTexts.value = it }
+                }
+                launch {
+                    appDataManager.stickers.collect { _stickers.value = it }
+                }
+                launch {
+                    appDataManager.speechs.collect { _speechs.value = it }
+                }
+                launch {
+                    appDataManager.isLoading.collect { _isLoading.value = it }
+                }
+                launch {
+                    appDataManager.error.collect { _error.value = it }
+                }
+
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
         }
     }
 
     /**
-     * Reload data (nếu cần refresh)
+     * Refresh chỉ API data (không load lại assets)
      */
-    fun reloadData() {
+    fun refreshApiData() {
         viewModelScope.launch {
-            appDataManager.reloadData()
+            appDataManager.refreshFromApi()
         }
     }
 
     /**
-     * Set character configuration đang được customize
+     * Force reload toàn bộ (hiếm khi cần)
      */
-    fun setCurrentConfiguration(config: CharacterConfiguration) {
-        _currentConfiguration.value = config
+    fun forceReloadAll() {
+        viewModelScope.launch {
+            appDataManager.forceReloadAll()
+        }
     }
 
     /**
-     * Get character theo ID
-     */
-    fun getCharacterById(id: String): CustomModel? {
-        return appDataManager.getCharacterById(id)
-    }
-
-    /**
-     * Get character theo index
+     * Get character by index
      */
     fun getCharacterByIndex(index: Int): CustomModel? {
-        return appDataManager.getCharacterByIndex(index)
+        return _characters.value.getOrNull(index)
     }
 
     /**
-     * Clear current configuration
+     * Clear all data
      */
-    fun clearConfiguration() {
-        _currentConfiguration.value = null
+    fun clearData() {
+        appDataManager.clearData()
+        _characters.value = emptyList()
+        _backgrounds.value = emptyList()
+        _backgroundTexts.value = emptyList()
+        _stickers.value = emptyList()
+        _speechs.value = emptyList()
     }
+
+    /* Update data Custom*/
+    fun updateCharacters(updatedList: List<CustomModel>) {
+        _characters.value = updatedList
+        // Nếu bạn muốn lưu luôn xuống AppDataManager:
+        viewModelScope.launch {
+            appDataManager.saveCharactersToJson(updatedList)
+        }
+    }
+
 }

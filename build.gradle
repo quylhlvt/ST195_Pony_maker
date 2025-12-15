@@ -6,6 +6,7 @@ plugins {
     id("com.google.firebase.crashlytics") version "2.9.9" apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kotlin.kapt) apply false
+
 }
 ext {
     retrofit = '2.9.0'

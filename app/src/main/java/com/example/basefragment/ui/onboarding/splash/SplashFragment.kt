@@ -33,7 +33,6 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(Frag
     ): FragmentSplashBinding = FragmentSplashBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        observeDataState()
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             kotlinx.coroutines.delay(2000)
         goToHome()

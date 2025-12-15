@@ -1,21 +1,18 @@
 package com.example.basefragment.data.model.custom
 
-import com.google.gson.annotations.SerializedName
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
-data class CustomModel(  @SerializedName("id")
-                         val id: String = "",
-
-                         @SerializedName("name")
-                         val name: String = "",
-
-                         @SerializedName("thumbnail")
-                         val thumbnail: String = "", // URL hoặc path ảnh preview
-
-                         @SerializedName("body_parts")
-                         val bodyParts: List<BodyPartModel> = emptyList(), // Danh sách các bộ phận cơ thể
-
-                         @SerializedName("is_premium")
-                         val isPremium: Boolean = false,
-
-                         @SerializedName("category")
-                         val category: String = "" // Ví dụ: "animal", "human", "fantasy")
+@Parcelize
+data class CustomModel(
+    val id: String = UUID.randomUUID().toString(),
+    val avatar: String,
+    val listPath: ArrayList<BodyPartModel>,
+    val checkDataOnline: Boolean = false,
+    val updatedAt: Long = System.currentTimeMillis()
+): Parcelable{
+    val bodyPartCount : Int by lazy { listPath.size }
+    inline  fun getBodyPart(index:Int) = listPath.getOrNull(index)
+    inline  fun isComplete() = listPath.isNotEmpty()
+}

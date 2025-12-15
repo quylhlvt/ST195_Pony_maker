@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
@@ -28,16 +29,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             // Click vào "Choose Character"
             btnCreate.onClick {
                 // Navigate tới CategoryFragment
-                // findNavController().navigate(R.id.action_homeFragment_to_categoryFragment)
+                 findNavController().navigate(R.id.action_home_to_createPony)
             }
 
             // Click vào "Quick Mix"
             btnQuickMaker.onClick {
                 // Navigate tới QuickMixFragment
-                // findNavController().navigate(R.id.action_homeFragment_to_quickMixFragment)
+                 findNavController().navigate(R.id.action_home_to_quick)
             }
             btnMyAlbum.onClick {
-
+                findNavController().navigate(R.id.action_home_to_myPony)
             }
         }
     }
@@ -110,7 +111,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 
         // Observe errors
         viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.loadError.collect { error ->
+            mainViewModel.error.collect { error ->
                 error?.let {
                     // Hiển thị error message
                     // showSnackbar("Error: $it")

@@ -4,7 +4,10 @@ import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.basefragment.R
@@ -14,6 +17,7 @@ import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.data.datalocal.manager.AppDataManager
 import com.example.basefragment.databinding.FragmentChoosePonyBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyViewModel>(
@@ -28,6 +32,9 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
                 findNavController().navigateUp()
             }
         }
+//        binding.swipeRefresh?.setOnRefreshListener {
+//            mainViewModel.refreshApiData()
+//        }
     }
 
 
@@ -42,32 +49,49 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
         }
         adapter = ChoosePonyAdapter { character, position ->
-            // Click vào 1 character
-            // Navigate tới CustomFragment với character đã chọn
             findNavController().navigate(
                 R.id.action_createPony_to_custom,
                 bundleOf(
-                    "characterId" to character.id,
-                    "characterIndex" to position
+                    "mode" to "CREATE",
+                    "templateId" to character.id // ID của template
                 )
             )
         }
 
         binding.recycleChoose.apply {
-            layoutManager = GridLayoutManager(requireContext(), 2) // 2 columns
-            adapter = this.adapter
+            layoutManager = GridLayoutManager(requireContext(), 2)
+            adapter = this@ChoosePonyFragment.adapter
         }
-//        binding.textView.text = "Home Fragment"
-//        binding.btnTest.setOnClickListener {
-//            showSnackbar("Xin chào từ Home!")
-//        }
+
     }
 
     override fun observeData() {
-//        viewModel.data.observe(viewLifecycleOwner) { text ->
-//            binding.textView.text = text
-//        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(
+                androidx.lifecycle.Lifecycle.State.STARTED
+            ) {
+
+                launch {
+                    mainViewModel.characters.collect { characters ->
+                        adapter.submitList(characters)
+                    }
+                }
+
+                launch {
+                    mainViewModel.isLoading.collect { isLoading ->
+                        // binding.progressBar.isVisible = isLoading
+                    }
+                }
+
+                launch {
+                    mainViewModel.error.collect { error ->
+                        error?.let { showSnackbar(it) }
+                    }
+                }
+            }
+        }
     }
+
 
     override fun bindViewModel() {
     }

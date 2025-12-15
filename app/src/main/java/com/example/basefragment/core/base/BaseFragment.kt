@@ -60,9 +60,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         initView()
         initText()
         observeData()
-
         viewListener()
-
         bindViewModel()
     }
     override fun onAttach(context: Context) {
