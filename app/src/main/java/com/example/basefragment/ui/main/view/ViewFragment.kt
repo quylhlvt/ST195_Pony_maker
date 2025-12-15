@@ -1,4 +1,4 @@
-package com.example.basefragment.ui.main.add_character
+package com.example.basefragment.ui.main.view
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
@@ -8,13 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.databinding.FragmentAddCharacterBinding
-import com.example.basefragment.databinding.FragmentChoosePonyBinding
-import com.example.basefragment.databinding.FragmentChoosePonyBinding.inflate
-import com.example.basefragment.ui.main.createPony.ChoosePonyViewModel
+import com.example.basefragment.databinding.FragmentQuickBinding
+import com.example.basefragment.databinding.FragmentQuickBinding.inflate
+import com.example.basefragment.databinding.FragmentViewBinding
+import com.example.basefragment.ui.main.quick.QuickViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharacterViewModel>( FragmentAddCharacterBinding::inflate, AddCharacterViewModel::class.java) {
+@AndroidEntryPoint
+class ViewFragment  : BaseFragment<FragmentViewBinding, ViewViewModel>( FragmentViewBinding::inflate, ViewViewModel::class.java) {
     override fun viewListener() {
+
 
     }
 
@@ -23,10 +26,9 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentAddCharacterBinding = FragmentAddCharacterBinding.inflate(inflater, container, false)
+    ): FragmentViewBinding = FragmentViewBinding.inflate(inflater, container, false)
 
     override fun initView() {
-
 //        binding.textView.text = "Home Fragment"
 //        binding.btnTest.setOnClickListener {
 //            showSnackbar("Xin chào từ Home!")

@@ -14,6 +14,7 @@ import com.example.basefragment.core.extention.strings
 import com.example.basefragment.data.model.intro.IntroModel
 import com.example.basefragment.databinding.ItemIntroBinding
 import javax.inject.Inject
+//import kotlin.io.root
 
 private val pageIntroDiff = object : DiffUtil.ItemCallback<IntroModel>() {
     override fun areItemsTheSame(oldItem: IntroModel, newItem: IntroModel) =
@@ -42,7 +43,9 @@ class PagerIntroViewHolder(
     fun bind(pager: IntroModel) {
         binding.run {
             tvContent.text = root.context.strings(pager.content)
-            imvImage.loadImage(pager.image)
+            loadImage(root, pager.image, imvImage, false)
+
+//            imvImage.loadImage(pager.image)
         }
     }
 }

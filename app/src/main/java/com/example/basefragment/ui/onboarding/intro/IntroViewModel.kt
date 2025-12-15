@@ -31,11 +31,9 @@ class IntroViewModel @Inject constructor( private val sharedPreferences: SharedP
         _uiState.update { state ->
             state.copy(pagesSplash = list)
         }
+        getPage(currentPage = 0, totalPages = list.size)
     }
 
-    private fun checkSplashScreenStatus() {
-            navigateToNextScreen()
-    }
 
     private fun navigateToNextScreen() {
         _singleEvent.value = IntroSingleEvent.NavigateToNextScreen

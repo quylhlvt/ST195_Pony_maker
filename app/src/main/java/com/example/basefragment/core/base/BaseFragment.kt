@@ -33,7 +33,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
     open fun setupPreViews() {}
     abstract fun viewListener()
-    protected lateinit var toast: Toast
+    protected var toast: Toast? = null
     @Inject
     internal lateinit var sharedPreferences: SharedPreferencesManager
     abstract fun inflateBinding(
@@ -58,6 +58,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         super.onViewCreated(view, savedInstanceState)
         Log.v(TAG, "onViewCreated: $this")
         initView()
+        initText()
         observeData()
 
         viewListener()
@@ -112,6 +113,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
 
     protected val navController: NavController? get() = _navController
     open fun initView() {}
+    open fun initText() {}
     open fun observeData() {}
 
     fun showSnackbar(message: String) {
@@ -119,7 +121,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
     fun showToast(content: Any) {
         if (toast != null){
-            toast.cancel()
+            toast?.cancel()
         }
         val contentString = when (content) {
             is String -> content
@@ -127,7 +129,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
             else -> {""}
         }
         toast = Toast.makeText(requireContext(), contentString, Toast.LENGTH_SHORT)
-        toast.show()
+        toast?.show()
     }
     abstract fun bindViewModel()
 }

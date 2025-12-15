@@ -1,0 +1,27 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ✅ Layer 1: Viền gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="0"
+                android:startColor="#667eea"
+                android:endColor="#764ba2"
+                android:type="linear" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+
+    <!-- ✅ Layer 2: Trong suốt hoàn toàn -->
+    <item
+        android:left="3dp"
+        android:top="3dp"
+        android:right="3dp"
+        android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00FFFFFF" />  <!-- ✅ Transparent -->
+            <corners android:radius="9dp" />
+        </shape>
+    </item>
+
+</layer-list>

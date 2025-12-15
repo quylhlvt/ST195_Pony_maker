@@ -63,10 +63,8 @@ object SharedPreferencesManager {
         saveIntDataByKey(COUNT_BACK_KEY, isSkipped)
     }
 
-    fun isLanguageKey(): String {
-        val lang = getStringDataByKey(LANGUAGE_KEY)
-        return lang.ifEmpty { "en" }
-    }
+    fun isLanguageKey(): String=getStringDataByKey(LANGUAGE_KEY)
+
     fun setLanguageKey(isSkipped: String) {
         saveStringDataByKey(LANGUAGE_KEY, isSkipped)
     }

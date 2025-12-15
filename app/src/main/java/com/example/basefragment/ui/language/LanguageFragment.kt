@@ -11,6 +11,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.toHomeFromLanguage
 import com.example.basefragment.core.extention.toIntroFromLanguage
@@ -51,7 +52,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
 
         val checkFirst = isLanuageScreen()
         val keyLanguage = isLanguageKey()
-        val currentLang = keyLanguage.ifEmpty { "en" }
+        val currentLang = keyLanguage
 
         viewModel.setFirstLanguage(isFirst = !checkFirst)
         viewModel.loadLanguages(currentLang)
