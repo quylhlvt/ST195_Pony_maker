@@ -79,6 +79,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycleColorItem"
                 android:layout_width="wrap_content"
+                android:elevation="2dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_10_stroke_linear_color"
                 android:clipToPadding="false"
@@ -90,6 +91,7 @@
 
         <FrameLayout
             android:id="@+id/frameLayer"
+            android:background="@drawable/img_bg_layer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/recyclerView2"
@@ -101,6 +103,7 @@
                 android:layout_height="match_parent"
                 android:paddingHorizontal="12dp"
                 android:paddingTop="12dp"
+                android:elevation="1dp"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="5"
                 tools:itemCount="40"
@@ -110,16 +113,19 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView2"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="70dp"
             android:background="@drawable/bg_nav_custom"
             android:clipToPadding="false"
+            android:elevation="1dp"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
+            android:paddingHorizontal="16dp"
             android:paddingVertical="5dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:listitem="@layout/item_layer" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:listitem="@layout/item_bottom_custom" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

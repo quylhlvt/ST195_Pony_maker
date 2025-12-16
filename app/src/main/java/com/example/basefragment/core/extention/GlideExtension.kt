@@ -18,7 +18,7 @@ import com.example.basefragment.utils.DataLocal
 import com.facebook.shimmer.ShimmerDrawable
 import java.io.File
 
-fun ImageView.loadImage(imgResource: Int? = null) {
+fun ImageView.loadImage(imgResource: Any? = null) {
     val shimmerDrawable = ShimmerDrawable().apply {
         setShimmer(DataLocal.shimmer)
     }

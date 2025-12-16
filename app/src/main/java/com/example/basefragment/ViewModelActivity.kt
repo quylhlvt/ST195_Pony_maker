@@ -1,5 +1,6 @@
 package com.example.basefragment
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basefragment.data.datalocal.manager.AppDataManager
@@ -105,7 +106,9 @@ class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: 
      * Get character by index
      */
     fun getCharacterByIndex(index: Int): CustomModel? {
-        return _characters.value.getOrNull(index)
+        val character = _characters.value.getOrNull(index)
+        Log.d("ViewModelActivity", "getCharacterByIndex($index): ${character?.listPath?.size} parts, total=${_characters.value.size}")
+        return character
     }
 
     /**
