@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class BodyPartModel(
-val nav: String,
+    val nav: String,
     val listPath: ArrayList<ColorModel>
 ): Parcelable{
     val position : String by lazy {

@@ -1,12 +1,10 @@
 package com.example.basefragment.ui.main.customize
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.fragment.app.activityViewModels
@@ -17,184 +15,333 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.data.model.custom.ColorModel
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.databinding.FragmentCustomizeBinding
-
-import com.example.basefragment.ui.main.createPony.ChoosePonyViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
-class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewModel>(
-    FragmentCustomizeBinding::inflate, CustomizeViewModel::class.java
-) {
-    private var selectedNavIndex = 0
-    private var selectedColorIndex = 0
+class CustomizeFragment :
+    BaseFragment<FragmentCustomizeBinding, CustomizeViewModel>(
+        FragmentCustomizeBinding::inflate,
+        CustomizeViewModel::class.java
+    ) {
+
+    private val mainViewModel: ViewModelActivity by activityViewModels()
     private lateinit var navAdapter: NavAdapter
     private lateinit var layerAdapter: LayerAdapter
     private lateinit var colorAdapter: ColorAdapter
-    private var isInitialLoad = true
-    private val mainViewModel: ViewModelActivity by activityViewModels()
-    private var characterIndex: Int = -1
 
-    override fun viewListener() {
-        binding.actionBar.apply {
-            btnActionBarLeft.setOnClickListener { findNavController().navigateUp() }
+    private var lastNavIndex = -1
 
-            btnActionBarRight.setOnClickListener {
-                viewModel.saveCharacter(mainViewModel)
-                mainViewModel.refreshApiData()
-            }
-            btnActionBarCenter.setOnClickListener { viewModel.resetCharacter() }
+    // 🔥 Helper function: Lấy đường dẫn ảnh thật từ ColorModel
+    private fun ColorModel.getImagePath(): String? {
+        return listPath.firstOrNull { path ->
+            path != "none" && path != "dice" && path.contains("/")
         }
-
-        binding.imgRandom.setOnClickListener { viewModel.randomizeCharacter() }
     }
-
-    override fun inflateBinding(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): FragmentCustomizeBinding = FragmentCustomizeBinding.inflate(inflater, container, false)
 
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
             setImageActionBar(btnActionBarCenter, R.drawable.ic_reset_all_custom)
         }
-        characterIndex = arguments?.getInt("characterIndex") ?: -1
-        if (characterIndex >= 0) {
-            // Edit từ Quick/MyWork
-            viewModel.initCharacter(mainViewModel,index = characterIndex)
-        } else {
-            val template: CustomModel? = arguments?.getParcelable("template")
-            template?.let { viewModel.initCharacter(mainViewModel,template = it) }
+
+        val characterIndex = arguments?.getInt("characterIndex", -1) ?: -1
+        val templateIndex = arguments?.getInt("templateIndex", -1) ?: -1
+
+        when {
+            characterIndex >= 0 -> {
+                viewModel.initCharacter(mainViewModel, index = characterIndex)
+            }
+            templateIndex >= 0 -> {
+                val template = mainViewModel.getCharacterByIndex(templateIndex)
+                viewModel.initCharacter(mainViewModel, template = template)
+            }
+            else -> {
+                findNavController().navigateUp()
+                return
+            }
         }
+
+        // NAV Adapter
         binding.recyclerView2.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        navAdapter = NavAdapter(requireContext(), emptyList()) { index ->
-            selectedNavIndex = index
-            updateLayerRecyclerView()
+
+        navAdapter = NavAdapter(requireContext(), emptyList()) { navIndex ->
+            viewModel.selectNav(navIndex)
         }
         binding.recyclerView2.adapter = navAdapter
 
-        // --- RecyclerView: grid 5 cột ---
-        binding.recycleColorItem.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        // COLOR Adapter
+        binding.recycleColorItem.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         colorAdapter = ColorAdapter(emptyList()) { colorIndex ->
-            selectedColorIndex = colorIndex  // ✅ Chỉ update index
-            updateLayerRecyclerView()
+            viewModel.selectColor(colorIndex, layerAdapter.selectedIndex)
         }
         binding.recycleColorItem.adapter = colorAdapter
+
+        // LAYER Adapter
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
-        layerAdapter = LayerAdapter(requireContext(), emptyList()) { imageIndex ->
-            updateSelectedImage(imageIndex)
+
+        layerAdapter = LayerAdapter(requireContext(), emptyList()) { layerIndex ->
+            viewModel.selectLayer(layerIndex)
         }
         binding.recyclerView.adapter = layerAdapter
     }
+
+    override fun viewListener() {
+        binding.actionBar.apply {
+            btnActionBarLeft.setOnClickListener {
+                findNavController().navigateUp()
+            }
+            btnActionBarRight.setOnClickListener {
+                viewModel.saveCharacter(mainViewModel)
+                mainViewModel.refreshApiData()
+                findNavController().navigateUp()
+            }
+            btnActionBarCenter.setOnClickListener {
+                viewModel.resetCurrentVariant()
+            }
+        }
+
+        binding.imgRandom.setOnClickListener {
+            viewModel.randomizeCharacter()
+        }
+    }
+
+    override fun inflateBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): FragmentCustomizeBinding = FragmentCustomizeBinding.inflate(inflater, container, false)
+
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.currentCharacter.collect { character ->
-                character?.let {
-                    updateCharacterPreview(
-                        it
-                    )
-                }
-            }}
+            viewModel.selectedBodyParts.collect { parts ->
+                navAdapter.setData(parts)
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.selectedBodyParts.collect { selectedParts ->
-                Log.d("CustomizeFragment", "Selected body parts: ${selectedParts.size}")
-                if (selectedParts.isEmpty()) return@collect
-                // Update Nav RecyclerView
-                navAdapter.setData(selectedParts)
-                // Update Layer RecyclerView theo nav đang chọn
-                if (isInitialLoad) {
-                    Log.d("CustomizeFragment", "🔵 Initial load - reset to index 0")
-                    selectedNavIndex = 0
-                    selectedColorIndex = 0
-                    isInitialLoad = false
+            viewModel.triggerLayerUpdate.collect { trigger ->
+                if (trigger > 0) {
+                    updateLayerRecyclerOnly(viewModel.currentNavIndex.value)
                 }
-                updateColorRecyclerView()
-                updateLayerRecyclerView()
-
             }
         }
 
-    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentNavIndex.collect { navIndex ->
+                if (navIndex != lastNavIndex) {
+                    lastNavIndex = navIndex
 
-    private fun updateColorRecyclerView() {
-        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(selectedNavIndex) ?: return
-        Log.d("CustomizeFragment", "updateColorRecyclerView: ${bodyPart.listPath.size} colors")
-        colorAdapter.setData(bodyPart.listPath)
-        colorAdapter.setSelectedIndex(selectedColorIndex)
-    }
-    override fun bindViewModel() {
-        // Không cần làm gì thêm nếu đã dùng Hilt + BaseFragment
-    }
-    private fun updateCharacterPreview(character: CustomModel) {
-        val container = binding.characterContainer
-        container.removeAllViews() // Xóa view cũ
+                    navAdapter.setSelectedIndex(navIndex)
+                    updateColorRecycler(navIndex)
+                    updateLayerRecycler(navIndex)
 
-        // Sắp xếp theo layer (từ nav)
-        val sortedParts = character.listPath.sortedBy { bodyPart ->
-            bodyPart.nav.substringAfterLast("-").toIntOrNull() ?: 0
-        }
-
-        sortedParts.forEach { bodyPart ->
-            // Dùng tất cả colorPath trong bodyPart
-            bodyPart.listPath.forEach { color ->
-                color.listPath.forEach { path ->
-                    val imageView = ImageView(requireContext()).apply {
-                        layoutParams = FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT
-                        )
-                        scaleType = ImageView.ScaleType.FIT_CENTER
-                    }
-
-                    // Nếu path là drawable
-                    val resId = resources.getIdentifier(path, "drawable", requireContext().packageName)
-                    if (resId != 0) {
-                        imageView.setImageResource(resId)
-                    } else {
-                        // Nếu path là URL, dùng Glide/Coil
-                        // Glide.with(this@CustomizeFragment).load(path).into(imageView)
-                    }
-
-                    container.addView(imageView)
                 }
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentCharacter.collect { character ->
+                updateCharacterPreview(character)
             }
         }
     }
 
-    // ✅ Update RecyclerView ảnh layer (grid 5 cột)
-    private fun updateLayerRecyclerView() {
-        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(selectedNavIndex) ?: return
-        val colorModel = bodyPart.listPath.getOrNull(selectedColorIndex) ?: return
+    private fun updateColorRecycler(navIndex: Int) {
+        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(navIndex) ?: return
 
-        Log.d("CustomizeFragment", "updateLayerRecyclerView: ${colorModel.listPath.size} images")
-        layerAdapter.setData(colorModel.listPath)
-    }
+        // 🔥 Kiểm tra xem có color hay không
+        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
-    // ✅ Khi user chọn 1 ảnh layer
-    private fun updateSelectedImage(imageIndex: Int) {
-        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(selectedNavIndex) ?: return
-        val colorModel = bodyPart.listPath.getOrNull(selectedColorIndex) ?: return
-        val selectedImagePath = colorModel.listPath.getOrNull(imageIndex) ?: return
+        if (!hasColor) {
+            // 🔥 Không có color → ẩn color recycler
+            binding.recycleColorItem.visibility = View.GONE
+            binding.imgChangColor.visibility = View.GONE
+            colorAdapter.setData(emptyList())
+        } else {
+            // 🔥 Có color → hiển thị color recycler
+            binding.recycleColorItem.visibility = View.VISIBLE
+            binding.imgChangColor.visibility = View.VISIBLE
 
-        Log.d("CustomizeFragment", "Selected image: $selectedImagePath")
+            colorAdapter.setData(bodyPart.listPath)
 
-        // ✅ Update bodyPart với màu đã chọn (giữ nguyên list màu)
-        // Chỉ cần update currentCharacter để preview
-        val currentChar = viewModel.currentCharacter.value ?: return
-        val updatedParts = currentChar.listPath.toMutableList()
-
-        if (selectedNavIndex in updatedParts.indices) {
-            val currentBodyPart = updatedParts[selectedNavIndex]
-            // Giữ nguyên tất cả màu, chỉ đánh dấu màu này đang được dùng
-            updatedParts[selectedNavIndex] = currentBodyPart.copy(
-                listPath = arrayListOf(colorModel)  // Lưu màu đang chọn để preview
-            )
-
-            viewModel.updateBodyPart(updatedParts[selectedNavIndex], selectedNavIndex)
+            val selection = viewModel.getSelection(navIndex)
+            colorAdapter.setSelectedIndex(selection.color)
         }
     }
+
+    private fun updateLayerRecyclerOnly(navIndex: Int) {
+        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(navIndex) ?: return
+
+        if (bodyPart.listPath.isEmpty()) {
+            binding.recyclerView.visibility = View.GONE
+            return
+        }
+
+        val selection = viewModel.getSelection(navIndex)
+        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
+
+        if (!hasColor) {
+            // 🔥 Không có color → lấy danh sách ảnh thật, sau đó thêm "none" và "dice" vào đầu
+            val realImages = bodyPart.listPath.mapNotNull { colorModel ->
+                colorModel.getImagePath()
+            }
+
+            // 🔥 Thêm "none" và "dice" vào đầu (theo thứ tự: "none" trước, "dice" sau nếu index != 1)
+            val layerImages = mutableListOf<String>()
+            val index = bodyPart.position.toIntOrNull() ?: 0  // Lấy index từ position
+            if (index != 1) {
+                layerImages.add("none")
+                layerImages.add("dice")
+            } else {
+                layerImages.add("dice")
+            }
+            layerImages.addAll(realImages)  // Thêm các ảnh thật vào sau
+
+            if (layerImages.isEmpty()) {
+                binding.recyclerView.visibility = View.GONE
+                return
+            }
+
+            binding.recyclerView.visibility = View.VISIBLE
+            val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
+            layerAdapter.setDataWithSelection(layerImages, actualLayerIndex)
+            return
+        }
+
+        // 🔥 Có color → logic cũ (không thay đổi)
+        val actualColorIndex = if (selection.color == -1) 0 else selection.color
+        val color = bodyPart.listPath.getOrNull(actualColorIndex) ?: return
+
+        if (color.listPath.isEmpty()) {
+            binding.recyclerView.visibility = View.GONE
+            return
+        }
+
+        binding.recyclerView.visibility = View.VISIBLE
+        val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
+
+        layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
+    }
+
+    private fun updateLayerRecycler(navIndex: Int) {
+        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(navIndex) ?: return
+
+        if (bodyPart.listPath.isEmpty()) {
+            binding.recyclerView.visibility = View.GONE
+            return
+        }
+
+        val selection = viewModel.getSelection(navIndex)
+        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
+
+        if (!hasColor) {
+            // 🔥 Không có color → lấy danh sách ảnh thật, sau đó thêm "none" và "dice" vào đầu
+            val realImages = bodyPart.listPath.mapNotNull { colorModel ->
+                colorModel.getImagePath()
+            }
+
+            // 🔥 Thêm "none" và "dice" vào đầu (theo thứ tự: "none" trước, "dice" sau nếu index != 1)
+            val layerImages = mutableListOf<String>()
+            val index = bodyPart.position.toIntOrNull() ?: 0  // Lấy index từ position (nếu cần, hoặc hardcode nếu biết)
+            if (index != 1) {
+                layerImages.add("none")
+                layerImages.add("dice")
+            } else {
+                layerImages.add("dice")
+            }
+            layerImages.addAll(realImages)  // Thêm các ảnh thật vào sau
+
+            if (layerImages.isEmpty()) {
+                binding.recyclerView.visibility = View.GONE
+                return
+            }
+
+            binding.recyclerView.visibility = View.VISIBLE
+            val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
+            layerAdapter.setDataWithSelection(layerImages, actualLayerIndex)
+            return
+        }
+
+        // 🔥 Có color → logic cũ (không thay đổi)
+        val actualColorIndex = if (selection.color == -1) 0 else selection.color
+        val color = bodyPart.listPath.getOrNull(actualColorIndex) ?: return
+
+        if (color.listPath.isEmpty()) {
+            binding.recyclerView.visibility = View.GONE
+            return
+        }
+
+        binding.recyclerView.visibility = View.VISIBLE
+        val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
+
+        layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
+    }
+    private fun updateCharacterPreview(character: CustomModel?) {
+        binding.characterContainer.removeAllViews()
+
+        val originalBodyParts = viewModel.selectedBodyParts.value
+        val allSelections = (0 until originalBodyParts.size).map { viewModel.getSelection(it) }
+
+        val hasAnySelection = allSelections.any { it.layer != -1 }
+
+        if (!hasAnySelection) {
+            character?.avatar?.let { avatarPath ->
+                val imageView = ImageView(requireContext()).apply {
+                    layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    scaleType = ImageView.ScaleType.FIT_XY
+                }
+                loadImage(avatarPath, imageView)
+                binding.characterContainer.addView(imageView)
+            }
+            return
+        }
+
+        allSelections.forEach { selection ->
+            if (selection.layer == -1) return@forEach
+
+            val bodyPart = originalBodyParts.getOrNull(selection.nav) ?: return@forEach
+            val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
+
+            val imagePath: String? = if (!hasColor) {
+                // 🔥 Case KHÔNG có color
+                val listPath = bodyPart.listPath.firstOrNull()?.listPath ?: return@forEach
+                val rawPath = listPath.getOrNull(selection.layer) ?: return@forEach
+
+                when (rawPath) {
+                    "none" -> null
+                    "dice" -> {
+                        // Random ảnh thật (giống applyPreviewSingleImage)
+                        val realImages = listPath.filter {
+                            it != "none" && it != "dice" && it.contains("/")
+                        }
+                        realImages.randomOrNull()
+                    }
+                    else -> rawPath.takeIf { it.contains("/") && it.isNotBlank() }
+                }
+            } else {
+                // Case có color (giữ nguyên logic cũ)
+                val colorIndex = if (selection.color == -1) 0 else selection.color
+                bodyPart.listPath.getOrNull(colorIndex)?.listPath?.getOrNull(selection.layer)
+                    ?.takeIf { it != "none" && it.isNotBlank() }
+            }
+
+            if (!imagePath.isNullOrBlank()) {
+                val imageView = ImageView(requireContext()).apply {
+                    layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    scaleType = ImageView.ScaleType.FIT_XY
+                }
+                loadImage(imagePath, imageView)
+                binding.characterContainer.addView(imageView)
+            }
+        }
+    }
+    override fun bindViewModel() {}
 }

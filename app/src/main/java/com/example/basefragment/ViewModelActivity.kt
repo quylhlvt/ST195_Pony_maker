@@ -124,12 +124,39 @@ class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: 
     }
 
     /* Update data Custom*/
-    fun updateCharacters(updatedList: List<CustomModel>) {
-        _characters.value = updatedList
-        // Nếu bạn muốn lưu luôn xuống AppDataManager:
+    fun updateOrAddCharacter(
+        character: CustomModel,
+        index: Int = -1
+    ) {
+        val currentList = _characters.value.toMutableList()
+
+        if (index >= 0 && index < currentList.size) {
+            // update
+            currentList[index] = character
+            Log.d("ViewModelActivity", "updateCharacter at index=$index")
+        } else {
+            // add new
+            currentList.add(character)
+            Log.d("ViewModelActivity", "addNewCharacter, size=${currentList.size}")
+        }
+
+        _characters.value = currentList
+
+        // persist xuống local json
         viewModelScope.launch {
-            appDataManager.saveCharactersToJson(updatedList)
+            appDataManager.saveCharactersToJson(currentList)
         }
     }
-
+    fun getCharacterById(characterId: String): CustomModel? {
+        val character = _characters.value.find { it.id == characterId }
+        return character
+    }
+    fun getCharacterIndexById(characterId: String): Int {
+        val index = _characters.value.indexOfFirst { it.id == characterId }
+        return index // trả về -1 nếu không tìm thấy
+    }
+    fun getTemplateById(templateId: String): CustomModel? {
+        // Có 3 cách implement, bạn chọn cách phù hợp
+        return _characters.value.find { it.id == templateId }
+    }
 }

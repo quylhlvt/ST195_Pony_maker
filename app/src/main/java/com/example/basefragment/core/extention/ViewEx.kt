@@ -7,7 +7,13 @@ import android.widget.TextView
 import androidx.annotation.FontRes
 import androidx.core.content.res.ResourcesCompat
 import com.example.basefragment.utils.DataLocal.KEY_LAST_CLICK_TIME
+import kotlin.math.roundToInt
 
+fun Int.dp(context: Context): Int =
+    (this * context.resources.displayMetrics.density).roundToInt()
+
+fun Float.dp(context: Context): Int =
+    (this * context.resources.displayMetrics.density).roundToInt()
 
 fun TextView.setFont(@FontRes resId: Int) {
     typeface = ResourcesCompat.getFont(context, resId)

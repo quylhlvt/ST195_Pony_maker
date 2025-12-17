@@ -49,6 +49,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
+            android:visibility="gone"
             android:id="@+id/imgChangColor"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -79,7 +80,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycleColorItem"
                 android:layout_width="wrap_content"
-                android:elevation="2dp"
+                android:paddingHorizontal="5dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_10_stroke_linear_color"
                 android:clipToPadding="false"

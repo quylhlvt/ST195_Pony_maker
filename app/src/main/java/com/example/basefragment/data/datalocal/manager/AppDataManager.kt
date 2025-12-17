@@ -169,10 +169,8 @@ class AppDataManager @Inject constructor(
             val index = itemName.substringAfter("-").toIntOrNull() ?: return
             colors.forEach { colorModel ->
                 when {
-                    index == 1 -> if (colorModel.listPath.firstOrNull() != "dice") colorModel.listPath.add(
-                        0, "dice"
-                    )
-
+                    index == 1 -> if (colorModel.listPath.firstOrNull() != "dice")
+                        colorModel.listPath.add(0, "dice")
                     else -> {
                         if (colorModel.listPath.firstOrNull() != "none") {
                             colorModel.listPath.add(0, "none")

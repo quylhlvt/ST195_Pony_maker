@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="60dp"
-    android:layout_height="60dp"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="1000dp"
-    app:cardElevation="2dp">
+    android:layout_width="26dp"
+    android:layout_height="26dp"
+    android:gravity="center"
+    android:layout_marginEnd="3dp"
+    >
 
-    <FrameLayout
+
+    <ImageView
+        android:id="@+id/ivColorPreview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/circle_color"
+        android:backgroundTint="@color/app_color3"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/ivColorPreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
-
-        <View
-            android:id="@+id/viewSelected"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/app_color3"
-            android:visibility="gone"
-        />
-    </FrameLayout>
-</androidx.cardview.widget.CardView>
+    <View
+        android:id="@+id/viewSelected"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/foreground_color_item"
+        android:elevation="2dp"
+        app:layout_constraintBottom_toBottomOf="@id/ivColorPreview"
+        app:layout_constraintEnd_toEndOf="@id/ivColorPreview"
+        app:layout_constraintStart_toStartOf="@id/ivColorPreview"
+        app:layout_constraintTop_toTopOf="@id/ivColorPreview" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -52,8 +52,7 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
             findNavController().navigate(
                 R.id.action_createPony_to_custom,
                 bundleOf(
-                    "mode" to "CREATE",
-                    "templateId" to character.id // ID của template
+                    "templateIndex" to position  // Pass index thay vì ID
                 )
             )
         }
