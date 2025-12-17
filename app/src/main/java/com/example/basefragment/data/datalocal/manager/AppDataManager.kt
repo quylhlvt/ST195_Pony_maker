@@ -85,9 +85,6 @@ class AppDataManager @Inject constructor(
         }
     }
 
-    /**
-     * --- Characters ---
-     */
     private suspend fun loadCharactersFromAssets() {
         try {
             val assetManager = context.assets
@@ -96,7 +93,17 @@ class AppDataManager @Inject constructor(
 
             for (folder in folders) {
                 val basePath = "data/$folder"
-                val items = assetManager.list(basePath) ?: continue
+                val itemsRaw = assetManager.list(basePath) ?: continue
+
+                // 🔥 QUAN TRỌNG: Sort items theo position (số trước "-")
+                // assetManager.list() không đảm bảo thứ tự!
+                val items = itemsRaw.sortedBy { item ->
+                    item.substringBefore("-").toIntOrNull() ?: 999
+                }
+
+                Log.d(TAG, "=== Loading character folder: $folder ===")
+                Log.d(TAG, "   Raw items: ${itemsRaw.toList()}")
+                Log.d(TAG, "   Sorted items: $items")
 
                 val bodyParts = arrayListOf<BodyPartModel>()
                 var avatar = ""
@@ -107,8 +114,11 @@ class AppDataManager @Inject constructor(
 
                     if (contents.isNullOrEmpty()) {
                         avatar = "$ASSET_PREFIX$fullPath"
+                        Log.d(TAG, "  📷 Avatar: $item")
                         continue
                     }
+
+                    Log.d(TAG, "  📦 Processing item: $item")
 
                     val nav = contents.firstOrNull { it.startsWith("nav.") }
                         ?.let { "$ASSET_PREFIX$fullPath/$it" } ?: ""
@@ -129,7 +139,16 @@ class AppDataManager @Inject constructor(
                     bodyParts.add(BodyPartModel(nav, colors))
                 }
 
-                result.add(CustomModel(avatar = avatar, listPath = bodyParts))
+                // 🔥 KHÔNG CẦN sort lại vì đã sort items ở trên rồi
+                // bodyParts đã theo đúng thứ tự position: 1, 2, 3, ...
+
+                Log.d(TAG, "✅ Character '$folder' loaded with ${bodyParts.size} parts")
+                Log.d(TAG, "   📋 Body parts order:")
+                bodyParts.forEachIndexed { idx, part ->
+                    Log.d(TAG, "      [$idx] position=${part.position}, navOrder=${part.navOrder}, z-index=${part.zIndex}")
+                }
+
+                result.add(CustomModel(avatar = avatar, listPath = ArrayList(bodyParts)))
             }
 
             _characters.value = result
@@ -139,6 +158,7 @@ class AppDataManager @Inject constructor(
             Log.e(TAG, "❌ Lỗi loadCharactersFromAssets: ${e.message}", e)
         }
     }
+
 
     private suspend fun loadDataFromApi() { // try { // val apiData = apiRepository.getCharacters() // Log.d(TAG, "✅ API call thành công") // } catch (e: Exception) { // Log.e(TAG, "⚠️ API error: ${e.message}") // }
     }
@@ -166,15 +186,29 @@ class AppDataManager @Inject constructor(
 
     private fun processColorDefaults(colors: ArrayList<ColorModel>, itemName: String) {
         try {
-            val index = itemName.substringAfter("-").toIntOrNull() ?: return
+            // 🔥 itemName format: "1-1", "2-4", "3-5"
+            // → Lấy số TRƯỚC dấu "-" (position), KHÔNG phải số sau (z-index)
+            val position = itemName.substringBefore("-").toIntOrNull() ?: return
+
+            Log.d(TAG, " processColorDefaults: itemName=$itemName, position=$position")
+
             colors.forEach { colorModel ->
+                val originalSize = colorModel.listPath.size
+
                 when {
-                    index == 1 -> if (colorModel.listPath.firstOrNull() != "dice")
-                        colorModel.listPath.add(0, "dice")
+                    position == 1 -> {
+                        // Position 1 → chỉ thêm "dice" (không có "none")
+                        if (colorModel.listPath.firstOrNull() != "dice") {
+                            colorModel.listPath.add(0, "dice")
+                            Log.d(TAG, "       → Added 'dice' at position 1 (size: $originalSize → ${colorModel.listPath.size})")
+                        }
+                    }
                     else -> {
+                        // Position khác → thêm cả "none" và "dice"
                         if (colorModel.listPath.firstOrNull() != "none") {
                             colorModel.listPath.add(0, "none")
                             colorModel.listPath.add(1, "dice")
+                            Log.d(TAG, "       → Added 'none' and 'dice' at position $position (size: $originalSize → ${colorModel.listPath.size})")
                         }
                     }
                 }

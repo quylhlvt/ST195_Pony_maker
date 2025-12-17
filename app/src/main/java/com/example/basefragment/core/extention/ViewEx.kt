@@ -18,9 +18,11 @@ fun Float.dp(context: Context): Int =
 fun TextView.setFont(@FontRes resId: Int) {
     typeface = ResourcesCompat.getFont(context, resId)
 }
-fun Context.strings(resId: Int) : String {
+
+fun Context.strings(resId: Int): String {
     return getString(resId)
 }
+
 fun setImageActionBar(imageView: ImageView, res: Int) {
     imageView.setImageResource(res)
     imageView.visible()
@@ -31,10 +33,31 @@ fun setTextActionBar(textView: TextView, text: String) {
     textView.visible()
     textView.visible()
 }
-fun View.visible() { visibility = View.VISIBLE }
-fun View.invisible() { visibility = View.INVISIBLE }
-fun View.gone() { visibility = View.GONE }
-fun View.select() { isSelected = true }
+
+fun View.visible() {
+    visibility = View.VISIBLE
+}
+
+fun View.invisible() {
+    visibility = View.INVISIBLE
+}
+
+fun View.gone() {
+    visibility = View.GONE
+}
+
+fun View.toggetShow() {
+    visibility = if (visibility == View.VISIBLE) {
+        View.INVISIBLE
+    } else {
+        View.VISIBLE
+    }
+}
+
+fun View.select() {
+    isSelected = true
+}
+
 fun View.onClick(interval: Long = 500, action: (View) -> Unit) {
     setOnClickListener {
         val lastClickTime = (this.getTag(KEY_LAST_CLICK_TIME) as? Long) ?: 0L

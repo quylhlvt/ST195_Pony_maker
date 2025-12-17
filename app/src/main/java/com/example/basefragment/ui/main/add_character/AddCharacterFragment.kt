@@ -2,6 +2,7 @@ package com.example.basefragment.ui.main.add_character
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.speech.SpeechRecognizer
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,11 +16,27 @@ import com.example.basefragment.databinding.FragmentAddCharacterBinding
 import com.example.basefragment.databinding.FragmentChoosePonyBinding
 import com.example.basefragment.databinding.FragmentChoosePonyBinding.inflate
 import com.example.basefragment.ui.main.createPony.ChoosePonyViewModel
+import com.example.basefragment.ui.onboarding.permission.PermissionViewModel
 import kotlinx.coroutines.launch
 
 class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharacterViewModel>( FragmentAddCharacterBinding::inflate, AddCharacterViewModel::class.java) {
     private val mainViewModel: ViewModelActivity by activityViewModels()
-
+    private val permissionViewModel: PermissionViewModel by viewModels()
+//
+//    private val backgroundImageAdapter by lazy { BackgroundImageAdapter() }
+//    private val backgroundColorAdapter by lazy { BackgroundColorAdapter() }
+//    private val stickerAdapter by lazy { StickerAdapter() }
+//    private val speechAdapter by lazy { SpeechAdapter() }
+//    private val textFontAdapter by lazy { TextFontAdapter(requireContext()) }
+//    private val textColorAdapter by lazy { TextColorAdapter() }
+//    private val buttonNavigationList by lazy {
+//        arrayListOf(
+//            binding.btnBackground,
+//            binding.btnSticker,
+//            binding.btnSpeech,
+//            binding.btnText,
+//        )
+//    }
     override fun viewListener() {
 
     }

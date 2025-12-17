@@ -21,7 +21,6 @@ import com.example.basefragment.databinding.ItemLayerBinding
 // NavAdapter.kt
 // NavAdapter.kt
 class NavAdapter(
-    private val context: Context,
     private var bodyParts: List<BodyPartModel>,
     private val onClick: (Int) -> Unit
 ) : RecyclerView.Adapter<NavAdapter.NavViewHolder>() {
@@ -71,7 +70,6 @@ class NavAdapter(
 
 // LayerAdapter.kt (VariantAdapter)
 class LayerAdapter(
-    private val context: Context,
     private var imagePaths: List<String>,
     private val onImageSelected: (Int) -> Unit
 ) : RecyclerView.Adapter<LayerAdapter.LayerViewHolder>() {
