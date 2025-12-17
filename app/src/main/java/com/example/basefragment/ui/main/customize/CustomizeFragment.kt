@@ -56,6 +56,7 @@ class CustomizeFragment :
             setImageActionBar(btnActionBarCenter, R.drawable.ic_flip_all_custom)
             setImageActionBar(btnActionBarCenter1, R.drawable.ic_reset_all_custom)
             setImageActionBar(btnActionBarCenter2, R.drawable.ic_show_all_custom)
+            setImageActionBar(btnActionBarRight, R.drawable.next_app)
         }
 
         val characterIndex = arguments?.getInt("characterIndex", -1) ?: -1
@@ -183,6 +184,12 @@ class CustomizeFragment :
                 updateCharacterPreview(character)
             }
         }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isFlipped.collect {
+                updateCharacterPreview(viewModel.currentCharacter.value)
+            }
+        }
+
     }
 
     private fun updateColorRecycler(navIndex: Int) {
@@ -288,6 +295,7 @@ class CustomizeFragment :
         layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
     }
     private fun updateCharacterPreview(character: CustomModel?) {
+        val isFlipped = viewModel.isFlipped.value
         binding.characterContainer.removeAllViews()
         if (character == null) return
 
@@ -322,6 +330,7 @@ class CustomizeFragment :
             val iv = ImageView(requireContext()).apply {
                 layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                 scaleType = ImageView.ScaleType.FIT_XY
+                scaleX = if (isFlipped) -1f else 1f
             }
             loadImage(imagePath, iv)
             binding.characterContainer.addView(iv)

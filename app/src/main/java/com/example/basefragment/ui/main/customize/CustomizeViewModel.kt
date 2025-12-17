@@ -40,22 +40,6 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         _isFlipped.value = !_isFlipped.value
     }
 
-    // 🔥 Helper function: Lấy đường dẫn ảnh thật từ ColorModel
-    private fun ColorModel.getImagePath(): String? {
-        return listPath.firstOrNull { path ->
-            path != "none" && path != "dice" && path.contains("/")
-        }
-    }
-
-    // 🔥 Helper function: Lấy tất cả ảnh để hiển thị (bao gồm none, dice)
-    private fun ColorModel.getAllDisplayPaths(): List<String> {
-        return listPath.filter { path ->
-            path == "none" || path == "dice" || path.contains("/")
-        }
-    }
-
-// Trong CustomizeViewModel.kt
-
     fun initCharacter(
         mainViewModel: ViewModelActivity,
         index: Int? = null,
@@ -73,7 +57,6 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             else -> null
         } ?: return
 
-        // 🔥 Sort character.listPath theo navOrder để đảm bảo thứ tự nav đúng
         val sortedListPath = character.listPath.sortedBy { it.zIndex }
         _currentCharacter.value = character.copy(listPath = ArrayList(sortedListPath))
 
