@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -18,15 +20,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.drawToBitmap
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.toggetShow
+import com.example.basefragment.data.datalocal.manager.CharacterImageManager
 import com.example.basefragment.data.model.custom.ColorModel
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.databinding.FragmentCustomizeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CustomizeFragment :
@@ -34,7 +39,8 @@ class CustomizeFragment :
         FragmentCustomizeBinding::inflate,
         CustomizeViewModel::class.java
     ) {
-
+    @Inject
+    lateinit var imageManager: CharacterImageManager
     private val mainViewModel: ViewModelActivity by activityViewModels()
     private lateinit var navAdapter: NavAdapter
     private lateinit var layerAdapter: LayerAdapter
@@ -66,40 +72,57 @@ class CustomizeFragment :
             characterIndex >= 0 -> {
                 viewModel.initCharacter(mainViewModel, index = characterIndex)
             }
+
             templateIndex >= 0 -> {
                 val template = mainViewModel.getCharacterByIndex(templateIndex)
                 viewModel.initCharacter(mainViewModel, template = template)
             }
+
             else -> {
                 findNavController().navigateUp()
                 return
             }
         }
 
-        // NAV Adapter
+        // ✨ NAV Adapter - CÓ AUTO-SCROLL
         binding.recyclerView2.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        navAdapter = NavAdapter( emptyList()) { navIndex ->
-            viewModel.selectNav(navIndex)
-        }
+        navAdapter = NavAdapter(
+            bodyParts = emptyList(),
+            onClick = { navIndex ->
+                viewModel.selectNav(navIndex)
+            }
+        )
         binding.recyclerView2.adapter = navAdapter
 
-        // COLOR Adapter
+// ✨ COLOR Adapter - CÓ AUTO-SCROLL
         binding.recycleColorItem.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        colorAdapter = ColorAdapter(emptyList()) { colorIndex ->
-            viewModel.selectColor(colorIndex, layerAdapter.selectedIndex)
-        }
+        colorAdapter = ColorAdapter(
+            colors = emptyList(),
+            onColorSelected = { colorIndex ->
+                viewModel.selectColor(colorIndex, layerAdapter.selectedIndex)
+            },
+            onScrollToPosition = { position ->
+                binding.recycleColorItem.smoothScrollToPosition(position)
+            }
+        )
         binding.recycleColorItem.adapter = colorAdapter
 
-        // LAYER Adapter
+// ✨ LAYER Adapter - CÓ AUTO-SCROLL
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
 
-        layerAdapter = LayerAdapter( emptyList()) { layerIndex ->
-            viewModel.selectLayer(layerIndex)
-        }
+        layerAdapter = LayerAdapter(
+            imagePaths = emptyList(),
+            onImageSelected = { layerIndex ->
+                viewModel.selectLayer(layerIndex)
+            },
+            onScrollToPosition = { position ->
+                binding.recyclerView.smoothScrollToPosition(position)
+            }
+        )
         binding.recyclerView.adapter = layerAdapter
     }
 
@@ -109,9 +132,7 @@ class CustomizeFragment :
                 findNavController().navigateUp()
             }
             btnActionBarRight.setOnClickListener {
-                viewModel.saveCharacter(mainViewModel)
-                mainViewModel.refreshApiData()
-                findNavController().navigateUp()
+                saveCharacterWithImage()
             }
             btnActionBarCenter.setOnClickListener {
                 viewModel.toggleFlip()
@@ -120,8 +141,11 @@ class CustomizeFragment :
                 viewModel.resetCurrentVariant()
             }
             btnActionBarCenter2.setOnClickListener {
-                checkShow= !checkShow
-                setImageActionBar(btnActionBarCenter2,if (checkShow) R.drawable.ic_show_all_custom else R.drawable.ic_hide_all_custom )
+                checkShow = !checkShow
+                setImageActionBar(
+                    btnActionBarCenter2,
+                    if (checkShow) R.drawable.ic_show_all_custom else R.drawable.ic_hide_all_custom
+                )
 
                 val navIndex = viewModel.currentNavIndex.value
                 val bodyPart = viewModel.selectedBodyParts.value
@@ -131,7 +155,7 @@ class CustomizeFragment :
                     imgRandom.toggetShow()
                     frameLayer.toggetShow()
                     recyclerView2.toggetShow()
-                    if (hasColor){
+                    if (hasColor) {
                         recycleColorItem.toggetShow()
                         imgChangColor.toggetShow()
                     }
@@ -187,6 +211,14 @@ class CustomizeFragment :
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isFlipped.collect {
                 updateCharacterPreview(viewModel.currentCharacter.value)
+            }
+        }
+        // ✨ THÊM: Observe color update trigger
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.triggerColorUpdate.collect { trigger ->
+                if (trigger > 0) {
+                    updateColorRecycler(viewModel.currentNavIndex.value)
+                }
             }
         }
 
@@ -294,6 +326,7 @@ class CustomizeFragment :
 
         layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
     }
+
     private fun updateCharacterPreview(character: CustomModel?) {
         val isFlipped = viewModel.isFlipped.value
         binding.characterContainer.removeAllViews()
@@ -309,20 +342,9 @@ class CustomizeFragment :
 
             // 🔥 Lấy path từ selection
             val imagePath = viewModel.getImagePathForSelection(navIndex)
+
+            // 🔥 Nếu imagePath là empty string hoặc null → skip (không hiển thị gì, cũng không hiển thị avatar)
             if (imagePath.isNullOrBlank()) {
-                // 🔥 Nếu không có path → check xem có phải nav hiện tại không
-                val currentNavIndex = viewModel.currentNavIndex.value
-                if (navIndex == currentNavIndex) {
-                    // Nav hiện tại mà không có selection → hiển thị avatar
-                    if (character.avatar?.isNotBlank() == true) {
-                        val avatarView = ImageView(requireContext()).apply {
-                            layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                            scaleType = ImageView.ScaleType.FIT_XY
-                        }
-                        loadImage(character.avatar!!, avatarView)
-                        binding.characterContainer.addView(avatarView)
-                    }
-                }
                 continue
             }
 
@@ -334,6 +356,69 @@ class CustomizeFragment :
             }
             loadImage(imagePath, iv)
             binding.characterContainer.addView(iv)
+        }
+    }
+
+    private fun saveCharacterWithImage() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // ✅ Check xem có selection nào không
+                if (!viewModel.hasAnyRealImageSelected()) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Please select at least one item",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
+                // ✅ Wait for layout to complete
+                binding.characterContainer.post {
+                    try {
+                        // ✅ Capture bitmap từ characterContainer
+                        val bitmap = binding.characterContainer.drawToBitmap()
+                        val characterId = viewModel.currentCharacter.value?.id ?: ""
+                        imageManager.deleteOldImage(characterId)
+
+                        val imagePath = imageManager.saveBitmap(bitmap, characterId)
+
+                        if (imagePath != null) {
+                            viewModel.saveCharacter(mainViewModel, imagePath)
+                            mainViewModel.refreshApiData()
+
+                            Log.d("CustomizeFragment", "✅ Character saved:")
+                            Log.d("CustomizeFragment", "   - ID: $characterId")
+                            Log.d("CustomizeFragment", "   - Image: $imagePath")
+
+                            Toast.makeText(requireContext(), "Character saved!", Toast.LENGTH_SHORT)
+                                .show()
+                            // ✅ Navigate to AddFragment với saved image path
+                            findNavController().navigate(
+                                R.id.action_customizeFragment_to_addFragment,
+                                bundleOf(
+                                    "characterId" to characterId,
+                                    "imagePath" to imagePath
+                                )
+                            )
+                        } else {
+                            Log.e("CustomizeFragment", "❌ Failed to save character image")
+                            Toast.makeText(
+                                requireContext(),
+                                "Failed to save character image",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("CustomizeFragment", "❌ Error capturing image: ${e.message}", e)
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e("CustomizeFragment", "❌ Error saving character: ${e.message}", e)
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

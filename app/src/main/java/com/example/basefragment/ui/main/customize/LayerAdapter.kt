@@ -71,15 +71,26 @@ class NavAdapter(
 // LayerAdapter.kt (VariantAdapter)
 class LayerAdapter(
     private var imagePaths: List<String>,
-    private val onImageSelected: (Int) -> Unit
+    private val onImageSelected: (Int) -> Unit,
+    private val onScrollToPosition: (Int) -> Unit
 ) : RecyclerView.Adapter<LayerAdapter.LayerViewHolder>() {
 
-    var selectedIndex = 0
+    var selectedIndex = -1
 
     fun setDataWithSelection(newPaths: List<String>, newSelectedIndex: Int) {
         imagePaths = newPaths
-        selectedIndex = newSelectedIndex.coerceIn(0, newPaths.size - 1)
-        notifyDataSetChanged()  // 🔥 Quan trọng: phải refresh toàn bộ
+        // 🔥 KHÔNG coerceIn nữa, giữ nguyên -1 nếu không có selection
+        selectedIndex = if (newPaths.isEmpty()) {
+            -1
+        } else if (newSelectedIndex >= 0 && newSelectedIndex < newPaths.size) {
+            newSelectedIndex
+        } else {
+            -1
+        }
+        notifyDataSetChanged()
+        if (selectedIndex >= 0) {
+            onScrollToPosition(selectedIndex)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LayerViewHolder {
@@ -88,7 +99,7 @@ class LayerAdapter(
     }
 
     override fun onBindViewHolder(holder: LayerViewHolder, position: Int) {
-        holder.bind(imagePaths[position], position == selectedIndex)
+        holder.bind(imagePaths[position], position == selectedIndex && selectedIndex >= 0)
     }
 
     override fun getItemCount() = imagePaths.size
@@ -98,8 +109,12 @@ class LayerAdapter(
 
         fun bind(imagePath: String, isSelected: Boolean) {
             binding.apply {
+                // 🔥 Reset shimmer mỗi lần bind
+                sflShimmer.visibility = View.VISIBLE
+                sflShimmer.startShimmer()
+
                 when {
-                    imagePath == "none" || imagePath.isBlank() -> {
+                    imagePath == "none" -> {
                         // 🔥 Hiển thị icon "none"
                         imvImage.setImageResource(R.drawable.ic_none)
                         sflShimmer.stopShimmer()
@@ -108,6 +123,12 @@ class LayerAdapter(
                     imagePath == "dice" -> {
                         // 🔥 Hiển thị icon "dice" (random)
                         imvImage.setImageResource(R.drawable.ic_random_layer)
+                        sflShimmer.stopShimmer()
+                        sflShimmer.gone()
+                    }
+                    imagePath.isBlank() -> {
+                        // 🔥 Blank path → cũng hiển thị none
+                        imvImage.setImageResource(R.drawable.ic_none)
                         sflShimmer.stopShimmer()
                         sflShimmer.gone()
                     }
@@ -134,7 +155,10 @@ class LayerAdapter(
                     val oldPosition = selectedIndex
                     selectedIndex = adapterPosition
 
-                    notifyItemChanged(oldPosition)
+                    // 🔥 Chỉ notify nếu oldPosition hợp lệ
+                    if (oldPosition >= 0 && oldPosition < imagePaths.size) {
+                        notifyItemChanged(oldPosition)
+                    }
                     notifyItemChanged(selectedIndex)
 
                     onImageSelected(adapterPosition)
@@ -146,10 +170,11 @@ class LayerAdapter(
 // ColorAdapter.kt
 class ColorAdapter(
     private var colors: List<ColorModel>,
-    private val onColorSelected: (Int) -> Unit
+    private val onColorSelected: (Int) -> Unit,
+    private val onScrollToPosition: (Int) -> Unit
 ) : RecyclerView.Adapter<ColorAdapter.ColorViewHolder>() {
 
-    private var selectedIndex = 0
+    private var selectedIndex = -1
 
     fun setData(newColors: List<ColorModel>) {
         colors = newColors
@@ -157,10 +182,20 @@ class ColorAdapter(
     }
     fun setSelectedIndex(index: Int) {
         val old = selectedIndex
-        selectedIndex = index // Có thể là -1
-        notifyItemChanged(old)
-        if (index >= 0) {
-            notifyItemChanged(selectedIndex)
+        // ✨ FIX: Nếu index = -1, chuyển thành 0 (default first item)
+        selectedIndex = if (index == -1 && colors.isNotEmpty()) 0 else index
+
+        // ✨ FIX: Chỉ notify và scroll khi có thay đổi thực sự
+        if (old != selectedIndex) {
+            // Chỉ notify old nếu nó hợp lệ
+            if (old >= 0 && old < colors.size) {
+                notifyItemChanged(old)
+            }
+            // Notify và scroll item mới
+            if (selectedIndex >= 0 && selectedIndex < colors.size) {
+                notifyItemChanged(selectedIndex)
+                onScrollToPosition(selectedIndex)
+            }
         }
     }
 
@@ -187,7 +222,6 @@ class ColorAdapter(
             } else android.graphics.Color.LTGRAY
 
             binding.ivColorPreview.backgroundTintList = ColorStateList.valueOf(backgroundColor)
-
             // 🔥 Chỉ hiện selected khi adapterPosition == selectedIndex VÀ selectedIndex >= 0
             binding.viewSelected.visibility = if (isSelected && selectedIndex >= 0) {
                 View.VISIBLE

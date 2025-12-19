@@ -71,8 +71,8 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
             ) {
 
                 launch {
-                    mainViewModel.characters.collect { characters ->
-                        adapter.submitList(characters)
+                    mainViewModel.templates.collect { templates ->
+                        adapter.submitList(templates)
                     }
                 }
 

@@ -69,6 +69,12 @@
         tools:layout="@layout/fragment_my_pony"
         android:label="My Pony" >
         <action
+            android:id="@+id/action_mypony_to_custom"
+            app:destination="@id/custom"
+            app:popUpTo="@id/myPony"
+            app:popUpToInclusive="false"
+            />
+        <action
             android:id="@+id/action_my_pony_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
@@ -80,6 +86,9 @@
         tools:layout="@layout/fragment_customize"
         android:label="Custom">
         <action
+            android:id="@+id/action_customizeFragment_to_addFragment"
+            app:destination="@id/addCharacterFragment" />
+        <action
             android:id="@+id/action_custom_to_addcharacter"
             app:destination="@id/custom"
             app:popUpTo="@id/custom"
@@ -87,5 +96,16 @@
             />
 
     </fragment>
+    <fragment
+        android:id="@+id/addCharacterFragment"
+        android:name="com.example.basefragment.ui.main.add_character.AddCharacterFragment"
+        android:label="fragment_add_character"
+        tools:layout="@layout/fragment_add_character" />
+    <fragment
+        android:id="@+id/viewFragment"
+        android:name="com.example.basefragment.ui.main.view.ViewFragment"
+        android:label="fragment_view"
+        tools:layout="@layout/fragment_view" />
+
 
 </navigation>

@@ -31,6 +31,9 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
     private val _triggerLayerUpdate = MutableStateFlow(0)
     val triggerLayerUpdate: StateFlow<Int> = _triggerLayerUpdate.asStateFlow()
 
+    private val _triggerColorUpdate = MutableStateFlow(0)
+    val triggerColorUpdate: StateFlow<Int> = _triggerColorUpdate.asStateFlow()
+
     private var baseCharacter: CustomModel? = null
     private var characterIndex: Int = -1
     private var originalBodyParts: List<BodyPartModel> = emptyList()
@@ -59,9 +62,11 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             else -> null
         } ?: return
 
-        val sortedListPath = character.listPath.sortedBy { it.zIndex }
+        // ✅ KHÔNG sort, giữ nguyên thứ tự nav trong listPath
+        val sortedListPath = character.listPath.sortedBy { it.navOrder }
         _currentCharacter.value = character.copy(listPath = ArrayList(sortedListPath))
 
+        // ✅ Deep copy toàn bộ dữ liệu gốc (GIỮ TẤT CẢ colors và layers)
         originalBodyParts = sortedListPath.map { bp ->
             bp.copy(
                 listPath = ArrayList(
@@ -73,64 +78,53 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         }
 
         Log.d("CustomizeViewModel", "=== Init character ===")
-        Log.d("CustomizeViewModel", "📋 Nav order (as stored in list):")
-        originalBodyParts.forEachIndexed { idx, bodyPart ->
-            Log.d(
-                "CustomizeViewModel",
-                "   [$idx] Nav position=${bodyPart.position}, z-index=${bodyPart.zIndex}"
-            )
-        }
+        Log.d("CustomizeViewModel", "   ID: ${character.id}")
+        Log.d("CustomizeViewModel", "   Has selections: ${character.selections.isNotEmpty()}")
 
         baseCharacter = character
         _selectedBodyParts.value = originalBodyParts
 
-        // Restore selection hoặc tạo mới
+        // ✅ Restore selections từ character.selections
         navSelections.clear()
-        originalBodyParts.forEachIndexed { navIndex, bodyPart ->
-            val selection = restoreSelectionForNav(navIndex, bodyPart)
-            navSelections.add(selection)
+        if (character.selections.isNotEmpty()) {
+            // Edit mode: restore selections
+            Log.d("CustomizeViewModel", "   📋 Restoring selections from saved character")
+            character.selections.forEach { selection ->
+                navSelections.add(selection)
+                Log.d("CustomizeViewModel", "      Nav ${selection.nav}: color=${selection.color}, layer=${selection.layer}")
+            }
+        } else {
+            // New character: initialize empty selections
+            Log.d("CustomizeViewModel", "   📋 New character, initializing empty selections")
+            originalBodyParts.forEachIndexed { navIndex, _ ->
+                navSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
+            }
         }
 
         _currentNavIndex.value = 0
 
-        // Auto-select cho nav 0 nếu chưa có selection (tạo mới)
+        // Auto-select cho nav 0 nếu chưa có selection
         val firstSelection = navSelections.getOrNull(0)
         if (firstSelection != null && firstSelection.layer == -1) {
             autoSelectFirstVariantForNav(0)
         }
+
+        // ✅ Apply preview cho tất cả nav đã có selection
+        applyAllSelections()
     }
 
-    private fun restoreSelectionForNav(navIndex: Int, bodyPart: BodyPartModel): SelectionPart {
-        if (bodyPart.listPath.isEmpty()) return SelectionPart(nav = navIndex, color = -1, layer = -1)
+    private fun applyAllSelections() {
+        navSelections.forEachIndexed { navIndex, selection ->
+            if (selection.layer != -1) {
+                val bodyPart = originalBodyParts.getOrNull(navIndex) ?: return@forEachIndexed
+                val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
-        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
-
-        if (!hasColor) {
-            val realImages = bodyPart.listPath.mapNotNull { cm ->
-                cm.listPath.firstOrNull { it.contains("/") && it != "none" && it != "dice" }
-            }
-
-            val position = bodyPart.position.toIntOrNull() ?: 0
-            val layerImages = mutableListOf<String>()
-            if (position != 1) layerImages.add("none")
-            layerImages.add("dice")
-            layerImages.addAll(realImages)
-
-            val savedPath = bodyPart.listPath.firstOrNull()?.listPath?.firstOrNull { it.isNotBlank() }
-            val layerIndex = when (savedPath) {
-                null, "" -> -1
-                in realImages -> layerImages.indexOf(savedPath)
-                else -> -1
-            }
-            return SelectionPart(nav = navIndex, color = -1, layer = layerIndex)
-        } else {
-            bodyPart.listPath.forEachIndexed { colorIndex, colorModel ->
-                val layerIndex = colorModel.listPath.indexOfFirst { it.isNotBlank() }
-                if (layerIndex != -1) {
-                    return SelectionPart(nav = navIndex, color = colorIndex, layer = layerIndex)
+                if (hasColor && selection.color != -1) {
+                    applyPreview(navIndex, selection.color, selection.layer)
+                } else if (!hasColor) {
+                    applyPreviewSingleImage(navIndex, selection.layer)
                 }
             }
-            return SelectionPart(nav = navIndex, color = -1, layer = -1)
         }
     }
 
@@ -145,10 +139,11 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             applyPreview(navIndex, 0, 0)
         } else {
             val position = bodyPart.position.toIntOrNull() ?: 0
-            val realImagesCount = bodyPart.listPath.sumOf { cm -> cm.listPath.count { it.contains("/") } }
+            val realImagesCount = bodyPart.listPath.sumOf { cm ->
+                cm.listPath.count { it.contains("/") }
+            }
 
             if (realImagesCount > 0) {
-                // Chọn variant đầu tiên trong các ảnh thật
                 val firstRealIndex = if (position != 1) 2 else 1
                 navSelections[navIndex] = SelectionPart(nav = navIndex, color = -1, layer = firstRealIndex)
                 applyPreviewSingleImage(navIndex, firstRealIndex)
@@ -159,7 +154,6 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
     fun selectNav(navIndex: Int) {
         _currentNavIndex.value = navIndex
 
-        // Chỉ auto-select khi chuyển sang nav chưa có selection (trừ nav 0 đã xử lý ở init)
         if (navIndex != 0) {
             val selection = navSelections.getOrNull(navIndex)
             if (selection?.layer == -1 && selection?.color == -1) {
@@ -188,7 +182,6 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
         if (!hasColor) {
-            // Build danh sách layer để kiểm tra giá trị
             val position = bodyPart.position.toIntOrNull() ?: 0
             val layerImages = mutableListOf<String>()
             if (position != 1) layerImages.add("none")
@@ -214,13 +207,12 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
                     return
                 }
                 "none" -> {
-                    navSelections[navIndex] = SelectionPart(nav = navIndex, color = -1, layer = 0) // index 0 = none
+                    navSelections[navIndex] = SelectionPart(nav = navIndex, color = -1, layer = 0)
                     applyPreviewSingleImage(navIndex, 0)
                     _triggerLayerUpdate.value += 1
                     return
                 }
                 else -> {
-                    // Ảnh thật bình thường
                     navSelections[navIndex] = SelectionPart(nav = navIndex, color = -1, layer = layerIndex)
                     applyPreviewSingleImage(navIndex, layerIndex)
                     _triggerLayerUpdate.value += 1
@@ -229,14 +221,27 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             }
         }
 
-        // Có color
         val currentSelection = navSelections.getOrNull(navIndex) ?: SelectionPart(navIndex, 0, 0)
         val actualColorIndex = if (currentSelection.color == -1) 0 else currentSelection.color
         val color = bodyPart.listPath.getOrNull(actualColorIndex) ?: return
-        val clampedLayerIndex = layerIndex.coerceIn(0, color.listPath.size - 1)
 
-        navSelections[navIndex] = SelectionPart(nav = navIndex, color = actualColorIndex, layer = clampedLayerIndex)
-        applyPreview(navIndex, actualColorIndex, clampedLayerIndex)
+        val layerPath = color.listPath.getOrNull(layerIndex)
+
+        if (layerPath == "dice") {
+            val realLayers = color.listPath.withIndex()
+                .filter { it.value != "none" && it.value != "dice" && it.value.contains("/") }
+
+            if (realLayers.isNotEmpty()) {
+                val randomLayer = realLayers.random()
+                navSelections[navIndex] = SelectionPart(nav = navIndex, color = actualColorIndex, layer = randomLayer.index)
+                applyPreview(navIndex, actualColorIndex, randomLayer.index)
+            }
+        } else {
+            val clampedLayerIndex = layerIndex.coerceIn(0, color.listPath.size - 1)
+            navSelections[navIndex] = SelectionPart(nav = navIndex, color = actualColorIndex, layer = clampedLayerIndex)
+            applyPreview(navIndex, actualColorIndex, clampedLayerIndex)
+        }
+
         _triggerLayerUpdate.value += 1
     }
 
@@ -286,9 +291,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             navSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
         }
 
-        // Auto-select lại nav 0 với variant đầu tiên cố định
         autoSelectFirstVariantForNav(0)
-
         _currentNavIndex.value = 0
         _triggerLayerUpdate.value += 1
     }
@@ -319,25 +322,8 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
                 applyPreview(nav, c, l)
             }
         }
+        _triggerColorUpdate.value += 1
         _triggerLayerUpdate.value += 1
-    }
-
-    fun saveCharacter(mainViewModel: ViewModelActivity) {
-        val base = baseCharacter ?: return
-
-        val updatedParts = originalBodyParts.mapIndexed { navIndex, originalPart ->
-            val selectedPath = getImagePathForSelection(navIndex)
-            originalPart.copy(
-                listPath = arrayListOf(ColorModel("", arrayListOf(selectedPath.orEmpty())))
-            )
-        }
-
-        val finalCharacter = base.copy(
-            listPath = ArrayList(updatedParts),
-            updatedAt = System.currentTimeMillis()
-        )
-
-        mainViewModel.updateOrAddCharacter(finalCharacter, characterIndex)
     }
 
     fun getSelection(navIndex: Int): SelectionPart {
@@ -398,5 +384,32 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         list.add("dice")
         list.addAll(realImages)
         return list
+    }
+
+    /**
+     * ✅ FIXED: Save character với TOÀN BỘ dữ liệu gốc + selections riêng
+     */
+    fun saveCharacter(mainViewModel: ViewModelActivity, capturedImagePath: String = "") {
+        val base = baseCharacter ?: return
+
+        // ✅ Lưu TOÀN BỘ originalBodyParts (không thay đổi)
+        val finalCharacter = base.copy(
+            listPath = ArrayList(originalBodyParts),  // ✅ Giữ nguyên TOÀN BỘ dữ liệu
+            selections = ArrayList(navSelections),     // ✅ Lưu selections riêng
+            imageSave = capturedImagePath,
+            updatedAt = System.currentTimeMillis()
+        )
+
+        mainViewModel.updateOrAddCharacter(finalCharacter, characterIndex)
+
+        Log.d("CustomizeViewModel", "✅ Character saved:")
+        Log.d("CustomizeViewModel", "   - ID: ${finalCharacter.id}")
+        Log.d("CustomizeViewModel", "   - Body parts: ${finalCharacter.listPath.size}")
+        Log.d("CustomizeViewModel", "   - Selections: ${finalCharacter.selections.size}")
+        Log.d("CustomizeViewModel", "   - Image: $capturedImagePath")
+
+        finalCharacter.selections.forEachIndexed { idx, selection ->
+            Log.d("CustomizeViewModel", "   - Selection[$idx]: nav=${selection.nav}, color=${selection.color}, layer=${selection.layer}")
+        }
     }
 }

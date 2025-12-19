@@ -16,13 +16,24 @@ import javax.inject.Singleton
 class AppDataManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val charactersFileName = "characters.json"
+    // ✅ TÁCH RIÊNG 2 file JSON
+    private val templatesFileName = "templates.json"        // Templates gốc từ assets
+    private val customizedFileName = "customized.json"      // Characters đã customize
 
     companion object {
         private const val TAG = "AppDataManager"
         private const val ASSET_PREFIX = "file:///android_asset/"
     }
 
+    // ✅ Templates (chỉ đọc từ assets, không thay đổi)
+    private val _templates = MutableStateFlow<List<CustomModel>>(emptyList())
+    val templates: StateFlow<List<CustomModel>> = _templates.asStateFlow()
+
+    // ✅ Customized characters (đã lưu)
+    private val _customizedCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
+    val customizedCharacters: StateFlow<List<CustomModel>> = _customizedCharacters.asStateFlow()
+
+    // ✅ Combined list (templates + customized) để hiển thị
     private val _characters = MutableStateFlow<List<CustomModel>>(emptyList())
     val characters: StateFlow<List<CustomModel>> = _characters.asStateFlow()
 
@@ -47,7 +58,7 @@ class AppDataManager @Inject constructor(
     private var isDataLoaded = false
 
     /**
-     * Load data lần đầu, ưu tiên JSON nếu đã có
+     * Load data lần đầu
      */
     suspend fun loadInitialData() {
         if (isDataLoaded) return
@@ -56,14 +67,22 @@ class AppDataManager @Inject constructor(
 
         withContext(Dispatchers.IO) {
             try {
-                val savedCharacters = loadCharactersFromJson()
-                if (savedCharacters.isNotEmpty()) {
-                    _characters.value = savedCharacters
-                    Log.d(TAG, "✅ Loaded characters from JSON")
+                // ✅ Load templates từ assets (hoặc cache)
+                val savedTemplates = loadTemplatesFromJson()
+                if (savedTemplates.isNotEmpty()) {
+                    _templates.value = savedTemplates
+                    Log.d(TAG, "✅ Loaded templates from cache")
                 } else {
-                    // Load từ assets nếu chưa có JSON
-                    loadCharactersFromAssets()
+                    loadTemplatesFromAssets()
                 }
+
+                // ✅ Load customized characters từ JSON
+                val customized = loadCustomizedFromJson()
+                _customizedCharacters.value = customized
+                Log.d(TAG, "✅ Loaded ${customized.size} customized characters")
+
+                // ✅ Combine lists
+                updateCharactersList()
 
                 // Load assets khác
                 coroutineScope {
@@ -85,7 +104,19 @@ class AppDataManager @Inject constructor(
         }
     }
 
-    private suspend fun loadCharactersFromAssets() {
+    /**
+     * ✅ Combine templates + customized characters
+     */
+    private fun updateCharactersList() {
+        val combined = _templates.value + _customizedCharacters.value
+        _characters.value = combined
+        Log.d(TAG, "📋 Total characters: ${combined.size} (${_templates.value.size} templates + ${_customizedCharacters.value.size} customized)")
+    }
+
+    /**
+     * Load templates từ assets (chỉ load 1 lần)
+     */
+    private suspend fun loadTemplatesFromAssets() {
         try {
             val assetManager = context.assets
             val result = arrayListOf<CustomModel>()
@@ -95,15 +126,11 @@ class AppDataManager @Inject constructor(
                 val basePath = "data/$folder"
                 val itemsRaw = assetManager.list(basePath) ?: continue
 
-                // 🔥 QUAN TRỌNG: Sort items theo position (số trước "-")
-                // assetManager.list() không đảm bảo thứ tự!
                 val items = itemsRaw.sortedBy { item ->
                     item.substringBefore("-").toIntOrNull() ?: 999
                 }
 
-                Log.d(TAG, "=== Loading character folder: $folder ===")
-                Log.d(TAG, "   Raw items: ${itemsRaw.toList()}")
-                Log.d(TAG, "   Sorted items: $items")
+                Log.d(TAG, "=== Loading template folder: $folder ===")
 
                 val bodyParts = arrayListOf<BodyPartModel>()
                 var avatar = ""
@@ -139,40 +166,180 @@ class AppDataManager @Inject constructor(
                     bodyParts.add(BodyPartModel(nav, colors))
                 }
 
-                // 🔥 KHÔNG CẦN sort lại vì đã sort items ở trên rồi
-                // bodyParts đã theo đúng thứ tự position: 1, 2, 3, ...
+                Log.d(TAG, "✅ Template '$folder' loaded with ${bodyParts.size} parts")
 
-                Log.d(TAG, "✅ Character '$folder' loaded with ${bodyParts.size} parts")
-                Log.d(TAG, "   📋 Body parts order:")
-                bodyParts.forEachIndexed { idx, part ->
-                    Log.d(TAG, "      [$idx] position=${part.position}, navOrder=${part.navOrder}, z-index=${part.zIndex}")
-                }
-
-                result.add(CustomModel(avatar = avatar, listPath = ArrayList(bodyParts)))
+                // ✅ Template với ID cố định (dùng folder name)
+                result.add(
+                    CustomModel(
+                        id = "template_$folder",  // ✅ ID cố định cho template
+                        avatar = avatar,
+                        listPath = ArrayList(bodyParts),
+                        selections = arrayListOf(),
+                        imageSave = ""
+                    )
+                )
             }
 
-            _characters.value = result
-            saveCharactersToJson(result)
-            Log.d(TAG, "✅ Loaded ${result.size} characters from assets")
+            _templates.value = result
+            saveTemplatesToJson(result)  // Cache lại
+            Log.d(TAG, "✅ Loaded ${result.size} templates from assets")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi loadCharactersFromAssets: ${e.message}", e)
+            Log.e(TAG, "❌ Lỗi loadTemplatesFromAssets: ${e.message}", e)
         }
     }
 
+    private fun processColorDefaults(colors: ArrayList<ColorModel>, itemName: String) {
+        try {
+            val position = itemName.substringBefore("-").toIntOrNull() ?: return
 
-    private suspend fun loadDataFromApi() { // try { // val apiData = apiRepository.getCharacters() // Log.d(TAG, "✅ API call thành công") // } catch (e: Exception) { // Log.e(TAG, "⚠️ API error: ${e.message}") // }
+            colors.forEach { colorModel ->
+                val originalSize = colorModel.listPath.size
+
+                when {
+                    position == 1 -> {
+                        if (colorModel.listPath.firstOrNull() != "dice") {
+                            colorModel.listPath.add(0, "dice")
+                        }
+                    }
+                    else -> {
+                        if (colorModel.listPath.firstOrNull() != "none") {
+                            colorModel.listPath.add(0, "none")
+                            colorModel.listPath.add(1, "dice")
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Lỗi processColorDefaults", e)
+        }
+    }
+
+    /**
+     * ✅ Save/Load templates cache
+     */
+    private suspend fun saveTemplatesToJson(templates: List<CustomModel>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val json = Gson().toJson(templates)
+                val file = File(context.filesDir, templatesFileName)
+                file.writeText(json)
+                Log.d(TAG, "✅ Templates cached to JSON")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Lỗi saveTemplatesToJson: ${e.message}", e)
+            }
+        }
+    }
+
+    private suspend fun loadTemplatesFromJson(): List<CustomModel> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = File(context.filesDir, templatesFileName)
+                if (!file.exists()) return@withContext emptyList()
+                val json = file.readText()
+                val type = object : TypeToken<List<CustomModel>>() {}.type
+                Gson().fromJson<List<CustomModel>>(json, type)
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Lỗi loadTemplatesFromJson: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * ✅ Save/Load customized characters
+     */
+    private suspend fun saveCustomizedToJson(characters: List<CustomModel>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val json = Gson().toJson(characters)
+                val file = File(context.filesDir, customizedFileName)
+                file.writeText(json)
+                Log.d(TAG, "✅ Customized characters saved (${characters.size} items)")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Lỗi saveCustomizedToJson: ${e.message}", e)
+            }
+        }
+    }
+
+    private suspend fun loadCustomizedFromJson(): List<CustomModel> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = File(context.filesDir, customizedFileName)
+                if (!file.exists()) return@withContext emptyList()
+                val json = file.readText()
+                val type = object : TypeToken<List<CustomModel>>() {}.type
+                Gson().fromJson<List<CustomModel>>(json, type)
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Lỗi loadCustomizedFromJson: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * ✅ Update hoặc add customized character
+     */
+    suspend fun updateCustomizedCharacter(character: CustomModel) {
+        val list = _customizedCharacters.value.toMutableList()
+        val index = list.indexOfFirst { it.id == character.id }
+
+        if (index >= 0) {
+            list[index] = character
+            Log.d(TAG, "✅ Updated customized character: ${character.id}")
+        } else {
+            list.add(character)
+            Log.d(TAG, "✅ Added new customized character: ${character.id}")
+        }
+
+        _customizedCharacters.value = list
+        updateCharactersList()
+        saveCustomizedToJson(list)
+    }
+
+    /**
+     * ✅ Delete customized character
+     */
+    suspend fun deleteCustomizedCharacter(characterId: String) {
+        val list = _customizedCharacters.value.toMutableList()
+        val removed = list.removeIf { it.id == characterId }
+
+        if (removed) {
+            Log.d(TAG, "✅ Deleted customized character: $characterId")
+            _customizedCharacters.value = list
+            updateCharactersList()
+            saveCustomizedToJson(list)
+        }
+    }
+
+    /**
+     * ✅ Check if character is a template
+     */
+    fun isTemplate(characterId: String): Boolean {
+        return characterId.startsWith("template_")
+    }
+
+    /**
+     * ✅ Get character by index (from combined list)
+     */
+    fun getCharacterByIndex(index: Int): CustomModel? {
+        return _characters.value.getOrNull(index)
+    }
+
+    /**
+     * ✅ Get character by ID
+     */
+    fun getCharacterById(id: String): CustomModel? {
+        return _characters.value.find { it.id == id }
     }
 
     suspend fun refreshFromApi() {
         _isLoading.value = true
         _error.value = null
         try {
-            loadDataFromApi()
+            // TODO: Implement API call
             Log.d(TAG, "🔄 Refresh API thành công")
         } catch (e: Exception) {
-            Log.e(
-                TAG, "❌ Lỗi refresh API", e
-            )
+            Log.e(TAG, "❌ Lỗi refresh API", e)
             _error.value = "Không thể cập nhật: ${e.message}"
         } finally {
             _isLoading.value = false
@@ -183,108 +350,6 @@ class AppDataManager @Inject constructor(
         isDataLoaded = false
         loadInitialData()
     }
-
-    private fun processColorDefaults(colors: ArrayList<ColorModel>, itemName: String) {
-        try {
-            // 🔥 itemName format: "1-1", "2-4", "3-5"
-            // → Lấy số TRƯỚC dấu "-" (position), KHÔNG phải số sau (z-index)
-            val position = itemName.substringBefore("-").toIntOrNull() ?: return
-
-            Log.d(TAG, " processColorDefaults: itemName=$itemName, position=$position")
-
-            colors.forEach { colorModel ->
-                val originalSize = colorModel.listPath.size
-
-                when {
-                    position == 1 -> {
-                        // Position 1 → chỉ thêm "dice" (không có "none")
-                        if (colorModel.listPath.firstOrNull() != "dice") {
-                            colorModel.listPath.add(0, "dice")
-                            Log.d(TAG, "       → Added 'dice' at position 1 (size: $originalSize → ${colorModel.listPath.size})")
-                        }
-                    }
-                    else -> {
-                        // Position khác → thêm cả "none" và "dice"
-                        if (colorModel.listPath.firstOrNull() != "none") {
-                            colorModel.listPath.add(0, "none")
-                            colorModel.listPath.add(1, "dice")
-                            Log.d(TAG, "       → Added 'none' and 'dice' at position $position (size: $originalSize → ${colorModel.listPath.size})")
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi processColorDefaults", e)
-        }
-    }
-
-    suspend fun saveCharactersToJson(characters: List<CustomModel>) {
-        withContext(Dispatchers.IO) {
-            try {
-                val json = Gson().toJson(characters)
-                val file = File(context.filesDir, charactersFileName)
-                file.writeText(json)
-                Log.d(TAG, "✅ Characters saved to JSON")
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi saveCharactersToJson: ${e.message}", e)
-            }
-        }
-    }
-
-    suspend fun loadCharactersFromJson(): List<CustomModel> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val file = File(context.filesDir, charactersFileName)
-                if (!file.exists()) return@withContext emptyList()
-                val json = file.readText()
-                val type = object : TypeToken<List<CustomModel>>() {}.type
-                Gson().fromJson<List<CustomModel>>(json, type)
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi loadCharactersFromJson: ${e.message}", e)
-                emptyList()
-            }
-        }
-    }
-
-    suspend fun updateCharacter(character: CustomModel) {
-        val list = _characters.value.toMutableList()
-        val index = list.indexOfFirst { it.id == character.id }
-        if (index >= 0) list[index] = character else list.add(character)
-        _characters.value = list
-        saveCharactersToJson(list)
-    }
-
-    suspend fun resetCharacter(characterId: String) {
-        val list = _characters.value.toMutableList()
-        val index = list.indexOfFirst { it.id == characterId }
-        if (index >= 0) {
-            val old = list[index]
-            val resetChar = old.copy(
-                listPath = ArrayList(old.listPath.map { it.copy(listPath = ArrayList(it.listPath)) }),
-                updatedAt = System.currentTimeMillis()
-            )
-            list[index] = resetChar
-            _characters.value = list
-            saveCharactersToJson(list)
-        }
-    }
-
-    suspend fun randomCharacter(characterId: String) {
-        val list = _characters.value.toMutableList()
-        val index = list.indexOfFirst { it.id == characterId }
-        if (index >= 0) {
-            val current = list[index]
-            val shuffledParts =
-                current.listPath.map { it.copy(listPath = ArrayList(it.listPath.shuffled())) }
-            list[index] = current.copy(
-                listPath = ArrayList(shuffledParts), updatedAt = System.currentTimeMillis()
-            )
-            _characters.value = list
-            saveCharactersToJson(list)
-        }
-    }
-
-    fun getCharacterByIndex(index: Int): CustomModel? = _characters.value.getOrNull(index)
 
     /**
      * --- Backgrounds / Stickers / Speechs ---
@@ -327,10 +392,9 @@ class AppDataManager @Inject constructor(
         }
     }
 
-    /**
-     * Clear all data
-     */
     fun clearData() {
+        _templates.value = emptyList()
+        _customizedCharacters.value = emptyList()
         _characters.value = emptyList()
         _backgrounds.value = emptyList()
         _backgroundTexts.value = emptyList()

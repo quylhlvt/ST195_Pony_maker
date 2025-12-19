@@ -1,19 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.myPony.MyPonyFragment">
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/img_bg_app"
-        android:scaleType="fitXY"
-        android:elevation="-1dp"
-        android:adjustViewBounds="true"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="My Pony" />
 
-</FrameLayout>
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:elevation="-1dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/img_bg_app" />
+    <FrameLayout
+        android:id="@+id/layoutActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/actionBar"
+            layout="@layout/layout_actionbar" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/noItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No Item Here"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
+        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar" />
+</androidx.constraintlayout.widget.ConstraintLayout>

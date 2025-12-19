@@ -14,11 +14,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: GetCatalogueUseCase, private val  appDataManager: AppDataManager) : ViewModel() {
+class ViewModelActivity @Inject constructor(
+    private val getCatalogueUseCase: GetCatalogueUseCase,
+    private val appDataManager: AppDataManager
+) : ViewModel() {
 
-    // Data StateFlows - load trong init{}
+    // ✅ Combined list (templates + customized)
     private val _characters = MutableStateFlow<List<CustomModel>>(emptyList())
     val characters: StateFlow<List<CustomModel>> = _characters.asStateFlow()
+
+    // ✅ Templates only (cho template selector)
+    private val _templates = MutableStateFlow<List<CustomModel>>(emptyList())
+    val templates: StateFlow<List<CustomModel>> = _templates.asStateFlow()
+
+    // ✅ Customized only (cho MyPony screen)
+    private val _customizedCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
+    val customizedCharacters: StateFlow<List<CustomModel>> = _customizedCharacters.asStateFlow()
 
     private val _backgrounds = MutableStateFlow<List<String>>(emptyList())
     val backgrounds: StateFlow<List<String>> = _backgrounds.asStateFlow()
@@ -39,25 +50,28 @@ class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: 
     val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        // 🔥 Load tất cả data ngay khi ViewModel được tạo
         loadInitialData()
     }
 
-    /**
-     * Load data lần đầu (tự động gọi trong init)
-     */
     private fun loadInitialData() {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
 
             try {
-                // Load data từ AppDataManager
                 appDataManager.loadInitialData()
 
-                // Collect data từ AppDataManager và update local StateFlows
+                // ✅ Collect all data streams
                 launch {
                     appDataManager.characters.collect { _characters.value = it }
+                }
+                launch {
+                    appDataManager.templates.collect { _templates.value = it }
+                }
+                launch {
+                    appDataManager.customizedCharacters.collect {
+                        _customizedCharacters.value = it
+                    }
                 }
                 launch {
                     appDataManager.backgrounds.collect { _backgrounds.value = it }
@@ -84,18 +98,12 @@ class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: 
         }
     }
 
-    /**
-     * Refresh chỉ API data (không load lại assets)
-     */
     fun refreshApiData() {
         viewModelScope.launch {
             appDataManager.refreshFromApi()
         }
     }
 
-    /**
-     * Force reload toàn bộ (hiếm khi cần)
-     */
     fun forceReloadAll() {
         viewModelScope.launch {
             appDataManager.forceReloadAll()
@@ -103,60 +111,84 @@ class ViewModelActivity @Inject constructor( private  val  getCatalogueUseCase: 
     }
 
     /**
-     * Get character by index
+     * ✅ Get character by index (from combined list)
      */
     fun getCharacterByIndex(index: Int): CustomModel? {
         val character = _characters.value.getOrNull(index)
-        Log.d("ViewModelActivity", "getCharacterByIndex($index): ${character?.listPath?.size} parts, total=${_characters.value.size}")
+        Log.d("ViewModelActivity", "getCharacterByIndex($index): ${character?.id}")
         return character
     }
 
     /**
-     * Clear all data
+     * ✅ Get character by ID
      */
+    fun getCharacterById(characterId: String): CustomModel? {
+        return appDataManager.getCharacterById(characterId)
+    }
+
+    /**
+     * ✅ Check if character is a template
+     */
+    fun isTemplate(characterId: String): Boolean {
+        return appDataManager.isTemplate(characterId)
+    }
+
+    /**
+     * ✅ Update or add customized character
+     * - Nếu là template → tạo character mới với ID mới
+     * - Nếu đã customize → update existing
+     */
+    fun updateOrAddCharacter(character: CustomModel, index: Int = -1) {
+        viewModelScope.launch {
+            // ✅ Nếu là template, tạo character mới
+            if (isTemplate(character.id)) {
+                val newCharacter = character.copy(
+                    id = java.util.UUID.randomUUID().toString(),  // ✅ ID mới
+                    updatedAt = System.currentTimeMillis()
+                )
+                appDataManager.updateCustomizedCharacter(newCharacter)
+                Log.d("ViewModelActivity", "✅ Created new character from template: ${newCharacter.id}")
+            } else {
+                // ✅ Update existing customized character
+                val updatedCharacter = character.copy(
+                    updatedAt = System.currentTimeMillis()
+                )
+                appDataManager.updateCustomizedCharacter(updatedCharacter)
+                Log.d("ViewModelActivity", "✅ Updated customized character: ${updatedCharacter.id}")
+            }
+        }
+    }
+
+    /**
+     * ✅ Delete customized character (không thể xóa template)
+     */
+    fun deleteCharacter(characterId: String) {
+        viewModelScope.launch {
+            if (isTemplate(characterId)) {
+                Log.w("ViewModelActivity", "⚠️ Cannot delete template: $characterId")
+                return@launch
+            }
+            appDataManager.deleteCustomizedCharacter(characterId)
+            Log.d("ViewModelActivity", "✅ Deleted character: $characterId")
+        }
+    }
+
     fun clearData() {
         appDataManager.clearData()
         _characters.value = emptyList()
+        _templates.value = emptyList()
+        _customizedCharacters.value = emptyList()
         _backgrounds.value = emptyList()
         _backgroundTexts.value = emptyList()
         _stickers.value = emptyList()
         _speechs.value = emptyList()
     }
 
-    /* Update data Custom*/
-    fun updateOrAddCharacter(
-        character: CustomModel,
-        index: Int = -1
-    ) {
-        val currentList = _characters.value.toMutableList()
-
-        if (index >= 0 && index < currentList.size) {
-            // update
-            currentList[index] = character
-            Log.d("ViewModelActivity", "updateCharacter at index=$index")
-        } else {
-            // add new
-            currentList.add(character)
-            Log.d("ViewModelActivity", "addNewCharacter, size=${currentList.size}")
-        }
-
-        _characters.value = currentList
-
-        // persist xuống local json
-        viewModelScope.launch {
-            appDataManager.saveCharactersToJson(currentList)
-        }
-    }
-    fun getCharacterById(characterId: String): CustomModel? {
-        val character = _characters.value.find { it.id == characterId }
-        return character
-    }
     fun getCharacterIndexById(characterId: String): Int {
-        val index = _characters.value.indexOfFirst { it.id == characterId }
-        return index // trả về -1 nếu không tìm thấy
+        return _characters.value.indexOfFirst { it.id == characterId }
     }
+
     fun getTemplateById(templateId: String): CustomModel? {
-        // Có 3 cách implement, bạn chọn cách phù hợp
-        return _characters.value.find { it.id == templateId }
+        return _templates.value.find { it.id == templateId }
     }
 }

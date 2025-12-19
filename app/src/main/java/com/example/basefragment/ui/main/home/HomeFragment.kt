@@ -51,7 +51,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarRight, R.drawable.ic_settings)
-            setImageActionBar(btnActionBarLeft, R.drawable.ic_settings)
+            setImageActionBar(btnActionBarLeft, R.drawable.logo_app)
         }
         binding.apply {
             tv1.isSelected = true

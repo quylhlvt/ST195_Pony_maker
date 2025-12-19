@@ -1,6 +1,8 @@
 package com.example.basefragment.core.extention
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -69,4 +71,27 @@ fun View.onClick(interval: Long = 500, action: (View) -> Unit) {
             this.setTag(KEY_LAST_CLICK_TIME, currentTime)
         }
     }
+}
+fun View.drawToBitmap(): Bitmap {
+    val bitmap = Bitmap.createBitmap(
+        width.coerceAtLeast(1),
+        height.coerceAtLeast(1),
+        Bitmap.Config.ARGB_8888
+    )
+    val canvas = Canvas(bitmap)
+
+    // Draw background nếu có
+    background?.draw(canvas)
+
+    // Draw view
+    draw(canvas)
+
+    return bitmap
+}
+
+/**
+ * Check xem view đã được layout chưa
+ */
+fun View.isLaidOut(): Boolean {
+    return width > 0 && height > 0
 }
