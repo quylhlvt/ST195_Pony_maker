@@ -23,5 +23,16 @@
     <string name="settings">Settings</string>
     <string name="cancel">Cancel</string>
     <string name="add_image">Add Image</string>
-
+    <string name="text">Text</string>
+    <string name="type_your_content">Type_your_content</string>
+    <string name="loading">Loading</string>
+    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Haven’t saved it yet, do you want to exit?</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="null_edt">Please enter text</string>
+    <string name="done">Done</string>
+    <string name="choose_color">Choose Color</string>
+    <string name="do_you_want_to_reset_all">Do you want to reset all?</string>
+    <string name="reset">Reset</string>
+    <string name="exit">Exit</string>
 </resources>

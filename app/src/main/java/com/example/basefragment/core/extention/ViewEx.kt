@@ -16,7 +16,9 @@ fun Int.dp(context: Context): Int =
 
 fun Float.dp(context: Context): Int =
     (this * context.resources.displayMetrics.density).roundToInt()
-
+fun dpToPx(context: Context, dp: Int): Int {
+    return (dp * context.resources.displayMetrics.density).toInt()
+}
 fun TextView.setFont(@FontRes resId: Int) {
     typeface = ResourcesCompat.getFont(context, resId)
 }

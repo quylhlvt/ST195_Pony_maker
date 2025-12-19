@@ -3,6 +3,7 @@ package com.example.basefragment.core.extention
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -14,6 +15,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
+import com.example.basefragment.R
 import com.example.basefragment.utils.DataLocal
 import com.facebook.shimmer.ShimmerDrawable
 import java.io.File
@@ -95,4 +97,11 @@ fun loadThumbnail(view: ImageView, url: String){
         .load(file)
         .frame(1000000)
         .into(view)
+}
+fun ImageView.loadFromAsset(assetPath: String) {  // assetPath = "bg/1.png"
+    Glide.with(this)
+        .load(Uri.parse("$assetPath"))
+        .placeholder(ShimmerDrawable().apply { setShimmer(DataLocal.shimmer) })
+        .error(R.drawable.logo_app)  // Để debug nếu path sai
+        .into(this)
 }

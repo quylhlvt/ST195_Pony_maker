@@ -48,6 +48,15 @@ class ViewModelActivity @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+    private val _selectedCharacterPath = MutableStateFlow<String?>(null)
+    val selectedCharacterPath: StateFlow<String?> = _selectedCharacterPath.asStateFlow()
+
+    private val _savedImagePath = MutableStateFlow<String?>(null)
+    val savedImagePath: StateFlow<String?> = _savedImagePath.asStateFlow()
+
+    private val _selectedCharacterId = MutableStateFlow<String?>(null)
+    val selectedCharacterId: StateFlow<String?> = _selectedCharacterId.asStateFlow()
+
 
     init {
         loadInitialData()

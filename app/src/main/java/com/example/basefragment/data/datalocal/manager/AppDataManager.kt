@@ -22,7 +22,7 @@ class AppDataManager @Inject constructor(
 
     companion object {
         private const val TAG = "AppDataManager"
-        private const val ASSET_PREFIX = "file:///android_asset/"
+        private const val ASSET_PREFIX = "file:///android_asset"
     }
 
     // ✅ Templates (chỉ đọc từ assets, không thay đổi)
@@ -140,7 +140,7 @@ class AppDataManager @Inject constructor(
                     val contents = assetManager.list(fullPath)
 
                     if (contents.isNullOrEmpty()) {
-                        avatar = "$ASSET_PREFIX$fullPath"
+                        avatar = "$ASSET_PREFIX/$fullPath"
                         Log.d(TAG, "  📷 Avatar: $item")
                         continue
                     }
@@ -148,16 +148,16 @@ class AppDataManager @Inject constructor(
                     Log.d(TAG, "  📦 Processing item: $item")
 
                     val nav = contents.firstOrNull { it.startsWith("nav.") }
-                        ?.let { "$ASSET_PREFIX$fullPath/$it" } ?: ""
+                        ?.let { "$ASSET_PREFIX/$fullPath/$it" } ?: ""
                     val colors = arrayListOf<ColorModel>()
 
                     contents.filter { !it.startsWith("nav.") }.forEach { layer ->
                         val layerPath = "$fullPath/$layer"
                         val files = assetManager.list(layerPath)
                         if (files.isNullOrEmpty()) {
-                            colors.add(ColorModel("", arrayListOf("$ASSET_PREFIX$layerPath")))
+                            colors.add(ColorModel("", arrayListOf("$ASSET_PREFIX/$layerPath")))
                         } else {
-                            val paths = files.map { "$ASSET_PREFIX$layerPath/$it" }
+                            val paths = files.map { "$ASSET_PREFIX/$layerPath/$it" }
                             colors.add(ColorModel(layer, ArrayList(paths)))
                         }
                     }
@@ -211,9 +211,7 @@ class AppDataManager @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e(TAG, "❌ Lỗi processColorDefaults", e)
-        }
-    }
-
+        }}
     /**
      * ✅ Save/Load templates cache
      */

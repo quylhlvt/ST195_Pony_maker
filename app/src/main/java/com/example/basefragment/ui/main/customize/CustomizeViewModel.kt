@@ -63,7 +63,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         } ?: return
 
         // ✅ KHÔNG sort, giữ nguyên thứ tự nav trong listPath
-        val sortedListPath = character.listPath.sortedBy { it.navOrder }
+        val sortedListPath = character.listPath.sortedBy { it.position }
         _currentCharacter.value = character.copy(listPath = ArrayList(sortedListPath))
 
         // ✅ Deep copy toàn bộ dữ liệu gốc (GIỮ TẤT CẢ colors và layers)
@@ -135,16 +135,17 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
         if (hasColor) {
-            navSelections[navIndex] = SelectionPart(nav = navIndex, color = 0, layer = 0)
-            applyPreview(navIndex, 0, 0)
+            var layerSet= if (navIndex==0)2 else 0
+            navSelections[navIndex] = SelectionPart(nav = navIndex, color = 0, layer = layerSet)
+            applyPreview(navIndex, 0, layerSet)
         } else {
-            val position = bodyPart.position.toIntOrNull() ?: 0
+            val position = bodyPart.position ?: 0
             val realImagesCount = bodyPart.listPath.sumOf { cm ->
                 cm.listPath.count { it.contains("/") }
             }
 
             if (realImagesCount > 0) {
-                val firstRealIndex = if (position != 1) 2 else 1
+                val firstRealIndex = if (position != 1) 0 else 1
                 navSelections[navIndex] = SelectionPart(nav = navIndex, color = -1, layer = firstRealIndex)
                 applyPreviewSingleImage(navIndex, firstRealIndex)
             }
@@ -182,7 +183,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
         if (!hasColor) {
-            val position = bodyPart.position.toIntOrNull() ?: 0
+            val position = bodyPart.position ?: 0
             val layerImages = mutableListOf<String>()
             if (position != 1) layerImages.add("none")
             layerImages.add("dice")
@@ -265,7 +266,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         val character = _currentCharacter.value ?: return
         val bodyPart = originalBodyParts.getOrNull(navIndex) ?: return
 
-        val position = bodyPart.position.toIntOrNull() ?: 0
+        val position = bodyPart.position ?: 0
         val layerImages = mutableListOf<String>()
         if (position != 1) layerImages.add("none")
         layerImages.add("dice")
@@ -307,7 +308,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
                     it.listPath.firstOrNull { p -> p.contains("/") }
                 }
                 if (realImages.isNotEmpty()) {
-                    val position = bodyPart.position.toIntOrNull() ?: 0
+                    val position = bodyPart.position ?: 0
                     val realStartIndex = if (position != 1) 2 else 1
                     val randomOffset = Random.nextInt(realImages.size)
                     val fixedLayerIndex = realStartIndex + randomOffset
@@ -346,7 +347,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         if (!hasColor) {
             if (selection.layer == -1) return null
 
-            val position = bodyPart.position.toIntOrNull() ?: 0
+            val position = bodyPart.position ?: 0
             val layerImages = mutableListOf<String>()
             if (position != 1) layerImages.add("none")
             layerImages.add("dice")
@@ -379,7 +380,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         }
 
         val list = mutableListOf<String>()
-        val position = bodyPart.position.toIntOrNull() ?: 0
+        val position = bodyPart.position ?: 0
         if (position != 1) list.add("none")
         list.add("dice")
         list.addAll(realImages)

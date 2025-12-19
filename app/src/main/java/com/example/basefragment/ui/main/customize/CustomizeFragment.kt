@@ -22,6 +22,7 @@ import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.drawToBitmap
 import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.toggetShow
@@ -57,6 +58,7 @@ class CustomizeFragment :
     }
 
     override fun initView() {
+        requireActivity().hideNavigation(true)
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
             setImageActionBar(btnActionBarCenter, R.drawable.ic_flip_all_custom)
@@ -133,12 +135,18 @@ class CustomizeFragment :
             }
             btnActionBarRight.setOnClickListener {
                 saveCharacterWithImage()
+                requireActivity().hideNavigation(true)
+
             }
             btnActionBarCenter.setOnClickListener {
                 viewModel.toggleFlip()
+                requireActivity().hideNavigation(true)
+
             }
             btnActionBarCenter1.setOnClickListener {
                 viewModel.resetCurrentVariant()
+                requireActivity().hideNavigation(true)
+
             }
             btnActionBarCenter2.setOnClickListener {
                 checkShow = !checkShow
@@ -166,6 +174,8 @@ class CustomizeFragment :
 
         binding.imgRandom.setOnClickListener {
             viewModel.randomizeCharacter()
+            requireActivity().hideNavigation(true)
+
         }
 
 
@@ -285,6 +295,8 @@ class CustomizeFragment :
         val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
 
         layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
+        requireActivity().hideNavigation(true)
+
     }
 
     private fun updateLayerRecycler(navIndex: Int) {
@@ -325,6 +337,8 @@ class CustomizeFragment :
         val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
 
         layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
+        requireActivity().hideNavigation(true)
+
     }
 
     private fun updateCharacterPreview(character: CustomModel?) {
@@ -333,7 +347,12 @@ class CustomizeFragment :
         if (character == null) return
 
         // 🔥 Render theo z-index
-        val sortedParts = character.listPath.sortedBy { it.zIndex }
+        val sortedParts =  character.listPath.sortedBy { bodyPart ->
+            bodyPart.nav.substringBeforeLast("/")
+                .substringAfterLast("/")
+                .substringBefore("-")
+                .toIntOrNull() ?: 0
+        }
 
         for (bodyPart in sortedParts) {
             // 🔥 TÌM navIndex THẬT từ character.listPath gốc
@@ -357,6 +376,8 @@ class CustomizeFragment :
             loadImage(imagePath, iv)
             binding.characterContainer.addView(iv)
         }
+        requireActivity().hideNavigation(true)
+
     }
 
     private fun saveCharacterWithImage() {
@@ -419,6 +440,7 @@ class CustomizeFragment :
                 Log.e("CustomizeFragment", "❌ Error saving character: ${e.message}", e)
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+            requireActivity().hideNavigation(true)
         }
     }
 

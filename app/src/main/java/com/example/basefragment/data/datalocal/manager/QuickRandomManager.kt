@@ -164,7 +164,7 @@ class QuickRandomManager @Inject constructor(
                 }
 
                 if (realImages.isNotEmpty()) {
-                    val position = bodyPart.position.toIntOrNull() ?: 0
+                    val position = bodyPart.position ?: 0
                     val layerImages = mutableListOf<String>()
                     if (position != 1) layerImages.add("none")
                     layerImages.add("dice")
@@ -297,7 +297,7 @@ class QuickRandomManager @Inject constructor(
         if (!hasColor) {
             if (selection.layer == -1) return null
 
-            val position = bodyPart.position.toIntOrNull() ?: 0
+            val position = bodyPart.position ?: 0
             val layerImages = mutableListOf<String>()
             if (position != 1) layerImages.add("none")
             layerImages.add("dice")

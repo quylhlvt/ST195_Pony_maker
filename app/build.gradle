@@ -35,11 +35,10 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-    dataBinding {
-        enabled true
-    }
+
     buildFeatures {
         viewBinding true
+        dataBinding true
     }
     bundle {
         language {
