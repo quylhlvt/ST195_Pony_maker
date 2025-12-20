@@ -75,6 +75,14 @@
             app:popUpToInclusive="false"
             />
         <action
+            android:id="@+id/action_mypony_to_view"
+            app:destination="@id/viewFragment"
+            app:popUpTo="@id/myPony"
+            app:popUpToInclusive="false"
+
+            />
+
+        <action
             android:id="@+id/action_my_pony_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
@@ -110,9 +118,22 @@
         android:name="com.example.basefragment.ui.main.view.ViewFragment"
         android:label="fragment_view"
         tools:layout="@layout/fragment_view" >
+        <action
+            android:id="@+id/action_view_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
         <argument
             android:name="imagePath"
             app:argType="string" />
+        <argument
+            android:name="imageType"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="idEdit"
+            app:argType="string"
+           />
     </fragment>
 
 

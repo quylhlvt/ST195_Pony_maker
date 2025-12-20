@@ -9,7 +9,7 @@
         tools:layout="@layout/fragment_setting"
         android:label="My Setting" >
         <action
-            android:id="@+id/action_my_pony_to_home"
+            android:id="@+id/action_setting_to_home"
             app:destination="@id/language"
             app:popUpTo="@id/language"
              />

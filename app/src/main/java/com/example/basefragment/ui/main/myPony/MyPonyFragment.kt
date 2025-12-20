@@ -6,12 +6,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.gone
@@ -22,8 +24,10 @@ import com.example.basefragment.core.extention.setTextActionBar
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.mypony.MyAlbumModel
 import com.example.basefragment.databinding.FragmentMyPonyBinding
+import com.example.basefragment.ui.main.add_character.AddCharacterFragmentDirections
 import com.example.basefragment.ui.main.myPony.adapter.MyAvatarAdapter
 import com.example.basefragment.ui.main.myPony.adapter.MyDesignAdapter
+import com.example.basefragment.ui.main.view.ViewFragmentDirections
 import com.example.basefragment.utils.share.whatsapp.StickerPack
 import com.example.basefragment.utils.share.whatsapp.WhitelistCheck
 import dagger.hilt.android.AndroidEntryPoint
@@ -55,11 +59,33 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         setupTabs()
         setupRecyclerViews()
         setupBottomButtons()
-
+        setupTouchListenerForResetSelection()
         // Load initial data
         loadAvatarData()
     }
+    private fun setupTouchListenerForResetSelection() {
+        binding.apply {
+            // Touch cho RecyclerView
+            val touchListener = object : RecyclerView.OnItemTouchListener {
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                    if (e.action == MotionEvent.ACTION_UP) {
+                        val child = rv.findChildViewUnder(e.x, e.y)
+                        if (child == null) {
+                            resetSelection()
+                            return true
+                        }
+                    }
+                    return false
+                }
 
+                override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+                override fun onRequestDisallowInterceptTouchEvent(disallow: Boolean) {}
+            }
+
+            recycleAvatar.addOnItemTouchListener(touchListener)
+            recycleDesign.addOnItemTouchListener(touchListener)
+        }
+    }
     private fun setupActionBar() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
@@ -117,7 +143,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         // Avatar adapter
         myAvatarAdapter = MyAvatarAdapter(requireContext()).apply {
             onItemClick = { path ->
-                handleItemClick(path, true)
+                handleItemClick(path.path, true,1, idEdit= path.idEdit )
             }
 
             onLongClick = { position ->
@@ -146,7 +172,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         // Design adapter
         myDesignAdapter = MyDesignAdapter().apply {
             onItemClick = { path ->
-                handleItemClick(path, false)
+                handleItemClick(path, false, 2,"0")
             }
 
             onLongClick = { position ->
@@ -179,20 +205,30 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
     }
 
     override fun observeData() {
-        // Observe avatar list
+        // ✅ Observe avatar list TỪ MyPonyViewModel
         viewLifecycleOwner.lifecycleScope.launch {
-//            viewModel.myAvatarList.collect { list ->
-//                myAvatarAdapter.submitList(list)
-//                updateEmptyState(list.isEmpty() && isAvatarTab.value)
-//                updateSelectionUI()
-//            }
-            viewModelActivity.customizedCharacters.collect {
-                myAvatarAdapter.submitList(it)
+        viewModelActivity.customizedCharacters.collect { customized ->
+           val list= customized.map {
+               MyAlbumModel(
+                   path = it.imageSave,
+                   idEdit = it.id,
+                   type = 1
+               )
+
+            }
+            myAvatarAdapter.submitList(list)
+            updateEmptyState(customized.isEmpty() && isAvatarTab.value)
+
+            updateSelectionUI()
+        }}
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.myAvatarList.collect { list ->
+                myAvatarAdapter.submitList(list)
+
             }
         }
 
-
-        // Observe design list
+        // ✅ Observe design list
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.myDesignList.collect { list ->
                 myDesignAdapter.submitList(list)
@@ -201,7 +237,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             }
         }
 
-        // Observe download state
+        // ✅ Observe download state
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadState.collect { state ->
                 when (state) {
@@ -241,7 +277,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
                 btnActionBarRight.visible()
                 tvCenter.text = "Selected $selectedCount/${currentList.size}"
                 btnActionBarRight.setImageResource(
-                    if (allSelected) R.drawable.ic_selected else R.drawable.ic_not_select_all
+                    if (allSelected) R.drawable.ic_select_all else R.drawable.ic_not_select_all
                 )
             } else {
                 btnActionBarRight.invisible()
@@ -276,7 +312,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
 
     // ==================== Selection Management ====================
 
-    private fun handleItemClick(path: String, isAvatar: Boolean) {
+    private fun handleItemClick(path: String, isAvatar: Boolean, type:Int, idEdit: String) {
         val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
 
         if (currentList.any { it.isShowSelection }) {
@@ -287,7 +323,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             }
         } else {
             // Normal mode, navigate to view
-            navigateToView(path)
+            navigateToView(path,type, idEdit)
         }
     }
 
@@ -334,15 +370,30 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
 
     // ==================== Navigation ====================
 
-    private fun navigateToView(path: String) {
-        val bundle = bundleOf("imagePath" to path)
-        // TODO: Navigate to ViewActivity
+    private fun navigateToView(path: String, type: Int, idEdit: String) {
+
+
+        val action = MyPonyFragmentDirections
+            .actionMyponyToView(path,idEdit,type)
+        findNavController().navigate(action)
         // findNavController().navigate(R.id.action_to_view, bundle)
     }
 
     private fun navigateToEdit(path: String) {
-        // TODO: Navigate to CustomizeActivity
-        // Find character by path and navigate
+//        findNavController().navigate(
+//            R.id.action_mypony_to_custom,
+//            bundleOf("characterIndex" to path, "isQuickRandom" to true),
+//        )
+        val globalIndex = viewModelActivity.characters.value.indexOfFirst {
+        it.id == path
+    }
+
+    if (globalIndex >= 0) {
+        findNavController().navigate(
+            R.id.action_mypony_to_custom,
+            bundleOf("characterIndex" to globalIndex)
+        )
+    }
     }
 
     // ==================== Actions ====================
@@ -520,11 +571,11 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
     override fun viewListener() {
         binding.actionBar.apply {
             btnActionBarLeft.setOnClickListener {
+                findNavController().navigateUp()
                 if (myAvatarAdapter.items.any { it.isShowSelection } ||
                     myDesignAdapter.items.any { it.isShowSelection }) {
                     resetSelection()
-                } else {
-                    findNavController().navigateUp()
+
                 }
             }
         }

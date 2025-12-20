@@ -76,7 +76,6 @@ class ViewModelActivity @Inject constructor(
                 appDataManager.loadInitialData()
 
                 // ✅ Collect all data streams
-
                 launch {
                     appDataManager.characters.collect { _characters.value = it }
                 }

@@ -3,6 +3,7 @@ package com.example.basefragment.data.datalocal.manager
 import android.content.Context
 import android.util.Log
 import com.example.basefragment.data.model.custom.*
+import com.example.basefragment.data.usecase.GetCatalogueUseCase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,6 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class AppDataManager @Inject constructor(
     @ApplicationContext private val context: Context
+    ,
+    private val getCatalogueUseCase: GetCatalogueUseCase
 ) {
     // ✅ TÁCH RIÊNG 2 file JSON
     private val templatesFileName = "templates.json"        // Templates gốc từ assets

@@ -48,7 +48,8 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
     fun initCharacter(
         mainViewModel: ViewModelActivity,
         index: Int? = null,
-        template: CustomModel? = null
+        template: CustomModel? = null,
+        isquick: Boolean=false
     ) {
         val character = when {
             index != null && index >= 0 -> {
@@ -63,7 +64,8 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         } ?: return
 
         // ✅ KHÔNG sort, giữ nguyên thứ tự nav trong listPath
-        val sortedListPath = character.listPath.sortedBy { it.zIndex }
+
+        val sortedListPath = character.listPath.sortedBy { it.position }
         _currentCharacter.value = character.copy(listPath = ArrayList(sortedListPath))
 
         // ✅ Deep copy toàn bộ dữ liệu gốc (GIỮ TẤT CẢ colors và layers)
@@ -393,21 +395,43 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
     fun saveCharacter(mainViewModel: ViewModelActivity, capturedImagePath: String = "") {
         val base = baseCharacter ?: return
 
-        // ✅ Lưu TOÀN BỘ originalBodyParts (không thay đổi)
         val finalCharacter = base.copy(
-            listPath = ArrayList(originalBodyParts),  // ✅ Giữ nguyên TOÀN BỘ dữ liệu
-            selections = ArrayList(navSelections),     // ✅ Lưu selections riêng
+            listPath = ArrayList(originalBodyParts),
+            selections = ArrayList(navSelections),
             imageSave = capturedImagePath,
             updatedAt = System.currentTimeMillis()
         )
 
         mainViewModel.updateOrAddCharacter(finalCharacter, characterIndex)
 
-        Log.d("CustomizeViewModel", "✅ Character saved:")
+        Log.d("CustomizeViewModel", "✅ Character saved (edit mode):")
         Log.d("CustomizeViewModel", "   - ID: ${finalCharacter.id}")
+        Log.d("CustomizeViewModel", "   - Index: $characterIndex")
+    }
+    fun saveCharacterWithNewId(
+        mainViewModel: ViewModelActivity,
+        newCharacterId: String,
+        imagePath: String = ""
+    ) {
+        val base = baseCharacter ?: return
+
+        // ✅ Tạo character mới với ID mới
+        val finalCharacter = base.copy(
+            id = newCharacterId,  // 🔥 ID hoàn toàn mới
+            listPath = ArrayList(originalBodyParts),
+            selections = ArrayList(navSelections),
+            imageSave = imagePath,
+            updatedAt = System.currentTimeMillis()
+        )
+
+        // 🔥 KHÔNG truyền characterIndex → sẽ tự động add mới
+        mainViewModel.updateOrAddCharacter(finalCharacter, index = -1)
+
+        Log.d("CustomizeViewModel", "✅ Character saved with new ID:")
+        Log.d("CustomizeViewModel", "   - New ID: $newCharacterId")
         Log.d("CustomizeViewModel", "   - Body parts: ${finalCharacter.listPath.size}")
         Log.d("CustomizeViewModel", "   - Selections: ${finalCharacter.selections.size}")
-        Log.d("CustomizeViewModel", "   - Image: $capturedImagePath")
+        Log.d("CustomizeViewModel", "   - Image: $imagePath")
 
         finalCharacter.selections.forEachIndexed { idx, selection ->
             Log.d("CustomizeViewModel", "   - Selection[$idx]: nav=${selection.nav}, color=${selection.color}, layer=${selection.layer}")

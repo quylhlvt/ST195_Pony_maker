@@ -53,9 +53,9 @@ object SharedPreferencesManager {
         saveIntDataByKey(PERMISSION_CAMERA, isSkipped)
     }
 
-    fun isRateRequest(): Int = getIntDataByKey(RATE_KEY)
-    fun setRateRequest(isSkipped: Int) {
-        saveIntDataByKey(RATE_KEY, isSkipped)
+    fun isRateRequest(): Boolean = getBooleanDataByKey(RATE_KEY)
+    fun setRateRequest(isSkipped: Boolean) {
+        saveBooleanDataByKey(RATE_KEY, isSkipped)
     }
 
     fun isBackRequest(): Int = getIntDataByKey(COUNT_BACK_KEY)

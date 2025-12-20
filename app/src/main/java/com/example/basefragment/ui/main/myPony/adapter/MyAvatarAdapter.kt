@@ -13,7 +13,7 @@ import com.example.basefragment.databinding.ItemMyAlbumBinding
 
 class MyAvatarAdapter(val context: Context) :
     BaseAdapter<MyAlbumModel, ItemMyAlbumBinding>(ItemMyAlbumBinding::inflate) {
-    var onItemClick: ((String) -> Unit) = {}
+    var onItemClick: ((MyAlbumModel) -> Unit) = {}
     var onLongClick: ((Int) -> Unit) = {}
     var onItemTick: ((Int) -> Unit) = {}
 
@@ -41,7 +41,7 @@ class MyAvatarAdapter(val context: Context) :
                 btnSelect.setImageResource(R.drawable.ic_not_select)
             }
 
-            root.onClick { onItemClick.invoke(item.path) }
+            root.onClick { onItemClick.invoke(item) }
 
             root.setOnLongClickListener {
                 if (items.any { album -> album.isShowSelection }) {
@@ -52,7 +52,7 @@ class MyAvatarAdapter(val context: Context) :
 
                 }
             }
-            btnEdit.onClick { onEditClick.invoke(item.path) }
+            btnEdit.onClick { onEditClick.invoke(item.idEdit) }
             btnDelete.onClick { onDeleteClick.invoke(item.path) }
             btnSelect.onClick { onItemTick.invoke(position) }
         }

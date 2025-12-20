@@ -21,16 +21,19 @@ import com.example.basefragment.ui.main.myPony.CharacterListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
     FragmentQuickBinding::inflate,
     QuickViewModel::class.java
 ) {
+    var check = false
 
     private lateinit var quickRandomAdapter: CharacterListAdapter
 
     override fun initView() {
+        showLoadingSafe()
         setImageActionBar(binding.actionBar.btnActionBarLeft, R.drawable.back_app)
         setupRecyclerView()
     }
@@ -61,6 +64,11 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
 
                 // Update empty state
                 if (characters.isEmpty()) {
+                    if (!check){
+                        hideLoadingSafe()
+                    }
+                    check=true
+
                     // Show empty/loading state
                     binding.recyclerViewQuick.visibility = android.view.View.GONE
                     // binding.emptyStateLayout.visibility = android.view.View.VISIBLE
@@ -96,24 +104,57 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
     private fun navigateToCustomize(character: CustomModel) {
         lifecycleScope.launch {
             try {
-                // ✅ Create new customized character
-                val newCharacter = character.copy(
-                    id = java.util.UUID.randomUUID().toString(),
+                // 🔥 TÌM TEMPLATE GỐC để lấy TOÀN BỘ dữ liệu (all colors, all layers)
+                val templateId = character.id
+                    .removePrefix("quick_")
+                    .substringBeforeLast("_")  // "template_xxx"
+
+                Log.d("QuickFragment", "🔍 Finding template for quick character:")
+                Log.d("QuickFragment", "   - Quick ID: ${character.id}")
+                Log.d("QuickFragment", "   - Template ID: $templateId")
+
+                val template = viewModelActivity.getCharacterById(templateId)
+
+                if (template == null) {
+                    Log.e("QuickFragment", "❌ Template not found: $templateId")
+                    Toast.makeText(requireContext(), "Template not found", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // 🔥 TẠO CHARACTER TẠM với:
+                // - ID tạm thời (để xóa khi back mà không save)
+                // - TOÀN BỘ listPath từ template (all colors, all layers)
+                // - SELECTIONS từ quick random (để user thấy kết quả random)
+                val newCharacter = template.copy(
+                    id = "temp_from_quick_${java.util.UUID.randomUUID()}",  // 🔥 ID tạm
+                    listPath = ArrayList(template.listPath.map { bp ->
+                        bp.copy(
+                            listPath = ArrayList(bp.listPath.map { color ->
+                                color.copy(listPath = ArrayList(color.listPath))
+                            })
+                        )
+                    }),
+                    selections = ArrayList(character.selections),  // 🔥 GIỮ selections từ quick
+                    imageSave = "",  // 🔥 Chưa có ảnh (sẽ generate mới khi save)
                     updatedAt = System.currentTimeMillis()
                 )
 
-                Log.d("QuickFragment", "🚀 Creating character: ${newCharacter.id}")
+                Log.d("QuickFragment", "🚀 Creating temp character from quick random:")
+                Log.d("QuickFragment", "   - Template ID: $templateId")
+                Log.d("QuickFragment", "   - Temp ID: ${newCharacter.id}")
+                Log.d("QuickFragment", "   - Selections: ${newCharacter.selections.size} (from quick)")
+                Log.d("QuickFragment", "   - Body parts: ${newCharacter.listPath.size}")
 
-                // ✅ Save to customized list
+                // ✅ Add to customized list (tạm thời)
                 viewModelActivity.updateOrAddCharacter(newCharacter)
 
-                // ✅ Wait for characters flow to contain the new character
+                // ✅ Wait for confirmation
                 viewModelActivity.characters
                     .first { characters ->
                         characters.any { it.id == newCharacter.id }
                     }
 
-                // ✅ Get index after confirmed in list
+                // ✅ Get index
                 val newIndex = viewModelActivity.characters.value.indexOfFirst {
                     it.id == newCharacter.id
                 }
@@ -122,7 +163,10 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
                     Log.d("QuickFragment", "✅ Navigate to customize with index: $newIndex")
                     findNavController().navigate(
                         R.id.action_quick_to_custom,
-                        bundleOf("characterIndex" to newIndex, "isQuickRandom" to true),
+                        bundleOf(
+                            "characterIndex" to newIndex,
+                            "isQuickRandom" to true  // 🔥 TRUE để biết cần xóa temp khi back
+                        )
                     )
                 } else {
                     throw Exception("Character not found in list")
@@ -160,17 +204,64 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
      * ✅ Save to My Pony (create new customized character)
      */
     private fun saveToMyPony(character: CustomModel) {
-        val newCharacter = character.copy(
-            id = java.util.UUID.randomUUID().toString(),
-            updatedAt = System.currentTimeMillis()
-        )
-        viewModelActivity.updateOrAddCharacter(newCharacter)
+        lifecycleScope.launch {
+            try {
+                // 🔥 TÌM TEMPLATE GỐC
+                val templateId = character.id
+                    .removePrefix("quick_")
+                    .substringBeforeLast("_")
 
-        Toast.makeText(
-            requireContext(),
-            "Saved to My Pony!",
-            Toast.LENGTH_SHORT
-        ).show()
+                val template = viewModelActivity.getCharacterById(templateId)
+
+                if (template == null) {
+                    Toast.makeText(requireContext(), "Template not found", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // 🔥 TẠO CHARACTER MỚI với selections từ quick random
+                val newCharacter = template.copy(
+                    id = java.util.UUID.randomUUID().toString(),
+                    listPath = ArrayList(template.listPath.map { bp ->
+                        bp.copy(
+                            listPath = ArrayList(bp.listPath.map { color ->
+                                color.copy(listPath = ArrayList(color.listPath))
+                            })
+                        )
+                    }),
+                    selections = ArrayList(character.selections),  // 🔥 Copy selections
+                    imageSave = "",  // 🔥 Sẽ copy ảnh bên dưới
+                    updatedAt = System.currentTimeMillis()
+                )
+
+                // 🔥 Copy ảnh từ quick sang character mới
+                if (character.imageSave.isNotEmpty()) {
+                    val quickImageFile = File(character.imageSave)
+                    if (quickImageFile.exists()) {
+                        val newImagePath = File(
+                            quickImageFile.parent,
+                            "character_${newCharacter.id}.png"
+                        ).absolutePath
+
+                        quickImageFile.copyTo(File(newImagePath), overwrite = true)
+
+                        val finalCharacter = newCharacter.copy(imageSave = newImagePath)
+                        viewModelActivity.updateOrAddCharacter(finalCharacter)
+
+                        Log.d("QuickFragment", "✅ Saved to My Pony with image: ${finalCharacter.id}")
+                        Toast.makeText(requireContext(), "Saved to My Pony!", Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
+                }
+
+                // Fallback: save without image
+                viewModelActivity.updateOrAddCharacter(newCharacter)
+                Toast.makeText(requireContext(), "Saved to My Pony!", Toast.LENGTH_SHORT).show()
+
+            } catch (e: Exception) {
+                Log.e("QuickFragment", "❌ Error saving to My Pony: ${e.message}", e)
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     /**
@@ -202,5 +293,10 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
         savedInstanceState: Bundle?
     ): FragmentQuickBinding {
         return FragmentQuickBinding.inflate(inflater, container, false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideLoadingSafe()
     }
 }

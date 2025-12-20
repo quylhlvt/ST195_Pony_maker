@@ -32,6 +32,7 @@ import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.databinding.FragmentCustomizeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -72,12 +73,12 @@ class CustomizeFragment :
         isQuickRandom = arguments?.getBoolean("isQuickRandom", false) ?: false
         when {
             characterIndex >= 0 -> {
-                viewModel.initCharacter(mainViewModel, index = characterIndex)
+                viewModel.initCharacter(mainViewModel, index = characterIndex, isquick = isQuickRandom)
             }
 
             templateIndex >= 0 -> {
                 val template = mainViewModel.getCharacterByIndex(templateIndex)
-                viewModel.initCharacter(mainViewModel, template = template)
+                viewModel.initCharacter(mainViewModel, template = template,isquick = isQuickRandom)
             }
 
             else -> {
@@ -131,9 +132,10 @@ class CustomizeFragment :
     override fun viewListener() {
         binding.actionBar.apply {
             btnActionBarLeft.setOnClickListener {
+                // 🔥 XÓA temp character khi back mà không save
                 if (isQuickRandom) {
                     val characterId = viewModel.currentCharacter.value?.id
-                    if (characterId != null && characterId.startsWith("temp_quickrandom_")) {
+                    if (characterId != null && characterId.startsWith("temp_from_quick_")) {
                         mainViewModel.deleteCharacter(characterId)
                         Log.d("CustomizeFragment", "🗑️ Deleted temp character: $characterId")
                     }
@@ -352,13 +354,12 @@ class CustomizeFragment :
         val isFlipped = viewModel.isFlipped.value
         binding.characterContainer.removeAllViews()
         if (character == null) return
-
         // 🔥 FIX: Sort theo zIndex (render order), KHÔNG phải position (nav order)
         val sortedParts = character.listPath.sortedBy { it.zIndex }
 
         for (bodyPart in sortedParts) {
             // 🔥 TÌM navIndex THẬT từ character.listPath GỐC (trước khi sort)
-            val navIndex = character.listPath.indexOf(bodyPart)
+            val navIndex = viewModel.selectedBodyParts.value.indexOfFirst { it.position == bodyPart.position }
             if (navIndex == -1) continue
 
             // 🔥 Lấy path từ selection
@@ -382,61 +383,86 @@ class CustomizeFragment :
     private fun saveCharacterWithImage() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // ✅ Check xem có selection nào không
                 if (!viewModel.hasAnyRealImageSelected()) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Please select at least one item",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Please select at least one item", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
-                // ✅ Wait for layout to complete
                 binding.characterContainer.post {
                     try {
-                        // ✅ Capture bitmap từ characterContainer
-                        val bitmap = binding.characterContainer.drawToBitmap()
-                        val characterId = viewModel.currentCharacter.value?.id ?: ""
-                        imageManager.deleteOldImage(characterId)
+                        val currentCharacter = viewModel.currentCharacter.value
 
-                        val imagePath = imageManager.saveBitmap(bitmap, characterId)
+                        // 🔥 NẾU LÀ TEMP từ quick → TẠO ID MỚI
+                        val finalCharacterId = if (isQuickRandom &&
+                            currentCharacter?.id?.startsWith("temp_from_quick_") == true) {
+
+                            // 🔥 Xóa temp character
+                            val tempId = currentCharacter.id
+                            mainViewModel.deleteCharacter(tempId)
+                            Log.d("CustomizeFragment", "🗑️ Deleted temp character: $tempId")
+
+                            // 🔥 Tạo ID mới HOÀN TOÀN
+                            java.util.UUID.randomUUID().toString()
+                        } else {
+                            // ✅ Giữ nguyên ID (edit mode hoặc new từ template)
+                            currentCharacter?.id ?: java.util.UUID.randomUUID().toString()
+                        }
+
+                        Log.d("CustomizeFragment", "💾 Saving character:")
+                        Log.d("CustomizeFragment", "   - Old ID: ${currentCharacter?.id}")
+                        Log.d("CustomizeFragment", "   - Final ID: $finalCharacterId")
+                        Log.d("CustomizeFragment", "   - isQuickRandom: $isQuickRandom")
+
+                        // 🔥 Render bitmap
+                        val bitmap = binding.characterContainer.drawToBitmap()
+
+                        // 🔥 Delete old image (if exists)
+                        imageManager.deleteOldImage(finalCharacterId)
+
+                        // 🔥 Save new image
+                        val imagePath = imageManager.saveBitmap(bitmap, finalCharacterId)
 
                         if (imagePath != null) {
-                            viewModel.saveCharacter(mainViewModel, imagePath)
+                            // ✅ Save character with new/existing ID
+                            if (isQuickRandom && currentCharacter?.id?.startsWith("temp_from_quick_") == true) {
+                                // 🔥 Save với ID mới
+                                viewModel.saveCharacterWithNewId(
+                                    mainViewModel = mainViewModel,
+                                    newCharacterId = finalCharacterId,
+                                    imagePath = imagePath
+                                )
+                            } else {
+                                // ✅ Save bình thường
+                                viewModel.saveCharacter(mainViewModel, imagePath)
+                            }
+
                             mainViewModel.refreshApiData()
 
                             Log.d("CustomizeFragment", "✅ Character saved:")
-                            Log.d("CustomizeFragment", "   - ID: $characterId")
+                            Log.d("CustomizeFragment", "   - ID: $finalCharacterId")
                             Log.d("CustomizeFragment", "   - Image: $imagePath")
+                            Log.d("CustomizeFragment", "   - Total customized: ${mainViewModel.customizedCharacters.value.size}")
 
-                            Toast.makeText(requireContext(), "Character saved!", Toast.LENGTH_SHORT)
-                                .show()
-                            // ✅ Navigate to AddFragment với saved image path
+                            Toast.makeText(requireContext(), "Character saved!", Toast.LENGTH_SHORT).show()
+
                             findNavController().navigate(
                                 R.id.action_customizeFragment_to_addFragment,
                                 bundleOf(
-                                    "characterId" to characterId,
+                                    "characterId" to finalCharacterId,
                                     "imagePath" to imagePath
                                 )
                             )
                         } else {
-                            Log.e("CustomizeFragment", "❌ Failed to save character image")
-                            Toast.makeText(
-                                requireContext(),
-                                "Failed to save character image",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Log.e("CustomizeFragment", "❌ Failed to save image")
+                            Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show()
                         }
                     } catch (e: Exception) {
-                        Log.e("CustomizeFragment", "❌ Error capturing image: ${e.message}", e)
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT)
-                            .show()
+                        Log.e("CustomizeFragment", "❌ Error: ${e.message}", e)
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
-
             } catch (e: Exception) {
-                Log.e("CustomizeFragment", "❌ Error saving character: ${e.message}", e)
+                Log.e("CustomizeFragment", "❌ Error: ${e.message}", e)
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
             requireActivity().hideNavigation(true)

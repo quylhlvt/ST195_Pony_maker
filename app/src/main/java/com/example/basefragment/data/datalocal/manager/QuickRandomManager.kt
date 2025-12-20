@@ -130,14 +130,17 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
+// ✅ FIXED: generateRandomCharacter - sử dụng originalIndex thay vì navIndex
+
     private fun generateRandomCharacter(template: CustomModel): CustomModel {
         val randomSelections = arrayListOf<SelectionPart>()
 
+        // 🔥 DÙNG forEachIndexed → index chính là navIndex đúng thứ tự trong template.listPath
         template.listPath.forEachIndexed { navIndex, bodyPart ->
             if (bodyPart.listPath.isEmpty()) {
                 randomSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
-                return@forEachIndexed
-            }
+
+            }else{
 
             val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
@@ -145,7 +148,8 @@ class QuickRandomManager @Inject constructor(
                 val colorIndex = Random.nextInt(bodyPart.listPath.size)
                 val color = bodyPart.listPath[colorIndex]
 
-                val realLayers = color.listPath.filterIndexed { idx, path ->
+                // Lọc các layer thật (có ảnh)
+                val realLayers = color.listPath.filter { path ->
                     path != "none" && path != "dice" && path.contains("/")
                 }
 
@@ -154,15 +158,17 @@ class QuickRandomManager @Inject constructor(
                     val layerIndex = color.listPath.indexOf(randomLayerPath)
                     randomSelections.add(SelectionPart(nav = navIndex, color = colorIndex, layer = layerIndex))
                 } else {
-                    randomSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
+                    // Không có layer thật → để mặc định
+                    randomSelections.add(SelectionPart(nav = navIndex, color = colorIndex, layer = 0))
                 }
             } else {
-                val realImages = bodyPart.listPath.mapNotNull { cm ->
-                    cm.listPath.firstOrNull { it.contains("/") && it != "none" && it != "dice" }
+                // Không có color → chọn layer thật ngẫu nhiên
+                val realImages = bodyPart.listPath.flatMap { it.listPath }.filter {
+                    it.contains("/") && it != "none" && it != "dice"
                 }
 
                 if (realImages.isNotEmpty()) {
-                    val position = bodyPart.position?: 0
+                    val position = bodyPart.position ?: 0
                     val layerImages = mutableListOf<String>()
                     if (position != 1) layerImages.add("none")
                     layerImages.add("dice")
@@ -175,7 +181,7 @@ class QuickRandomManager @Inject constructor(
                     randomSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
                 }
             }
-        }
+        }}
 
         return CustomModel(
             id = "quick_${template.id}_${UUID.randomUUID()}",
@@ -211,34 +217,27 @@ class QuickRandomManager @Inject constructor(
             val height = 800
             val finalBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(finalBitmap)
-
-            canvas.drawColor(android.graphics.Color.WHITE)
+            canvas.drawColor(android.graphics.Color.TRANSPARENT) // hoặc WHITE nếu muốn nền trắng
 
             try {
+                // Sort theo zIndex để render đúng thứ tự chồng layer
                 val sortedParts = character.listPath.sortedBy { it.zIndex }
 
                 for (bodyPart in sortedParts) {
-                    val navIndex = character.listPath.indexOf(bodyPart)
+                    // 🔥 FIX: Tìm navIndex theo position (an toàn nhất)
+                    val navIndex = character.listPath.indexOfFirst { it.position == bodyPart.position }
                     if (navIndex == -1) continue
 
                     val imagePath = getImagePathForSelection(character, navIndex)
+                    if (imagePath.isNullOrBlank() || imagePath in listOf("none", "dice")) continue
 
-                    if (imagePath.isNullOrBlank() || imagePath == "none" || imagePath == "dice") {
-                        continue
-                    }
+                    val layerBitmap = loadBitmapFromAssets(imagePath) ?: continue
 
-                    val layerBitmap = loadBitmapFromAssets(imagePath)
-                    if (layerBitmap != null) {
-                        val scaledBitmap = Bitmap.createScaledBitmap(
-                            layerBitmap,
-                            width,
-                            height,
-                            true
-                        )
-                        canvas.drawBitmap(scaledBitmap, 0f, 0f, null)
-                        scaledBitmap.recycle()
-                        layerBitmap.recycle()
-                    }
+                    val scaledBitmap = Bitmap.createScaledBitmap(layerBitmap, width, height, true)
+                    canvas.drawBitmap(scaledBitmap, 0f, 0f, null)
+
+                    scaledBitmap.recycle()
+                    layerBitmap.recycle()
                 }
 
                 Log.d(TAG, "✅ Rendered character: ${character.id}")
@@ -273,17 +272,25 @@ class QuickRandomManager @Inject constructor(
         if (!hasColor) {
             if (selection.layer == -1) return null
 
-            val position = bodyPart.position?: 0
+            val position = bodyPart.position ?: 0
+
+            // 🔥 FIX: Phải flatMap để lấy TẤT CẢ ảnh thật, giống như khi generate
+            val realImages = bodyPart.listPath.flatMap { colorModel ->
+                colorModel.listPath.filter { path ->
+                    path.contains("/") && path != "none" && path != "dice"
+                }
+            }
+
             val layerImages = mutableListOf<String>()
             if (position != 1) layerImages.add("none")
             layerImages.add("dice")
-            layerImages.addAll(
-                bodyPart.listPath.mapNotNull { it.listPath.firstOrNull { p -> p.contains("/") } }
-            )
+            layerImages.addAll(realImages)
 
             val selectedVariant = layerImages.getOrNull(selection.layer) ?: return null
             return if (selectedVariant == "none") "" else selectedVariant
+
         } else {
+            // Phần có color giữ nguyên (đã đúng)
             if (selection.color == -1 || selection.layer == -1) return null
             val color = bodyPart.listPath.getOrNull(selection.color) ?: return null
             return color.listPath.getOrNull(selection.layer)

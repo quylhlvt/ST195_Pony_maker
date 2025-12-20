@@ -70,11 +70,13 @@ class MyPonyViewModel @Inject constructor(
                     avatarPaths
                 }
 
-                val avatarList = allPaths.map { path ->
+                val avatarList = customizedCharacters.map { path ->
                     MyAlbumModel(
-                        path = path,
+                        path = path.imageSave,
                         isSelected = false,
-                        isShowSelection = false
+                        isShowSelection = false,
+                        type = 1,
+                        idEdit = path.id
                     )
                 }
 
@@ -114,7 +116,9 @@ class MyPonyViewModel @Inject constructor(
                     MyAlbumModel(
                         path = path,
                         isSelected = false,
-                        isShowSelection = false
+                        isShowSelection = false,
+                        idEdit = "",
+                       type =  2
                     )
                 }
 

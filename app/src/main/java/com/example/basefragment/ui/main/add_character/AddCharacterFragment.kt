@@ -722,7 +722,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     Toast.makeText(requireContext(), "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
 
                     val action = AddCharacterFragmentDirections
-                        .actionAddCharacterFragmentToViewImageFragment(savedImagePath)
+                        .actionAddCharacterFragmentToViewImageFragment(savedImagePath,"0",0)
                     findNavController().navigate(action)
                 } else {
                     Toast.makeText(requireContext(), "Lưu thất bại!", Toast.LENGTH_SHORT).show()
@@ -734,9 +734,5 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
         }
     }
-    companion object {
-        fun newInstance(): AddCharacterFragment {
-            return AddCharacterFragment()
-        }
-    }
+
 }
