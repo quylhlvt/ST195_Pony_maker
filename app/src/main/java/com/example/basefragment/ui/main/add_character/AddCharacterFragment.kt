@@ -349,7 +349,9 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             viewModel.loadDataFromMainViewModel(backgrounds, stickers, speeches)
 
             // Lấy path từ viewModelActivity
-            val pathDefault = viewModelActivity.selectedCharacterPath.value ?: ""
+            val pathDefault =
+//                viewModelActivity.selectedCharacterPath.value ?:
+                ""
             viewModel.updatePathDefault(pathDefault)
             if (pathDefault.isNotEmpty()) {
                 addDrawable(viewModel.pathDefault, true)

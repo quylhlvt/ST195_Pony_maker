@@ -3,7 +3,6 @@ package com.example.basefragment.data.datalocal.manager
 import android.content.Context
 import android.util.Log
 import com.example.basefragment.data.model.custom.*
-import com.example.basefragment.data.usecase.GetCatalogueUseCase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -16,29 +15,33 @@ import javax.inject.Singleton
 @Singleton
 class AppDataManager @Inject constructor(
     @ApplicationContext private val context: Context
-    ,
-    private val getCatalogueUseCase: GetCatalogueUseCase
 ) {
-    // ✅ TÁCH RIÊNG 2 file JSON
-    private val templatesFileName = "templates.json"        // Templates gốc từ assets
-    private val customizedFileName = "customized.json"      // Characters đã customize
-    private val myDesignFileName = "my_designs.json"
     companion object {
         private const val TAG = "AppDataManager"
         private const val ASSET_PREFIX = "file:///android_asset"
+
+        // ✅ 3 FILE JSON RIÊNG BIỆT
+        private const val TEMPLATES_FILE = "templates.json"           // Templates từ API/Assets
+        private const val CUSTOMIZED_FILE = "customized.json"         // Characters do user tạo
+        private const val MY_DESIGNS_FILE = "my_designs.json"         // Saved images
     }
 
-    // ✅ Templates (chỉ đọc từ assets, không thay đổi)
+    // ==================== TEMPLATES (Read-only, từ API/Assets) ====================
+
     private val _templates = MutableStateFlow<List<CustomModel>>(emptyList())
     val templates: StateFlow<List<CustomModel>> = _templates.asStateFlow()
 
-    // ✅ Customized characters (đã lưu)
+    // ==================== CUSTOMIZED CHARACTERS (User-created, persistent) ====================
+
     private val _customizedCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
     val customizedCharacters: StateFlow<List<CustomModel>> = _customizedCharacters.asStateFlow()
 
-    // ✅ Combined list (templates + customized) để hiển thị
+    // ==================== COMBINED LIST (Templates + Customized) ====================
+
     private val _characters = MutableStateFlow<List<CustomModel>>(emptyList())
     val characters: StateFlow<List<CustomModel>> = _characters.asStateFlow()
+
+    // ==================== ASSETS DATA ====================
 
     private val _backgrounds = MutableStateFlow<List<String>>(emptyList())
     val backgrounds: StateFlow<List<String>> = _backgrounds.asStateFlow()
@@ -52,6 +55,11 @@ class AppDataManager @Inject constructor(
     private val _speechs = MutableStateFlow<List<String>>(emptyList())
     val speechs: StateFlow<List<String>> = _speechs.asStateFlow()
 
+    private val _myDesignPaths = MutableStateFlow<List<String>>(emptyList())
+    val myDesignPaths: StateFlow<List<String>> = _myDesignPaths.asStateFlow()
+
+    // ==================== LOADING STATES ====================
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
@@ -63,79 +71,51 @@ class AppDataManager @Inject constructor(
 
     private val _errorQuick = MutableStateFlow<String?>(null)
     val errorQuick = _errorQuick.asStateFlow()
-    private val _myDesignPaths = MutableStateFlow<List<String>>(emptyList())
-    val myDesignPaths: StateFlow<List<String>> = _myDesignPaths.asStateFlow()
+
     private var isDataLoaded = false
     private var isDataQuickLoaded = false
 
-    /**
-     * Load data lần đầu
-     */
-    suspend fun loadQuickData(quickRandomManager: QuickRandomManager? = null,
-                              onQuickRandomProgress: (current: Int, total: Int, templateName: String) -> Unit = { _, _, _ -> }){
-        if (isDataQuickLoaded) return
-        _isQuickLoading.value = true
-        _errorQuick.value = null
-        withContext(Dispatchers.IO) {
-            try {
-                if (quickRandomManager != null) {
-                    val hasQuickRandom = quickRandomManager.hasQuickRandomData()
-                    if (!hasQuickRandom) {
-                        Log.d(TAG, "🚀 Starting quick random generation...")
-                        quickRandomManager.generateQuickRandomCharacters(onQuickRandomProgress)
-                        Log.d(TAG, "✅ Quick random generation completed")
-                        isDataQuickLoaded = true  // ✅ Fix: đổi từ isDataLoaded → isDataQuickLoaded
-                    } else {
-                        Log.d(TAG, "✅ Quick random data already exists")
-                        isDataQuickLoaded = true  // ✅ Thêm dòng này
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi loadQuickData: ${e.message}", e)
-                _errorQuick.value = e.message
-            } finally {
-                _isQuickLoading.value = false  // ✅ Thêm dòng này
-            }
-        }
-    }
+    // ==================== INIT: LOAD ALL DATA ====================
+
     suspend fun loadInitialData() {
-        if (isDataLoaded) return
+        if (isDataLoaded) {
+            Log.d(TAG, "⚠️ Data already loaded, skipping")
+            return
+        }
+
         _isLoading.value = true
         _error.value = null
 
         withContext(Dispatchers.IO) {
             try {
-                // ✅ Load templates từ assets (hoặc cache)
-                val savedTemplates = loadTemplatesFromJson()
-                if (savedTemplates.isNotEmpty()) {
-                    _templates.value = savedTemplates
-                    Log.d(TAG, "✅ Loaded templates from cache")
-                } else {
-                    loadTemplatesFromAssets()
-                }
+                Log.d(TAG, "🚀 Starting initial data load...")
 
-                // ✅ Load customized characters từ JSON
-                val customized = loadCustomizedFromJson()
-                _customizedCharacters.value = customized
-                Log.d(TAG, "✅ Loaded ${customized.size} customized characters")
+                // 1. Load templates (từ cache hoặc assets)
+                loadTemplates()
 
-                // ✅ Combine lists
-                updateCharactersList()
+                // 2. Load customized characters (từ JSON)
+                loadCustomizedCharacters()
 
-                // Load assets khác
+                // 3. Combine lists
+                combineCharacterLists()
+
+                // 4. Load assets khác
                 coroutineScope {
-                    launch { loadMyDesignData() }
                     launch { loadBackgrounds() }
                     launch { loadBackgroundTexts() }
                     launch { loadStickers() }
                     launch { loadSpeechs() }
+                    launch { loadMyDesigns() }
                 }
 
-                Log.d(TAG, "✅ Load initial data xong")
                 isDataLoaded = true
+                Log.d(TAG, "✅ Initial data loaded successfully")
+                Log.d(TAG, "   📊 Templates: ${_templates.value.size}")
+                Log.d(TAG, "   📊 Customized: ${_customizedCharacters.value.size}")
+                Log.d(TAG, "   📊 Total characters: ${_characters.value.size}")
 
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi loadInitialData: ${e.message}", e)
+                Log.e(TAG, "❌ Error loading initial data: ${e.message}", e)
                 _error.value = e.message
             } finally {
                 _isLoading.value = false
@@ -143,87 +123,121 @@ class AppDataManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Combine templates + customized characters
-     */
-    private fun updateCharactersList() {
-        val combined = _templates.value + _customizedCharacters.value
-        _characters.value = combined
-        Log.d(TAG, "📋 Total characters: ${combined.size} (${_templates.value.size} templates + ${_customizedCharacters.value.size} customized)")
+    // ==================== LOAD TEMPLATES ====================
+
+    private suspend fun loadTemplates() {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "📦 Loading templates...")
+
+                // Try load from cache first
+                val cached = loadTemplatesFromJson()
+                if (cached.isNotEmpty()) {
+                    _templates.value = cached
+                    Log.d(TAG, "✅ Loaded ${cached.size} templates from cache")
+                    return@withContext
+                }
+
+                // If no cache, load from assets
+                Log.d(TAG, "📂 No cache found, loading from assets...")
+                loadTemplatesFromAssets()
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error loading templates: ${e.message}", e)
+            }
+        }
     }
 
-    /**
-     * Load templates từ assets (chỉ load 1 lần)
-     */
     private suspend fun loadTemplatesFromAssets() {
-        try {
-            val assetManager = context.assets
-            val result = arrayListOf<CustomModel>()
-            val folders = assetManager.list("data") ?: return
+        withContext(Dispatchers.IO) {
+            try {
+                val assetManager = context.assets
+                val result = arrayListOf<CustomModel>()
+                val folders = assetManager.list("data") ?: return@withContext
 
-            for (folder in folders) {
-                val basePath = "data/$folder"
-                val itemsRaw = assetManager.list(basePath) ?: continue
+                Log.d(TAG, "📁 Found ${folders.size} template folders")
 
-                val items = itemsRaw.sortedBy { item ->
-                    item.substringBefore("-").toIntOrNull() ?: 999
-                }
+                folders.forEach { folder ->
+                    val basePath = "data/$folder"
+                    val itemsRaw = assetManager.list(basePath) ?: return@forEach
 
-                Log.d(TAG, "=== Loading template folder: $folder ===")
-
-                val bodyParts = arrayListOf<BodyPartModel>()
-                var avatar = ""
-
-                for (item in items) {
-                    val fullPath = "$basePath/$item"
-                    val contents = assetManager.list(fullPath)
-
-                    if (contents.isNullOrEmpty()) {
-                        avatar = "$ASSET_PREFIX/$fullPath"
-                        Log.d(TAG, "  📷 Avatar: $item")
-                        continue
+                    val items = itemsRaw.sortedBy {
+                        it.substringBefore("-").toIntOrNull() ?: 999
                     }
 
-                    Log.d(TAG, "  📦 Processing item: $item")
+                    Log.d(TAG, "=== Processing template: $folder ===")
 
-                    val nav = contents.firstOrNull { it.startsWith("nav.") }
-                        ?.let { "$ASSET_PREFIX/$fullPath/$it" } ?: ""
-                    val colors = arrayListOf<ColorModel>()
+                    val bodyParts = arrayListOf<BodyPartModel>()
+                    var avatar = ""
+                    var position = 0
 
-                    contents.filter { !it.startsWith("nav.") }.forEach { layer ->
-                        val layerPath = "$fullPath/$layer"
-                        val files = assetManager.list(layerPath)
-                        if (files.isNullOrEmpty()) {
-                            colors.add(ColorModel("", arrayListOf("$ASSET_PREFIX/$layerPath")))
-                        } else {
-                            val paths = files.map { "$ASSET_PREFIX/$layerPath/$it" }
-                            colors.add(ColorModel(layer, ArrayList(paths)))
+                    items.forEach { item ->
+                        val fullPath = "$basePath/$item"
+                        val contents = assetManager.list(fullPath)
+
+                        // Avatar image (file, not folder)
+                        if (contents.isNullOrEmpty()) {
+                            avatar = "$ASSET_PREFIX/$fullPath"
+                            Log.d(TAG, "  📷 Avatar: $item")
+                            return@forEach
                         }
+
+                        Log.d(TAG, "  📦 Body part: $item")
+
+                        // Nav image
+                        val nav = contents.firstOrNull { it.startsWith("nav.") }
+                            ?.let { "$ASSET_PREFIX/$fullPath/$it" } ?: ""
+
+                        val colors = arrayListOf<ColorModel>()
+
+                        // Process layers
+                        contents.filter { !it.startsWith("nav.") }.forEach { layer ->
+                            val layerPath = "$fullPath/$layer"
+                            val files = assetManager.list(layerPath)
+
+                            if (files.isNullOrEmpty()) {
+                                // Single image layer
+                                colors.add(ColorModel("", arrayListOf("$ASSET_PREFIX/$layerPath")))
+                            } else {
+                                // Multiple variants
+                                val paths = files.map { "$ASSET_PREFIX/$layerPath/$it" }
+                                colors.add(ColorModel(layer, ArrayList(paths)))
+                            }
+                        }
+
+                        processColorDefaults(colors, item)
+
+                        bodyParts.add(BodyPartModel(
+                            nav = nav,
+                            listPath = colors,
+                            position = position,
+                            zIndex = position
+                        ))
+
+                        position++
                     }
 
-                    processColorDefaults(colors, item)
-                    bodyParts.add(BodyPartModel(nav, colors))
+                    result.add(
+                        CustomModel(
+                            id = "template_$folder",
+                            avatar = avatar,
+                            listPath = ArrayList(bodyParts),
+                            selections = arrayListOf(),
+                            imageSave = "",
+                            updatedAt = System.currentTimeMillis()
+                        )
+                    )
+
+                    Log.d(TAG, "✅ Template '$folder' loaded with ${bodyParts.size} body parts")
                 }
 
-                Log.d(TAG, "✅ Template '$folder' loaded with ${bodyParts.size} parts")
+                _templates.value = result
+                saveTemplatesToJson(result)
+                Log.d(TAG, "✅ Loaded ${result.size} templates from assets")
 
-                // ✅ Template với ID cố định (dùng folder name)
-                result.add(
-                    CustomModel(
-                        id = "template_$folder",  // ✅ ID cố định cho template
-                        avatar = avatar,
-                        listPath = ArrayList(bodyParts),
-                        selections = arrayListOf(),
-                        imageSave = ""
-                    )
-                )
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error loading templates from assets: ${e.message}", e)
             }
-
-            _templates.value = result
-            saveTemplatesToJson(result)  // Cache lại
-            Log.d(TAG, "✅ Loaded ${result.size} templates from assets")
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi loadTemplatesFromAssets: ${e.message}", e)
         }
     }
 
@@ -232,8 +246,6 @@ class AppDataManager @Inject constructor(
             val position = itemName.substringBefore("-").toIntOrNull() ?: return
 
             colors.forEach { colorModel ->
-                val originalSize = colorModel.listPath.size
-
                 when {
                     position == 1 -> {
                         if (colorModel.listPath.firstOrNull() != "dice") {
@@ -249,20 +261,21 @@ class AppDataManager @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi processColorDefaults", e)
-        }}
-    /**
-     * ✅ Save/Load templates cache
-     */
+            Log.e(TAG, "❌ Error processing color defaults", e)
+        }
+    }
+
+    // ==================== SAVE/LOAD TEMPLATES (Cache) ====================
+
     private suspend fun saveTemplatesToJson(templates: List<CustomModel>) {
         withContext(Dispatchers.IO) {
             try {
                 val json = Gson().toJson(templates)
-                val file = File(context.filesDir, templatesFileName)
+                val file = File(context.filesDir, TEMPLATES_FILE)
                 file.writeText(json)
-                Log.d(TAG, "✅ Templates cached to JSON")
+                Log.d(TAG, "💾 Templates cached: ${file.absolutePath}")
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi saveTemplatesToJson: ${e.message}", e)
+                Log.e(TAG, "❌ Error saving templates: ${e.message}", e)
             }
         }
     }
@@ -270,116 +283,151 @@ class AppDataManager @Inject constructor(
     private suspend fun loadTemplatesFromJson(): List<CustomModel> {
         return withContext(Dispatchers.IO) {
             try {
-                val file = File(context.filesDir, templatesFileName)
-                if (!file.exists()) return@withContext emptyList()
+                val file = File(context.filesDir, TEMPLATES_FILE)
+                if (!file.exists()) {
+                    Log.d(TAG, "📄 Templates cache not found")
+                    return@withContext emptyList()
+                }
+
                 val json = file.readText()
                 val type = object : TypeToken<List<CustomModel>>() {}.type
                 Gson().fromJson<List<CustomModel>>(json, type)
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi loadTemplatesFromJson: ${e.message}", e)
+                Log.e(TAG, "❌ Error loading templates from JSON: ${e.message}", e)
                 emptyList()
             }
         }
     }
 
-    /**
-     * ✅ Save/Load customized characters
-     */
-    private suspend fun saveCustomizedToJson(characters: List<CustomModel>) {
+    // ==================== CUSTOMIZED CHARACTERS ====================
+
+    private suspend fun loadCustomizedCharacters() {
+        withContext(Dispatchers.IO) {
+            try {
+                val file = File(context.filesDir, CUSTOMIZED_FILE)
+                if (!file.exists()) {
+                    _customizedCharacters.value = emptyList()
+                    Log.d(TAG, "📋 No customized characters found")
+                    return@withContext
+                }
+
+                val json = file.readText()
+                val type = object : TypeToken<List<CustomModel>>() {}.type
+                val characters = Gson().fromJson<List<CustomModel>>(json, type)
+
+                _customizedCharacters.value = characters
+                Log.d(TAG, "✅ Loaded ${characters.size} customized characters")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error loading customized characters: ${e.message}", e)
+                _customizedCharacters.value = emptyList()
+            }
+        }
+    }
+
+    private suspend fun saveCustomizedCharacters(characters: List<CustomModel>) {
         withContext(Dispatchers.IO) {
             try {
                 val json = Gson().toJson(characters)
-                val file = File(context.filesDir, customizedFileName)
+                val file = File(context.filesDir, CUSTOMIZED_FILE)
                 file.writeText(json)
-                Log.d(TAG, "✅ Customized characters saved (${characters.size} items)")
+                Log.d(TAG, "💾 Saved ${characters.size} customized characters")
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi saveCustomizedToJson: ${e.message}", e)
-            }
-        }
-    }
-
-    private suspend fun loadCustomizedFromJson(): List<CustomModel> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val file = File(context.filesDir, customizedFileName)
-                if (!file.exists()) return@withContext emptyList()
-                val json = file.readText()
-                val type = object : TypeToken<List<CustomModel>>() {}.type
-                Gson().fromJson<List<CustomModel>>(json, type)
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Lỗi loadCustomizedFromJson: ${e.message}", e)
-                emptyList()
+                Log.e(TAG, "❌ Error saving customized characters: ${e.message}", e)
             }
         }
     }
 
     /**
-     * ✅ Update hoặc add customized character
+     * ✅ ADD hoặc UPDATE customized character
      */
     suspend fun updateCustomizedCharacter(character: CustomModel) {
-        val list = _customizedCharacters.value.toMutableList()
-        val index = list.indexOfFirst { it.id == character.id }
+        withContext(Dispatchers.IO) {
+            val list = _customizedCharacters.value.toMutableList()
+            val index = list.indexOfFirst { it.id == character.id }
 
-        if (index >= 0) {
-            list[index] = character
-            Log.d(TAG, "✅ Updated customized character: ${character.id}")
-        } else {
-            list.add(character)
-            Log.d(TAG, "✅ Added new customized character: ${character.id}")
+            if (index >= 0) {
+                list[index] = character
+                Log.d(TAG, "📝 Updated character: ${character.id}")
+            } else {
+                list.add(character)
+                Log.d(TAG, "➕ Added new character: ${character.id}")
+            }
+
+            _customizedCharacters.value = list
+            saveCustomizedCharacters(list)
+            combineCharacterLists()
         }
-
-        _customizedCharacters.value = list
-        updateCharactersList()
-        saveCustomizedToJson(list)
     }
 
     /**
-     * ✅ Delete customized character
+     * ✅ DELETE customized character
      */
     suspend fun deleteCustomizedCharacter(characterId: String) {
-        val list = _customizedCharacters.value.toMutableList()
-        val removed = list.removeIf { it.id == characterId }
+        withContext(Dispatchers.IO) {
+            val list = _customizedCharacters.value.toMutableList()
+            val removed = list.removeIf { it.id == characterId }
 
-        if (removed) {
-            Log.d(TAG, "✅ Deleted customized character: $characterId")
-            _customizedCharacters.value = list
-            updateCharactersList()
-            saveCustomizedToJson(list)
+            if (removed) {
+                _customizedCharacters.value = list
+                saveCustomizedCharacters(list)
+                combineCharacterLists()
+                Log.d(TAG, "🗑️ Deleted character: $characterId")
+            }
         }
     }
 
-    /**
-     * ✅ Check if character is a template
-     */
+    // ==================== COMBINE LISTS ====================
+
+    private fun combineCharacterLists() {
+        val combined = _templates.value + _customizedCharacters.value
+        _characters.value = combined
+
+        Log.d(TAG, "📊 Combined characters: ${combined.size} total")
+        Log.d(TAG, "   - Templates: ${_templates.value.size}")
+        Log.d(TAG, "   - Customized: ${_customizedCharacters.value.size}")
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+
     fun isTemplate(characterId: String): Boolean {
         return characterId.startsWith("template_")
     }
 
-    /**
-     * ✅ Get character by index (from combined list)
-     */
     fun getCharacterByIndex(index: Int): CustomModel? {
         return _characters.value.getOrNull(index)
     }
 
-    /**
-     * ✅ Get character by ID
-     */
     fun getCharacterById(id: String): CustomModel? {
         return _characters.value.find { it.id == id }
     }
 
+    // ==================== REFRESH FROM API ====================
+
     suspend fun refreshFromApi() {
         _isLoading.value = true
         _error.value = null
-        try {
-            // TODO: Implement API call
-            Log.d(TAG, "🔄 Refresh API thành công")
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi refresh API", e)
-            _error.value = "Không thể cập nhật: ${e.message}"
-        } finally {
-            _isLoading.value = false
+
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "🔄 Refreshing templates from API/Assets...")
+
+                // ✅ CHỈ reload templates
+                loadTemplatesFromAssets()
+
+                // ✅ Combine lại (customized vẫn giữ nguyên)
+                combineCharacterLists()
+
+                Log.d(TAG, "✅ Refresh completed")
+                Log.d(TAG, "   - Templates: ${_templates.value.size}")
+                Log.d(TAG, "   - Customized (preserved): ${_customizedCharacters.value.size}")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error refreshing: ${e.message}", e)
+                _error.value = "Cannot refresh: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
@@ -388,17 +436,17 @@ class AppDataManager @Inject constructor(
         loadInitialData()
     }
 
-    /**
-     * --- Backgrounds / Stickers / Speechs ---
-     */
+    // ==================== LOAD ASSETS ====================
+
     private suspend fun loadBackgrounds() {
         try {
             val files = context.assets.list("bg") ?: emptyArray()
             val sorted = files.sortedBy { it.substringBeforeLast(".").toIntOrNull() ?: 0 }
                 .map { "$ASSET_PREFIX/bg/$it" }
             _backgrounds.value = listOf("") + sorted
+            Log.d(TAG, "✅ Loaded ${files.size} backgrounds")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi loadBackgrounds: ${e.message}", e)
+            Log.e(TAG, "❌ Error loading backgrounds: ${e.message}", e)
         }
     }
 
@@ -406,8 +454,9 @@ class AppDataManager @Inject constructor(
         try {
             val files = context.assets.list("BG_Text") ?: emptyArray()
             _backgroundTexts.value = files.map { "$ASSET_PREFIX/BG_Text/$it" }
+            Log.d(TAG, "✅ Loaded ${files.size} background texts")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi loadBackgroundTexts: ${e.message}", e)
+            Log.e(TAG, "❌ Error loading background texts: ${e.message}", e)
         }
     }
 
@@ -415,8 +464,9 @@ class AppDataManager @Inject constructor(
         try {
             val files = context.assets.list("sticker") ?: emptyArray()
             _stickers.value = files.map { "$ASSET_PREFIX/sticker/$it" }
+            Log.d(TAG, "✅ Loaded ${files.size} stickers")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi loadStickers: ${e.message}", e)
+            Log.e(TAG, "❌ Error loading stickers: ${e.message}", e)
         }
     }
 
@@ -424,52 +474,102 @@ class AppDataManager @Inject constructor(
         try {
             val files = context.assets.list("BG_Text") ?: emptyArray()
             _speechs.value = files.map { "$ASSET_PREFIX/BG_Text/$it" }
+            Log.d(TAG, "✅ Loaded ${files.size} speeches")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Lỗi loadSpeechs: ${e.message}", e)
+            Log.e(TAG, "❌ Error loading speeches: ${e.message}", e)
         }
     }
-    private suspend fun loadMyDesignFromJson(): List<String> {
-        return withContext(Dispatchers.IO) {
+
+    // ==================== MY DESIGNS ====================
+
+    private suspend fun loadMyDesigns() {
+        withContext(Dispatchers.IO) {
             try {
-                val file = File(context.filesDir, myDesignFileName)
-                if (!file.exists()) return@withContext emptyList()
+                val file = File(context.filesDir, MY_DESIGNS_FILE)
+                if (!file.exists()) {
+                    _myDesignPaths.value = emptyList()
+                    Log.d(TAG, "📋 No my designs found")
+                    return@withContext
+                }
+
                 val json = file.readText()
                 val type = object : TypeToken<List<String>>() {}.type
-                Gson().fromJson<List<String>>(json, type) ?: emptyList()
+                val paths = Gson().fromJson<List<String>>(json, type) ?: emptyList()
+
+                _myDesignPaths.value = paths
+                Log.d(TAG, "✅ Loaded ${paths.size} my designs")
             } catch (e: Exception) {
-                Log.e(TAG, "Lỗi loadMyDesignFromJson: ${e.message}", e)
-                emptyList()
+                Log.e(TAG, "❌ Error loading my designs: ${e.message}", e)
+                _myDesignPaths.value = emptyList()
             }
         }
     }
+
     suspend fun saveMyDesignToJson(paths: List<String>) {
         withContext(Dispatchers.IO) {
             try {
                 val json = Gson().toJson(paths)
-                val file = File(context.filesDir, myDesignFileName)
+                val file = File(context.filesDir, MY_DESIGNS_FILE)
                 file.writeText(json)
-                Log.d(TAG, "My Designs saved to JSON (${paths.size} items)")
+                Log.d(TAG, "💾 Saved ${paths.size} my designs")
             } catch (e: Exception) {
-                Log.e(TAG, "Lỗi saveMyDesignToJson: ${e.message}", e)
+                Log.e(TAG, "❌ Error saving my designs: ${e.message}", e)
             }
         }
     }
+
     suspend fun addMyDesignPath(imagePath: String) {
         val currentList = _myDesignPaths.value.toMutableList()
-        // Tránh trùng lặp
         if (!currentList.contains(imagePath)) {
-            currentList.add(0, imagePath) // Thêm lên đầu để mới nhất hiện đầu tiên
+            currentList.add(0, imagePath)
             _myDesignPaths.value = currentList
             saveMyDesignToJson(currentList)
-            Log.d(TAG, "Added new design: $imagePath")
+            Log.d(TAG, "➕ Added new design: $imagePath")
         }
     }
 
-    // Load khi khởi động
     suspend fun loadMyDesignData() {
-        val paths = loadMyDesignFromJson()
-        _myDesignPaths.value = paths
+        loadMyDesigns()
     }
+
+    // ==================== QUICK RANDOM ====================
+
+    suspend fun loadQuickData(
+        quickRandomManager: QuickRandomManager? = null,
+        onQuickRandomProgress: (current: Int, total: Int, templateName: String) -> Unit = { _, _, _ -> }
+    ) {
+        if (isDataQuickLoaded) {
+            Log.d(TAG, "⚠️ Quick data already loaded, skipping")
+            return
+        }
+
+        _isQuickLoading.value = true
+        _errorQuick.value = null
+
+        withContext(Dispatchers.IO) {
+            try {
+                if (quickRandomManager != null) {
+                    val hasQuickRandom = quickRandomManager.hasQuickRandomData()
+                    if (!hasQuickRandom) {
+                        Log.d(TAG, "🚀 Starting quick random generation...")
+                        quickRandomManager.generateQuickRandomCharacters(onQuickRandomProgress)
+                        Log.d(TAG, "✅ Quick random generation completed")
+                    } else {
+                        Log.d(TAG, "✅ Quick random data already exists")
+                    }
+                    isDataQuickLoaded = true
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error loading quick data: ${e.message}", e)
+                _errorQuick.value = e.message
+            } finally {
+                _isQuickLoading.value = false
+            }
+        }
+    }
+
+    // ==================== CLEAR DATA ====================
+
     fun clearData() {
         _templates.value = emptyList()
         _customizedCharacters.value = emptyList()
@@ -478,7 +578,9 @@ class AppDataManager @Inject constructor(
         _backgroundTexts.value = emptyList()
         _stickers.value = emptyList()
         _speechs.value = emptyList()
+        _myDesignPaths.value = emptyList()
         isDataLoaded = false
         isDataQuickLoaded = false
+        Log.d(TAG, "🗑️ All data cleared")
     }
 }

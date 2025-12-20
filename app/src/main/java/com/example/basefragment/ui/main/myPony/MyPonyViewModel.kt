@@ -47,59 +47,59 @@ class MyPonyViewModel @Inject constructor(
         IDLE, LOADING, SUCCESS, ERROR
     }
 
-    // ==================== Load Data ====================
+    // ==================== LOAD AVATAR DATA ====================
 
+    /**
+     * ✅ Load avatars TỪ customized characters (KHÔNG scan storage folder)
+     */
     fun loadMyAvatar(context: Context, forceReload: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                Log.d(TAG, "🔄 Loading avatars...")
+                Log.d(TAG, "🔄 Loading avatars from customized characters...")
 
-                // ✅ FIX: Load từ customized characters (imageSave)
-                val customizedCharacters = appDataManager.customizedCharacters.value
-                val avatarPaths = customizedCharacters
+                // ✅ TRỰC TIẾP lấy từ appDataManager.customizedCharacters
+                val customized = appDataManager.customizedCharacters.value
+
+                Log.d(TAG, "📦 Found ${customized.size} customized characters")
+
+                // ✅ Filter: chỉ lấy characters có ảnh và file tồn tại
+                val avatarList = customized
                     .filter { it.imageSave.isNotEmpty() && File(it.imageSave).exists() }
-                    .map { it.imageSave }
-
-                Log.d(TAG, "✅ Found ${avatarPaths.size} avatars from customized characters")
-
-                // Nếu không có từ customized, thử load từ storage folder
-                val allPaths = if (avatarPaths.isEmpty()) {
-                    Log.d(TAG, "⚠️ No customized avatars, loading from storage...")
-                    loadAvatarsFromStorage(context)
-                } else {
-                    avatarPaths
-                }
-
-                val avatarList = customizedCharacters.map { path ->
-                    MyAlbumModel(
-                        path = path.imageSave,
-                        isSelected = false,
-                        isShowSelection = false,
-                        type = 1,
-                        idEdit = path.id
-                    )
-                }
+                    .sortedByDescending { it.updatedAt }  // Mới nhất lên đầu
+                    .map { character ->
+                        MyAlbumModel(
+                            path = character.imageSave,
+                            isSelected = false,
+                            isShowSelection = false,
+                            type = 1,
+                            idEdit = character.id
+                        )
+                    }
 
                 withContext(Dispatchers.Main) {
                     _myAvatarList.value = avatarList
                     Log.d(TAG, "✅ Avatar list updated: ${avatarList.size} items")
                 }
+
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error loading avatars: ${e.message}", e)
+                withContext(Dispatchers.Main) {
+                    _myAvatarList.value = emptyList()
+                }
             }
         }
     }
+
+    // ==================== LOAD DESIGN DATA ====================
 
     fun loadMyDesign(context: Context, forceReload: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 Log.d(TAG, "🔄 Loading designs...")
 
-                // ✅ FIX: Dùng .value thay vì collect
                 val paths = appDataManager.myDesignPaths.value
 
                 Log.d(TAG, "📦 Raw paths from AppDataManager: ${paths.size}")
-                paths.forEach { Log.d(TAG, "  - $it") }
 
                 // Filter only existing files
                 val existingPaths = paths.filter { path ->
@@ -118,7 +118,7 @@ class MyPonyViewModel @Inject constructor(
                         isSelected = false,
                         isShowSelection = false,
                         idEdit = "",
-                       type =  2
+                        type = 2
                     )
                 }
 
@@ -132,36 +132,7 @@ class MyPonyViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadAvatarsFromStorage(context: Context): List<String> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val avatarDir = File(context.filesDir, "avatars")
-                Log.d(TAG, "📂 Avatar directory: ${avatarDir.absolutePath}")
-                Log.d(TAG, "📂 Directory exists: ${avatarDir.exists()}")
-
-                if (!avatarDir.exists()) {
-                    avatarDir.mkdirs()
-                    Log.d(TAG, "📁 Created avatar directory")
-                }
-
-                val files = avatarDir.listFiles()
-                    ?.filter { it.isFile && (it.extension == "png" || it.extension == "jpg" || it.extension == "webp") }
-                    ?.sortedByDescending { it.lastModified() }
-                    ?.map { it.absolutePath }
-                    ?: emptyList()
-
-                Log.d(TAG, "✅ Found ${files.size} avatar files in storage")
-                files.forEach { Log.d(TAG, "  - $it") }
-
-                files
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error loading avatars from storage: ${e.message}", e)
-                emptyList()
-            }
-        }
-    }
-
-    // ==================== Selection Management ====================
+    // ==================== SELECTION MANAGEMENT ====================
 
     fun showLongClick(position: Int, isAvatar: Boolean) {
         val currentList = if (isAvatar) _myAvatarList.value else _myDesignList.value
@@ -218,23 +189,28 @@ class MyPonyViewModel @Inject constructor(
         return ArrayList(currentList.filter { it.isSelected }.map { it.path })
     }
 
-    // ==================== Delete ====================
+    // ==================== DELETE OPERATIONS ====================
 
+    /**
+     * ✅ Delete avatar - Xóa từ customized characters
+     */
     fun deleteItem(context: Context, paths: ArrayList<String>) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 Log.d(TAG, "🗑️ Deleting ${paths.size} avatar items")
 
-                paths.forEach { path ->
-                    deleteFileFromStorage(context, path)
-
-                    // ✅ Also remove from customized characters
+                paths.forEach { imagePath ->
+                    // ✅ Tìm character có imageSave trùng với path
                     val character = appDataManager.customizedCharacters.value
-                        .find { it.imageSave == path }
+                        .find { it.imageSave == imagePath }
 
                     if (character != null) {
+                        // ✅ Xóa character từ AppDataManager
                         appDataManager.deleteCustomizedCharacter(character.id)
-                        Log.d(TAG, "✅ Removed character from customized list: ${character.id}")
+                        Log.d(TAG, "✅ Deleted character: ${character.id}")
+
+                        // ✅ Xóa file ảnh
+                        deleteFileFromStorage(context, imagePath)
                     }
                 }
 
@@ -249,6 +225,9 @@ class MyPonyViewModel @Inject constructor(
         }
     }
 
+    /**
+     * ✅ Delete design
+     */
     fun deleteItemDesign(paths: ArrayList<String>, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -294,7 +273,7 @@ class MyPonyViewModel @Inject constructor(
         }
     }
 
-    // ==================== Download ====================
+    // ==================== DOWNLOAD ====================
 
     fun downloadFiles(context: Context, paths: ArrayList<String>) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -334,7 +313,7 @@ class MyPonyViewModel @Inject constructor(
         }
     }
 
-    // ==================== WhatsApp Integration ====================
+    // ==================== WHATSAPP INTEGRATION ====================
 
     fun addToWhatsapp(
         context: Context,
@@ -382,7 +361,7 @@ class MyPonyViewModel @Inject constructor(
         }
     }
 
-    // ==================== Telegram Integration ====================
+    // ==================== TELEGRAM INTEGRATION ====================
 
     fun addToTelegram(context: Context, paths: ArrayList<String>) {
         viewModelScope.launch(Dispatchers.IO) {

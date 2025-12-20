@@ -7,7 +7,6 @@ import com.example.basefragment.data.datalocal.manager.AppDataManager
 import com.example.basefragment.data.datalocal.manager.QuickRandomManager
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.data.model.quick.QuickRandomProgress
-import com.example.basefragment.data.usecase.GetCatalogueUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,51 +16,31 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ViewModelActivity @Inject constructor(
-    private val getCatalogueUseCase: GetCatalogueUseCase,
     val appDataManager: AppDataManager,
     private val quickRandomManager: QuickRandomManager
-
 ) : ViewModel() {
 
-    // ✅ Combined list (templates + customized)
-    private val _characters = MutableStateFlow<List<CustomModel>>(emptyList())
-    val characters: StateFlow<List<CustomModel>> = _characters.asStateFlow()
+    companion object {
+        private const val TAG = "ViewModelActivity"
+    }
 
-    // ✅ Templates only (cho template selector)
-    private val _templates = MutableStateFlow<List<CustomModel>>(emptyList())
-    val templates: StateFlow<List<CustomModel>> = _templates.asStateFlow()
+    // ✅ EXPOSE AppDataManager flows
+    val characters: StateFlow<List<CustomModel>> = appDataManager.characters
+    val templates: StateFlow<List<CustomModel>> = appDataManager.templates
+    val customizedCharacters: StateFlow<List<CustomModel>> = appDataManager.customizedCharacters
 
-    // ✅ Customized only (cho MyPony screen)
-    private val _customizedCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
-    val customizedCharacters: StateFlow<List<CustomModel>> = _customizedCharacters.asStateFlow()
+    val backgrounds: StateFlow<List<String>> = appDataManager.backgrounds
+    val backgroundTexts: StateFlow<List<String>> = appDataManager.backgroundTexts
+    val stickers: StateFlow<List<String>> = appDataManager.stickers
+    val speechs: StateFlow<List<String>> = appDataManager.speechs
+    val myDesignPaths: StateFlow<List<String>> = appDataManager.myDesignPaths
+
+    val isLoading: StateFlow<Boolean> = appDataManager.isLoading
+    val error: StateFlow<String?> = appDataManager.error
+
+    // ✅ Quick random progress
     private val _quickRandomProgress = MutableStateFlow(QuickRandomProgress(0, 0, ""))
     val quickRandomProgress: StateFlow<QuickRandomProgress> = _quickRandomProgress.asStateFlow()
-    private val _backgrounds = MutableStateFlow<List<String>>(emptyList())
-    val backgrounds: StateFlow<List<String>> = _backgrounds.asStateFlow()
-
-    private val _backgroundTexts = MutableStateFlow<List<String>>(emptyList())
-    val backgroundTexts: StateFlow<List<String>> = _backgroundTexts.asStateFlow()
-
-    private val _stickers = MutableStateFlow<List<String>>(emptyList())
-    val stickers: StateFlow<List<String>> = _stickers.asStateFlow()
-
-    private val _speechs = MutableStateFlow<List<String>>(emptyList())
-    val speechs: StateFlow<List<String>> = _speechs.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
-    private val _selectedCharacterPath = MutableStateFlow<String?>(null)
-    val selectedCharacterPath: StateFlow<String?> = _selectedCharacterPath.asStateFlow()
-
-    private val _savedImagePath = MutableStateFlow<String?>(null)
-    val savedImagePath: StateFlow<String?> = _savedImagePath.asStateFlow()
-
-    private val _selectedCharacterId = MutableStateFlow<String?>(null)
-    val selectedCharacterId: StateFlow<String?> = _selectedCharacterId.asStateFlow()
-
 
     init {
         loadInitialData()
@@ -69,75 +48,40 @@ class ViewModelActivity @Inject constructor(
 
     private fun loadInitialData() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-
             try {
+                Log.d(TAG, "🚀 Starting data load...")
+
+                // Load main data
                 appDataManager.loadInitialData()
 
-                // ✅ Collect all data streams
-                launch {
-                    appDataManager.characters.collect { _characters.value = it }
-                }
-                launch {
-                    appDataManager.templates.collect { _templates.value = it }
-                }
-                launch {
-                    appDataManager.customizedCharacters.collect {
-                        _customizedCharacters.value = it
+                // Load quick random data
+                appDataManager.loadQuickData(
+                    quickRandomManager = quickRandomManager,
+                    onQuickRandomProgress = { current, total, templateName ->
+                        _quickRandomProgress.value = QuickRandomProgress(current, total, templateName)
+                        Log.d(TAG, "📊 Quick random progress: $current/$total ($templateName)")
                     }
-                }
-                launch {
-                    appDataManager.backgrounds.collect { _backgrounds.value = it }
-                }
-                launch {
-                    appDataManager.backgroundTexts.collect { _backgroundTexts.value = it }
-                }
-                launch {
-                    appDataManager.stickers.collect { _stickers.value = it }
-                }
-                launch {
-                    appDataManager.speechs.collect { _speechs.value = it }
-                }
-                launch {
-                    appDataManager.isLoading.collect { _isLoading.value = it }
-                }
-                launch {
-                    appDataManager.error.collect { _error.value = it }
-                }
-                launch {
-                    appDataManager.loadQuickData(
-                        quickRandomManager = quickRandomManager,
-                        onQuickRandomProgress = { current, total, templateName ->
-                            _quickRandomProgress.value = QuickRandomProgress(current, total, templateName)
-                        }
-                    )
-                }
+                )
+
+                Log.d(TAG, "✅ All data loaded successfully")
+                Log.d(TAG, "   📊 Templates: ${templates.value.size}")
+                Log.d(TAG, "   📊 Customized: ${customizedCharacters.value.size}")
+                Log.d(TAG, "   📊 Total: ${characters.value.size}")
 
             } catch (e: Exception) {
-                _error.value = e.message
+                Log.e(TAG, "❌ Error loading initial data: ${e.message}", e)
             }
         }
     }
 
-    fun refreshApiData() {
-        viewModelScope.launch {
-            appDataManager.refreshFromApi()
-        }
-    }
-
-    fun forceReloadAll() {
-        viewModelScope.launch {
-            appDataManager.forceReloadAll()
-        }
-    }
+    // ==================== CHARACTER OPERATIONS ====================
 
     /**
      * ✅ Get character by index (from combined list)
      */
     fun getCharacterByIndex(index: Int): CustomModel? {
-        val character = _characters.value.getOrNull(index)
-        Log.d("ViewModelActivity", "getCharacterByIndex($index): ${character?.id}")
+        val character = appDataManager.getCharacterByIndex(index)
+        Log.d(TAG, "getCharacterByIndex($index): ${character?.id}")
         return character
     }
 
@@ -145,7 +89,9 @@ class ViewModelActivity @Inject constructor(
      * ✅ Get character by ID
      */
     fun getCharacterById(characterId: String): CustomModel? {
-        return appDataManager.getCharacterById(characterId)
+        val character = appDataManager.getCharacterById(characterId)
+        Log.d(TAG, "getCharacterById($characterId): found=${character != null}")
+        return character
     }
 
     /**
@@ -162,21 +108,29 @@ class ViewModelActivity @Inject constructor(
      */
     fun updateOrAddCharacter(character: CustomModel, index: Int = -1) {
         viewModelScope.launch {
-            // ✅ Nếu là template, tạo character mới
-            if (isTemplate(character.id)) {
-                val newCharacter = character.copy(
-                    id = java.util.UUID.randomUUID().toString(),  // ✅ ID mới
-                    updatedAt = System.currentTimeMillis()
-                )
-                appDataManager.updateCustomizedCharacter(newCharacter)
-                Log.d("ViewModelActivity", "✅ Created new character from template: ${newCharacter.id}")
-            } else {
-                // ✅ Update existing customized character
-                val updatedCharacter = character.copy(
-                    updatedAt = System.currentTimeMillis()
-                )
-                appDataManager.updateCustomizedCharacter(updatedCharacter)
-                Log.d("ViewModelActivity", "✅ Updated customized character: ${updatedCharacter.id}")
+            try {
+                val isTemplate = isTemplate(character.id)
+
+                if (isTemplate) {
+                    // ✅ Template → Tạo character mới với ID mới
+                    val newCharacter = character.copy(
+                        id = java.util.UUID.randomUUID().toString(),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    appDataManager.updateCustomizedCharacter(newCharacter)
+                    Log.d(TAG, "✅ Created new character from template:")
+                    Log.d(TAG, "   - Template ID: ${character.id}")
+                    Log.d(TAG, "   - New ID: ${newCharacter.id}")
+                } else {
+                    // ✅ Customized → Update existing
+                    val updatedCharacter = character.copy(
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    appDataManager.updateCustomizedCharacter(updatedCharacter)
+                    Log.d(TAG, "✅ Updated customized character: ${updatedCharacter.id}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error updating character: ${e.message}", e)
             }
         }
     }
@@ -187,30 +141,67 @@ class ViewModelActivity @Inject constructor(
     fun deleteCharacter(characterId: String) {
         viewModelScope.launch {
             if (isTemplate(characterId)) {
-                Log.w("ViewModelActivity", "⚠️ Cannot delete template: $characterId")
+                Log.w(TAG, "⚠️ Cannot delete template: $characterId")
                 return@launch
             }
             appDataManager.deleteCustomizedCharacter(characterId)
-            Log.d("ViewModelActivity", "✅ Deleted character: $characterId")
+            Log.d(TAG, "✅ Deleted character: $characterId")
         }
+    }
+
+    // ==================== REFRESH & RELOAD ====================
+
+    /**
+     * ✅ Refresh templates from API/Assets
+     * KHÔNG ẢNH HƯỞNG đến customized characters
+     */
+    fun refreshApiData() {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "🔄 Refreshing API data...")
+
+                val customizedBefore = customizedCharacters.value.size
+
+                appDataManager.refreshFromApi()
+
+                val customizedAfter = customizedCharacters.value.size
+
+                Log.d(TAG, "✅ API refresh completed")
+                Log.d(TAG, "   - Templates: ${templates.value.size}")
+                Log.d(TAG, "   - Customized (before): $customizedBefore")
+                Log.d(TAG, "   - Customized (after): $customizedAfter")
+                Log.d(TAG, "   - Total: ${characters.value.size}")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error refreshing API: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
+     * ✅ Force reload all data
+     */
+    fun forceReloadAll() {
+        viewModelScope.launch {
+            Log.d(TAG, "🔄 Force reloading all data...")
+            appDataManager.forceReloadAll()
+        }
+    }
+
+    // ==================== UTILITY ====================
+
+    fun getCharacterIndexById(characterId: String): Int {
+        val index = characters.value.indexOfFirst { it.id == characterId }
+        Log.d(TAG, "getCharacterIndexById($characterId): $index")
+        return index
+    }
+
+    fun getTemplateById(templateId: String): CustomModel? {
+        return templates.value.find { it.id == templateId }
     }
 
     fun clearData() {
         appDataManager.clearData()
-        _characters.value = emptyList()
-        _templates.value = emptyList()
-        _customizedCharacters.value = emptyList()
-        _backgrounds.value = emptyList()
-        _backgroundTexts.value = emptyList()
-        _stickers.value = emptyList()
-        _speechs.value = emptyList()
-    }
-
-    fun getCharacterIndexById(characterId: String): Int {
-        return _characters.value.indexOfFirst { it.id == characterId }
-    }
-
-    fun getTemplateById(templateId: String): CustomModel? {
-        return _templates.value.find { it.id == templateId }
+        Log.d(TAG, "🗑️ All data cleared")
     }
 }

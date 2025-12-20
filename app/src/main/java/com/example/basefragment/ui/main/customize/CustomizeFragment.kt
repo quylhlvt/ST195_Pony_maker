@@ -380,6 +380,8 @@ class CustomizeFragment :
 
         requireActivity().hideNavigation(true)
     }
+    // ✅ CHỈ CẬP NHẬT HÀM saveCharacterWithImage() trong CustomizeFragment.kt
+
     private fun saveCharacterWithImage() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -423,16 +425,16 @@ class CustomizeFragment :
                         val imagePath = imageManager.saveBitmap(bitmap, finalCharacterId)
 
                         if (imagePath != null) {
-                            // ✅ Save character with new/existing ID
+                            // ✅ Save character với ID phù hợp
                             if (isQuickRandom && currentCharacter?.id?.startsWith("temp_from_quick_") == true) {
-                                // 🔥 Save với ID mới
+                                // 🔥 Quick random → Save với ID mới
                                 viewModel.saveCharacterWithNewId(
                                     mainViewModel = mainViewModel,
                                     newCharacterId = finalCharacterId,
                                     imagePath = imagePath
                                 )
                             } else {
-                                // ✅ Save bình thường
+                                // ✅ Normal mode → Save bình thường
                                 viewModel.saveCharacter(mainViewModel, imagePath)
                             }
 
