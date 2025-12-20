@@ -3,6 +3,7 @@ package com.example.basefragment.ui.main.quick
 import android.app.AlertDialog
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
@@ -18,6 +19,7 @@ import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.databinding.FragmentQuickBinding
 import com.example.basefragment.ui.main.myPony.CharacterListAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -27,52 +29,16 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
 ) {
 
     private lateinit var quickRandomAdapter: CharacterListAdapter
-    private var progressDialog: AlertDialog? = null
 
     override fun initView() {
         setImageActionBar(binding.actionBar.btnActionBarLeft, R.drawable.back_app)
         setupRecyclerView()
-        // Vào màn → load + nếu chưa có data thì tự động tạo luôn
-        viewLifecycleOwner.lifecycleScope.launch {
-            val hasData = viewModel.hasQuickRandomData()  // ← Đây mới là gọi thật
-            if (!hasData) {
-                startGeneration()
-            }
-        }
     }
-
 
     private fun setupRecyclerView() {
         quickRandomAdapter = CharacterListAdapter(
             onCharacterClick = { character, position ->
-                // ✅ Navigate to CustomizeFragment để edit
-                val globalIndex = viewModelActivity.characters.value.indexOfFirst {
-                    it.id == character.id
-                }
-
-                if (globalIndex >= 0) {
-                    findNavController().navigate(
-                        R.id.action_quick_to_custom,
-                        bundleOf("characterIndex" to globalIndex)
-                    )
-                } else {
-                    // ✅ Character chưa có trong combined list, thêm vào
-                    viewModelActivity.updateOrAddCharacter(character)
-
-                    // Wait một chút để combined list update
-                    lifecycleScope.launch {
-                        kotlinx.coroutines.delay(100)
-                        val newIndex = viewModelActivity.characters.value.indexOfFirst {
-                            it.id == character.id
-                        }
-                        if (newIndex >= 0) {
-                            findNavController().navigate(
-                                R.id.action_quick_to_custom,
-                                bundleOf("characterIndex" to newIndex)
-                            )
-                        }
-                    }
-                }
+                navigateToCustomize(character)
             },
             onCharacterLongClick = { character, position ->
                 showCharacterOptions(character)
@@ -86,36 +52,33 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
     }
 
     override fun observeData() {
-        // ✅ Observe quick random characters
+        // ✅ 🔥 Observe real-time characters - Update ngay khi có item mới
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.quickRandomCharacters.collect { characters ->
                 quickRandomAdapter.submitList(characters)
-            }
-        }
 
-        // ✅ Observe loading state
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isGenerating.collect { isGenerating ->
-                if (isGenerating) {
-//                    binding.progressBar.visible()
-//                    binding.btnGenerate.isEnabled = false
+                Log.d("QuickFragment", "📱 UI Updated: ${characters.size} characters")
+
+                // Update empty state
+                if (characters.isEmpty()) {
+                    // Show empty/loading state
+                    binding.recyclerViewQuick.visibility = android.view.View.GONE
+                    // binding.emptyStateLayout.visibility = android.view.View.VISIBLE
                 } else {
-//                    binding.progressBar.gone()
-//                    binding.btnGenerate.isEnabled = true
-                    progressDialog?.dismiss()
+                    // Show list
+                    binding.recyclerViewQuick.visibility = android.view.View.VISIBLE
+                    // binding.emptyStateLayout.visibility = android.view.View.GONE
                 }
             }
         }
 
-        // ✅ Observe generation progress
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.generationProgress.collect { progress ->
-                updateProgressDialog(
-                    progress.current,
-                    progress.total,
-                    progress.templateName,
-                    progress.step
-                )
+        // ✅ Observe progress từ ViewModelActivity
+        lifecycleScope.launch {
+            viewModelActivity.quickRandomProgress.collect { progress ->
+                if (progress.current > 0) {
+                    // Show progress nếu cần
+                    Log.d("QuickFragment", "📊 Progress: ${progress.current}/${progress.total}")
+                }
             }
         }
     }
@@ -125,46 +88,48 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
         binding.actionBar.btnActionBarLeft.onClick {
             findNavController().navigateUp()
         }
-
-        // ✅ Generate button
-//        binding.btnGenerate.setOnClickListener {
-//            confirmGenerate()
-//        }
-//
-//        // ✅ Clear all button
-//        binding.btnClearAll.setOnClickListener {
-//            confirmClearAll()
-//        }
-//
-//        // ✅ Empty state button
-//        binding.btnGenerateEmpty.setOnClickListener {
-//            confirmGenerate()
-//        }
     }
 
-//    private fun confirmGenerate() {
-//        AlertDialog.Builder(requireContext())
-//            .setTitle("Generate Quick Random")
-//            .setMessage("Generate 10 random characters for each template? This may take a while.")
-//            .setPositiveButton("Generate") { _, _ ->
-//                startGeneration()
-//            }
-//            .setNegativeButton("Cancel", null)
-//            .show()
-//    }
-
-    private fun startGeneration() {
-        showProgressDialog()
-
-        viewLifecycleOwner.lifecycleScope.launch {
+    /**
+     * ✅ Navigate to customize screen
+     */
+    private fun navigateToCustomize(character: CustomModel) {
+        lifecycleScope.launch {
             try {
-                viewModel.generateQuickRandomCharacters()
-                Toast.makeText(
-                    requireContext(),
-                    "Quick random characters generated!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                // ✅ Create new customized character
+                val newCharacter = character.copy(
+                    id = java.util.UUID.randomUUID().toString(),
+                    updatedAt = System.currentTimeMillis()
+                )
+
+                Log.d("QuickFragment", "🚀 Creating character: ${newCharacter.id}")
+
+                // ✅ Save to customized list
+                viewModelActivity.updateOrAddCharacter(newCharacter)
+
+                // ✅ Wait for characters flow to contain the new character
+                viewModelActivity.characters
+                    .first { characters ->
+                        characters.any { it.id == newCharacter.id }
+                    }
+
+                // ✅ Get index after confirmed in list
+                val newIndex = viewModelActivity.characters.value.indexOfFirst {
+                    it.id == newCharacter.id
+                }
+
+                if (newIndex >= 0) {
+                    Log.d("QuickFragment", "✅ Navigate to customize with index: $newIndex")
+                    findNavController().navigate(
+                        R.id.action_quick_to_custom,
+                        bundleOf("characterIndex" to newIndex, "isQuickRandom" to true),
+                    )
+                } else {
+                    throw Exception("Character not found in list")
+                }
+
             } catch (e: Exception) {
+                Log.e("QuickFragment", "❌ Error navigating: ${e.message}", e)
                 Toast.makeText(
                     requireContext(),
                     "Error: ${e.message}",
@@ -174,71 +139,26 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
         }
     }
 
-    private fun showProgressDialog() {
-        progressDialog = AlertDialog.Builder(requireContext())
-            .setTitle("Generating...")
-            .setMessage("0 / 0")
-            .setCancelable(false)
-            .create()
-        progressDialog?.show()
-    }
-
-    private fun updateProgressDialog(current: Int, total: Int, templateName: String, step: String) {
-        progressDialog?.setMessage(
-            "Progress: $current / $total\n" +
-                    "Template: ${templateName.substringAfter("template_")}\n" +
-                    "Step: $step"
-        )
-    }
-
-    private fun confirmClearAll() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Clear All")
-            .setMessage("Delete all quick random characters and their images?")
-            .setPositiveButton("Delete") { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.clearQuickRandomCharacters()
-                    Toast.makeText(
-                        requireContext(),
-                        "Quick random cleared!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
+    /**
+     * ✅ Show character options menu
+     */
     private fun showCharacterOptions(character: CustomModel) {
         AlertDialog.Builder(requireContext())
             .setTitle("Character Options")
             .setItems(arrayOf("View/Edit", "Save to My Pony", "Delete")) { _, which ->
                 when (which) {
-                    0 -> {
-                        // View/Edit
-                        quickRandomAdapter.currentList.indexOf(character).let { position ->
-                            if (position >= 0) {
-                                quickRandomAdapter.submitList(quickRandomAdapter.currentList)
-                                // Trigger click
-                            }
-                        }
-                    }
-
-                    1 -> {
-                        // Save to My Pony
-                        saveToMyPony(character)
-                    }
-
-                    2 -> {
-                        // Delete
-                        confirmDeleteCharacter(character)
-                    }
+                    0 -> navigateToCustomize(character)
+                    1 -> saveToMyPony(character)
+                    2 -> confirmDeleteCharacter(character)
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
+    /**
+     * ✅ Save to My Pony (create new customized character)
+     */
     private fun saveToMyPony(character: CustomModel) {
         val newCharacter = character.copy(
             id = java.util.UUID.randomUUID().toString(),
@@ -253,6 +173,9 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
         ).show()
     }
 
+    /**
+     * ✅ Delete quick random character
+     */
     private fun confirmDeleteCharacter(character: CustomModel) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Character")

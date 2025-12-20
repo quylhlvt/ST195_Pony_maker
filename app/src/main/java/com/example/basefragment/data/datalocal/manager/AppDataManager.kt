@@ -55,11 +55,45 @@ class AppDataManager @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
+    private val _isQuickLoading = MutableStateFlow(false)
+    val isQuickLoading = _isQuickLoading.asStateFlow()
+
+    private val _errorQuick = MutableStateFlow<String?>(null)
+    val errorQuick = _errorQuick.asStateFlow()
+
     private var isDataLoaded = false
+    private var isDataQuickLoaded = false
 
     /**
      * Load data lần đầu
      */
+    suspend fun loadQuickData(quickRandomManager: QuickRandomManager? = null,
+                              onQuickRandomProgress: (current: Int, total: Int, templateName: String) -> Unit = { _, _, _ -> }){
+        if (isDataQuickLoaded) return
+        _isQuickLoading.value = true
+        _errorQuick.value = null
+        withContext(Dispatchers.IO) {
+            try {
+                if (quickRandomManager != null) {
+                    val hasQuickRandom = quickRandomManager.hasQuickRandomData()
+                    if (!hasQuickRandom) {
+                        Log.d(TAG, "🚀 Starting quick random generation...")
+                        quickRandomManager.generateQuickRandomCharacters(onQuickRandomProgress)
+                        Log.d(TAG, "✅ Quick random generation completed")
+                        isDataQuickLoaded = true  // ✅ Fix: đổi từ isDataLoaded → isDataQuickLoaded
+                    } else {
+                        Log.d(TAG, "✅ Quick random data already exists")
+                        isDataQuickLoaded = true  // ✅ Thêm dòng này
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Lỗi loadQuickData: ${e.message}", e)
+                _errorQuick.value = e.message
+            } finally {
+                _isQuickLoading.value = false  // ✅ Thêm dòng này
+            }
+        }
+    }
     suspend fun loadInitialData() {
         if (isDataLoaded) return
         _isLoading.value = true
@@ -399,5 +433,6 @@ class AppDataManager @Inject constructor(
         _stickers.value = emptyList()
         _speechs.value = emptyList()
         isDataLoaded = false
+        isDataQuickLoaded = false
     }
 }

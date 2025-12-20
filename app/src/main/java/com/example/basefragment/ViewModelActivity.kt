@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basefragment.data.datalocal.manager.AppDataManager
+import com.example.basefragment.data.datalocal.manager.QuickRandomManager
 import com.example.basefragment.data.model.custom.CustomModel
+import com.example.basefragment.data.model.quick.QuickRandomProgress
 import com.example.basefragment.data.usecase.GetCatalogueUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +18,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewModelActivity @Inject constructor(
     private val getCatalogueUseCase: GetCatalogueUseCase,
-    private val appDataManager: AppDataManager
+    private val appDataManager: AppDataManager,
+    private val quickRandomManager: QuickRandomManager
+
 ) : ViewModel() {
 
     // ✅ Combined list (templates + customized)
@@ -30,7 +34,8 @@ class ViewModelActivity @Inject constructor(
     // ✅ Customized only (cho MyPony screen)
     private val _customizedCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
     val customizedCharacters: StateFlow<List<CustomModel>> = _customizedCharacters.asStateFlow()
-
+    private val _quickRandomProgress = MutableStateFlow(QuickRandomProgress(0, 0, ""))
+    val quickRandomProgress: StateFlow<QuickRandomProgress> = _quickRandomProgress.asStateFlow()
     private val _backgrounds = MutableStateFlow<List<String>>(emptyList())
     val backgrounds: StateFlow<List<String>> = _backgrounds.asStateFlow()
 
@@ -71,6 +76,7 @@ class ViewModelActivity @Inject constructor(
                 appDataManager.loadInitialData()
 
                 // ✅ Collect all data streams
+
                 launch {
                     appDataManager.characters.collect { _characters.value = it }
                 }
@@ -99,6 +105,14 @@ class ViewModelActivity @Inject constructor(
                 }
                 launch {
                     appDataManager.error.collect { _error.value = it }
+                }
+                launch {
+                    appDataManager.loadQuickData(
+                        quickRandomManager = quickRandomManager,
+                        onQuickRandomProgress = { current, total, templateName ->
+                            _quickRandomProgress.value = QuickRandomProgress(current, total, templateName)
+                        }
+                    )
                 }
 
             } catch (e: Exception) {

@@ -18,31 +18,27 @@ class QuickViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val TAG = "QuickRandomViewModel"
+        private const val TAG = "QuickViewModel"
     }
 
+    // ✅ Quick random characters
     private val _quickRandomCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
     val quickRandomCharacters: StateFlow<List<CustomModel>> = _quickRandomCharacters.asStateFlow()
 
+    // ✅ Loading state
     private val _isGenerating = MutableStateFlow(false)
     val isGenerating: StateFlow<Boolean> = _isGenerating.asStateFlow()
 
-    private val _generationProgress = MutableStateFlow(GenerationProgress(0, 0, "", ""))
-    val generationProgress: StateFlow<GenerationProgress> = _generationProgress.asStateFlow()
-
-    data class GenerationProgress(
-        val current: Int,
-        val total: Int,
-        val templateName: String,
-        val step: String
-    )
-
     init {
+        // ✅ Load data đã có sẵn
         loadQuickRandomCharacters()
+
+        // ✅ 🔥 Observe real-time generation stream
+        observeGeneratingCharacters()
     }
 
     /**
-     * ✅ Load quick random characters từ JSON
+     * ✅ Load quick random characters từ JSON (data đã generate sẵn)
      */
     private fun loadQuickRandomCharacters() {
         viewModelScope.launch {
@@ -57,40 +53,24 @@ class QuickViewModel @Inject constructor(
     }
 
     /**
-     * ✅ Generate quick random characters
+     * ✅ 🔥 Observe real-time generation - Update UI ngay khi có character mới
      */
-    fun generateQuickRandomCharacters() {
+    private fun observeGeneratingCharacters() {
         viewModelScope.launch {
-            _isGenerating.value = true
-            try {
-                val characters = quickRandomManager.generateQuickRandomCharacters { current, total, templateName ->
-                    _generationProgress.value = GenerationProgress(current, total, templateName, "")
+            quickRandomManager.generatingCharacters.collect { characters ->
+                if (characters.isNotEmpty()) {
+                    _quickRandomCharacters.value = characters
+                    Log.d(TAG, "🔥 Real-time update: ${characters.size} characters")
                 }
-
-                _quickRandomCharacters.value = characters
-                Log.d(TAG, "✅ Generated ${characters.size} quick random characters")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error generating quick random: ${e.message}", e)
-            } finally {
-                _isGenerating.value = false
-                _generationProgress.value = GenerationProgress(0, 0, "", "")            }
+            }
         }
     }
 
     /**
-     * ✅ Clear all quick random characters
+     * ✅ Refresh data (reload từ JSON)
      */
-    fun clearQuickRandomCharacters() {
-        viewModelScope.launch {
-            try {
-                quickRandomManager.clearQuickRandomCharacters()
-                _quickRandomCharacters.value = emptyList()
-                Log.d(TAG, "✅ Cleared quick random characters")
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error clearing quick random: ${e.message}", e)
-            }
-        }
+    fun refreshQuickRandomCharacters() {
+        loadQuickRandomCharacters()
     }
 
     /**
@@ -109,12 +89,6 @@ class QuickViewModel @Inject constructor(
                     // Save lại JSON
                     quickRandomManager.saveQuickRandomToJson(currentList)
 
-                    // Delete image
-                    if (character.imageSave.isNotEmpty()) {
-                        // You need to add this method to QuickRandomManager
-                        // quickRandomManager.deleteImage(character.imageSave)
-                    }
-
                     Log.d(TAG, "✅ Deleted quick random character: $characterId")
                 }
             } catch (e: Exception) {
@@ -124,16 +98,35 @@ class QuickViewModel @Inject constructor(
     }
 
     /**
-     * ✅ Refresh quick random characters
+     * ✅ Regenerate quick random (nếu user muốn tạo lại)
      */
-    fun refreshQuickRandomCharacters() {
-        loadQuickRandomCharacters()
+    fun regenerateQuickRandomCharacters() {
+        viewModelScope.launch {
+            _isGenerating.value = true
+            try {
+                val characters = quickRandomManager.generateQuickRandomCharacters()
+                _quickRandomCharacters.value = characters
+                Log.d(TAG, "✅ Regenerated ${characters.size} quick random characters")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error regenerating quick random: ${e.message}", e)
+            } finally {
+                _isGenerating.value = false
+            }
+        }
     }
 
     /**
-     * ✅ Check if quick random data exists
+     * ✅ Clear all quick random characters
      */
-    suspend fun hasQuickRandomData(): Boolean {
-        return quickRandomManager.hasQuickRandomData()
+    fun clearQuickRandomCharacters() {
+        viewModelScope.launch {
+            try {
+                quickRandomManager.clearQuickRandomCharacters()
+                _quickRandomCharacters.value = emptyList()
+                Log.d(TAG, "✅ Cleared quick random characters")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error clearing quick random: ${e.message}", e)
+            }
+        }
     }
 }

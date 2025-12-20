@@ -3,13 +3,15 @@ package com.example.basefragment.data.datalocal.manager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.util.Log
 import com.example.basefragment.data.model.custom.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
@@ -27,8 +29,12 @@ class QuickRandomManager @Inject constructor(
 
     companion object {
         private const val TAG = "QuickRandomManager"
-        private const val CHARACTERS_PER_TEMPLATE = 10 // ✅ 10 nhân vật cho mỗi template
+        private const val CHARACTERS_PER_TEMPLATE = 10
     }
+
+    // ✅ Real-time list của characters đang được generate
+    private val _generatingCharacters = MutableStateFlow<List<CustomModel>>(emptyList())
+    val generatingCharacters: StateFlow<List<CustomModel>> = _generatingCharacters.asStateFlow()
 
     /**
      * ✅ Load quick random characters từ JSON
@@ -52,9 +58,6 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Save quick random characters to JSON (public for external use)
-     */
     suspend fun saveQuickRandomToJson(characters: List<CustomModel>) {
         withContext(Dispatchers.IO) {
             try {
@@ -69,15 +72,8 @@ class QuickRandomManager @Inject constructor(
     }
 
     /**
-     * ✅ Save quick random characters to JSON (private wrapper)
-     */
-    private suspend fun saveQuickRandomCharacters(characters: List<CustomModel>) {
-        saveQuickRandomToJson(characters)
-    }
-
-    /**
      * ✅ Generate 10 random characters cho mỗi template
-     * @return List of generated characters with images
+     * Emit từng character ngay khi generate xong
      */
     suspend fun generateQuickRandomCharacters(
         onProgress: (current: Int, total: Int, templateName: String) -> Unit = { _, _, _ -> }
@@ -89,7 +85,10 @@ class QuickRandomManager @Inject constructor(
                 return@withContext emptyList()
             }
 
+            // ✅ Reset list trước khi generate
+            _generatingCharacters.value = emptyList()
             val allGeneratedCharacters = mutableListOf<CustomModel>()
+
             var currentIndex = 0
             val totalCharacters = templates.size * CHARACTERS_PER_TEMPLATE
 
@@ -101,34 +100,36 @@ class QuickRandomManager @Inject constructor(
                         // ✅ Generate random character
                         val randomCharacter = generateRandomCharacter(template)
 
-                        // ✅ Generate random image (without UI rendering)
+                        // ✅ Generate random image
                         val imagePath = generateRandomImage(randomCharacter)
 
                         // ✅ Save with image path
                         val finalCharacter = randomCharacter.copy(imageSave = imagePath)
+
+                        // ✅ Add to lists
                         allGeneratedCharacters.add(finalCharacter)
+
+                        // ✅ 🔥 Emit ngay lập tức để UI update
+                        _generatingCharacters.value = allGeneratedCharacters.toList()
 
                         currentIndex++
                         onProgress(currentIndex, totalCharacters, template.id)
 
-                        Log.d(TAG, "   ✅ Generated character ${index + 1}/$CHARACTERS_PER_TEMPLATE")
+                        Log.d(TAG, "   ✅ Generated character ${index + 1}/$CHARACTERS_PER_TEMPLATE - Total: ${allGeneratedCharacters.size}")
                     } catch (e: Exception) {
                         Log.e(TAG, "   ❌ Error generating character: ${e.message}", e)
                     }
                 }
             }
 
-            // ✅ Save to JSON
-            saveQuickRandomCharacters(allGeneratedCharacters)
+            // ✅ Save to JSON khi hoàn thành
+            saveQuickRandomToJson(allGeneratedCharacters)
 
             Log.d(TAG, "✅ Generated total ${allGeneratedCharacters.size} quick random characters")
             allGeneratedCharacters
         }
     }
 
-    /**
-     * ✅ Generate một random character từ template
-     */
     private fun generateRandomCharacter(template: CustomModel): CustomModel {
         val randomSelections = arrayListOf<SelectionPart>()
 
@@ -141,11 +142,9 @@ class QuickRandomManager @Inject constructor(
             val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
             if (hasColor) {
-                // ✅ Random color và layer
                 val colorIndex = Random.nextInt(bodyPart.listPath.size)
                 val color = bodyPart.listPath[colorIndex]
 
-                // Filter out "none" and "dice"
                 val realLayers = color.listPath.filterIndexed { idx, path ->
                     path != "none" && path != "dice" && path.contains("/")
                 }
@@ -158,13 +157,12 @@ class QuickRandomManager @Inject constructor(
                     randomSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
                 }
             } else {
-                // ✅ No color system - random layer
                 val realImages = bodyPart.listPath.mapNotNull { cm ->
                     cm.listPath.firstOrNull { it.contains("/") && it != "none" && it != "dice" }
                 }
 
                 if (realImages.isNotEmpty()) {
-                    val position = bodyPart.position ?: 0
+                    val position = bodyPart.position?: 0
                     val layerImages = mutableListOf<String>()
                     if (position != 1) layerImages.add("none")
                     layerImages.add("dice")
@@ -190,20 +188,14 @@ class QuickRandomManager @Inject constructor(
                 )
             }),
             selections = randomSelections,
-            imageSave = "" // Will be filled later
+            imageSave = ""
         )
     }
 
-    /**
-     * ✅ Generate random image - Render actual character based on selections
-     */
     private suspend fun generateRandomImage(character: CustomModel): String {
         return withContext(Dispatchers.IO) {
             try {
-                // ✅ Render character bitmap từ selections
                 val bitmap = renderCharacterFromSelections(character)
-
-                // ✅ Save bitmap
                 val imagePath = imageManager.saveBitmap(bitmap, character.id)
                 imagePath ?: ""
             } catch (e: Exception) {
@@ -213,9 +205,6 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Render character bitmap từ selections (giống CustomizeFragment)
-     */
     private suspend fun renderCharacterFromSelections(character: CustomModel): Bitmap {
         return withContext(Dispatchers.IO) {
             val width = 800
@@ -223,28 +212,23 @@ class QuickRandomManager @Inject constructor(
             val finalBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(finalBitmap)
 
-            // ✅ Draw white background
             canvas.drawColor(android.graphics.Color.WHITE)
 
             try {
-                // ✅ Sort theo z-index (giống updateCharacterPreview)
                 val sortedParts = character.listPath.sortedBy { it.zIndex }
 
                 for (bodyPart in sortedParts) {
                     val navIndex = character.listPath.indexOf(bodyPart)
                     if (navIndex == -1) continue
 
-                    // ✅ Lấy imagePath từ selection
                     val imagePath = getImagePathForSelection(character, navIndex)
 
                     if (imagePath.isNullOrBlank() || imagePath == "none" || imagePath == "dice") {
                         continue
                     }
 
-                    // ✅ Load và draw layer
                     val layerBitmap = loadBitmapFromAssets(imagePath)
                     if (layerBitmap != null) {
-                        // Scale to fit canvas
                         val scaledBitmap = Bitmap.createScaledBitmap(
                             layerBitmap,
                             width,
@@ -260,7 +244,6 @@ class QuickRandomManager @Inject constructor(
                 Log.d(TAG, "✅ Rendered character: ${character.id}")
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error rendering character: ${e.message}", e)
-                // Draw error placeholder
                 drawErrorPlaceholder(canvas, character.id)
             }
 
@@ -268,12 +251,8 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Load bitmap từ assets path
-     */
     private fun loadBitmapFromAssets(assetPath: String): Bitmap? {
         return try {
-            // Remove "file:///android_asset/" prefix
             val cleanPath = assetPath.replace("file:///android_asset/", "")
             val inputStream = context.assets.open(cleanPath)
             val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
@@ -285,9 +264,6 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Get image path từ selection (giống CustomizeViewModel.getImagePathForSelection)
-     */
     private fun getImagePathForSelection(character: CustomModel, navIndex: Int): String? {
         val selection = character.selections.getOrNull(navIndex) ?: return null
         val bodyPart = character.listPath.getOrNull(navIndex) ?: return null
@@ -297,7 +273,7 @@ class QuickRandomManager @Inject constructor(
         if (!hasColor) {
             if (selection.layer == -1) return null
 
-            val position = bodyPart.position ?: 0
+            val position = bodyPart.position?: 0
             val layerImages = mutableListOf<String>()
             if (position != 1) layerImages.add("none")
             layerImages.add("dice")
@@ -314,14 +290,11 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Draw error placeholder
-     */
     private fun drawErrorPlaceholder(canvas: Canvas, characterId: String) {
-        val paint = Paint().apply {
+        val paint = android.graphics.Paint().apply {
             color = android.graphics.Color.RED
             textSize = 40f
-            textAlign = Paint.Align.CENTER
+            textAlign = android.graphics.Paint.Align.CENTER
         }
         canvas.drawText(
             "Render Error",
@@ -337,20 +310,15 @@ class QuickRandomManager @Inject constructor(
         )
     }
 
-    /**
-     * ✅ Delete all quick random characters and images
-     */
     suspend fun clearQuickRandomCharacters() {
         withContext(Dispatchers.IO) {
             try {
-                // Delete JSON file
                 val file = File(context.filesDir, quickRandomFileName)
                 if (file.exists()) {
                     file.delete()
                     Log.d(TAG, "✅ Deleted quick random JSON")
                 }
 
-                // Delete all quick random images
                 val characters = loadQuickRandomCharacters()
                 characters.forEach { character ->
                     if (character.imageSave.isNotEmpty()) {
@@ -358,6 +326,7 @@ class QuickRandomManager @Inject constructor(
                     }
                 }
 
+                _generatingCharacters.value = emptyList()
                 Log.d(TAG, "✅ Cleared all quick random characters")
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error clearing quick random: ${e.message}", e)
@@ -365,17 +334,11 @@ class QuickRandomManager @Inject constructor(
         }
     }
 
-    /**
-     * ✅ Get character by ID
-     */
     suspend fun getQuickRandomById(characterId: String): CustomModel? {
         val characters = loadQuickRandomCharacters()
         return characters.find { it.id == characterId }
     }
 
-    /**
-     * ✅ Check if quick random data exists
-     */
     suspend fun hasQuickRandomData(): Boolean {
         return withContext(Dispatchers.IO) {
             val file = File(context.filesDir, quickRandomFileName)

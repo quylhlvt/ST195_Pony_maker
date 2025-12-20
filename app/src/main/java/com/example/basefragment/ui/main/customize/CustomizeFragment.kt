@@ -49,7 +49,7 @@ class CustomizeFragment :
 
     private var lastNavIndex = -1
     private var checkShow = true
-
+    private var isQuickRandom = false
     // 🔥 Helper function: Lấy đường dẫn ảnh thật từ ColorModel
     private fun ColorModel.getImagePath(): String? {
         return listPath.firstOrNull { path ->
@@ -69,7 +69,7 @@ class CustomizeFragment :
 
         val characterIndex = arguments?.getInt("characterIndex", -1) ?: -1
         val templateIndex = arguments?.getInt("templateIndex", -1) ?: -1
-
+        isQuickRandom = arguments?.getBoolean("isQuickRandom", false) ?: false
         when {
             characterIndex >= 0 -> {
                 viewModel.initCharacter(mainViewModel, index = characterIndex)
@@ -131,6 +131,13 @@ class CustomizeFragment :
     override fun viewListener() {
         binding.actionBar.apply {
             btnActionBarLeft.setOnClickListener {
+                if (isQuickRandom) {
+                    val characterId = viewModel.currentCharacter.value?.id
+                    if (characterId != null && characterId.startsWith("temp_quickrandom_")) {
+                        mainViewModel.deleteCharacter(characterId)
+                        Log.d("CustomizeFragment", "🗑️ Deleted temp character: $characterId")
+                    }
+                }
                 findNavController().navigateUp()
             }
             btnActionBarRight.setOnClickListener {
@@ -346,28 +353,21 @@ class CustomizeFragment :
         binding.characterContainer.removeAllViews()
         if (character == null) return
 
-        // 🔥 Render theo z-index
-        val sortedParts =  character.listPath.sortedBy { bodyPart ->
-            bodyPart.nav.substringBeforeLast("/")
-                .substringAfterLast("/")
-                .substringBefore("-")
-                .toIntOrNull() ?: 0
-        }
+        // 🔥 FIX: Sort theo zIndex (render order), KHÔNG phải position (nav order)
+        val sortedParts = character.listPath.sortedBy { it.zIndex }
 
         for (bodyPart in sortedParts) {
-            // 🔥 TÌM navIndex THẬT từ character.listPath gốc
+            // 🔥 TÌM navIndex THẬT từ character.listPath GỐC (trước khi sort)
             val navIndex = character.listPath.indexOf(bodyPart)
             if (navIndex == -1) continue
 
             // 🔥 Lấy path từ selection
             val imagePath = viewModel.getImagePathForSelection(navIndex)
 
-            // 🔥 Nếu imagePath là empty string hoặc null → skip (không hiển thị gì, cũng không hiển thị avatar)
-            if (imagePath.isNullOrBlank()) {
-                continue
-            }
+            // 🔥 Skip nếu không có ảnh
+            if (imagePath.isNullOrBlank()) continue
 
-            // 🔥 Có path → hiển thị layer
+            // 🔥 Render layer
             val iv = ImageView(requireContext()).apply {
                 layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                 scaleType = ImageView.ScaleType.FIT_XY
@@ -376,10 +376,9 @@ class CustomizeFragment :
             loadImage(imagePath, iv)
             binding.characterContainer.addView(iv)
         }
+
         requireActivity().hideNavigation(true)
-
     }
-
     private fun saveCharacterWithImage() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {

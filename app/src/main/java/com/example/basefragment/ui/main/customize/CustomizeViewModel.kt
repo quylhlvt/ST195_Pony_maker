@@ -63,7 +63,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         } ?: return
 
         // ✅ KHÔNG sort, giữ nguyên thứ tự nav trong listPath
-        val sortedListPath = character.listPath.sortedBy { it.position }
+        val sortedListPath = character.listPath.sortedBy { it.zIndex }
         _currentCharacter.value = character.copy(listPath = ArrayList(sortedListPath))
 
         // ✅ Deep copy toàn bộ dữ liệu gốc (GIỮ TẤT CẢ colors và layers)
