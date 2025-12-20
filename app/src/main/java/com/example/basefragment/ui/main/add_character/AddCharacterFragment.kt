@@ -8,10 +8,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -26,6 +28,7 @@ import com.example.basefragment.core.dialog.ChooseColorDialog
 import com.example.basefragment.core.dialog.DialogSpeech
 import com.example.basefragment.core.extention.checkPermissions
 import com.example.basefragment.core.extention.dpToPx
+import com.example.basefragment.core.extention.drawToBitmap
 import com.example.basefragment.core.extention.goToSettings
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.hideNavigation
@@ -49,17 +52,26 @@ import com.example.basefragment.utils.key.ValueKey
 import com.example.basefragment.data.model.addcharacter.draw.Draw
 import com.pfp.ocmaker.create.maker.data.model.draw.DrawableDraw
 import com.example.basefragment.core.listener.listenerdraw.OnDrawListener
+import com.example.basefragment.data.datalocal.di.DataRemoveModule
+import com.example.basefragment.data.datalocal.manager.AppDataManager
+import com.example.basefragment.data.datalocal.manager.CharacterImageManager
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharacterViewModel>(
     FragmentAddCharacterBinding::inflate,
     AddCharacterViewModel::class.java
 ) {
+    @Inject
+    lateinit var imageManager: CharacterImageManager
     private val permissionViewModel: PermissionViewModel by viewModels()
 
     private val backgroundImageAdapter by lazy { BackgroundImageAdapter() }
@@ -71,6 +83,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     private  val imagepath: String by lazy {
         arguments?.getString("imagePath")?:""
     }
+
     private val buttonNavigationList by lazy {
         arrayListOf(
             binding.btnBackground,
@@ -186,6 +199,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                                     dpToPx(requireContext(), -170)
                                 flFunction.layoutParams = viewModel.layoutParams
                             } else {
+                                delay(200)
                                 viewModel.layoutParams.topMargin = viewModel.originalMarginBottom
                                 flFunction.layoutParams = viewModel.layoutParams
                                 edtText.clearFocus()
@@ -248,6 +262,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             main.onClick {
                 viewModel.setIsFocusEditText(false)
                 clearFocus()
+                hideSoftKeyboard()
             }
 
             backgroundImageAdapter.apply {
@@ -672,56 +687,53 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
 
     private fun handleSave() {
-        binding.apply {
-            binding.apply {
-                viewModel.setIsFocusEditText(false)
-                clearFocus()
+        viewModel.setIsFocusEditText(false)
+        clearFocus()
+        hideSoftKeyboard()
 
-                viewLifecycleOwner.lifecycleScope.launch {
-                    showLoadingSafe()
+        viewLifecycleOwner.lifecycleScope.launch {
+            showLoadingSafe()
 
-                    withContext(Dispatchers.IO) {
-                        delay(200)
-                        // xử lý save
+            try {
+                // 1. Chụp bitmap
+                val bitmap = binding.flSave.drawToBitmap()
+
+                // 2. Tạo ID unique
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                    .format(java.util.Date())
+                val designId = "design_$timestamp"
+
+                // 3. Lưu ảnh và path vào JSON
+                val savedImagePath = withContext(Dispatchers.IO) {
+                    imageManager.deleteOldImage(designId)
+                    val path = imageManager.saveBitmap(bitmap, designId)
+
+                    if (path != null) {
+                        // Lưu path vào JSON
+                        viewModelActivity.appDataManager.addMyDesignPath(path)
                     }
 
-                    hideLoadingSafe()
+                    path
                 }
+
+                hideLoadingSafe()
+
+                if (savedImagePath != null) {
+                    Toast.makeText(requireContext(), "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
+
+                    val action = AddCharacterFragmentDirections
+                        .actionAddCharacterFragmentToViewImageFragment(savedImagePath)
+                    findNavController().navigate(action)
+                } else {
+                    Toast.makeText(requireContext(), "Lưu thất bại!", Toast.LENGTH_SHORT).show()
+                }
+
+            } catch (e: Exception) {
+                hideLoadingSafe()
+                Toast.makeText(requireContext(), "Có lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-//            viewModel.setIsFocusEditText(false)
-//            clearFocus()
-//            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-//                showLoadingSafe()
-//                delay(200)
-//                viewModel.saveImageFromView(flSave).collect { result ->
-//                    when (result) {
-//                        is SaveState.Loading -> showLoadingSafe()
-//
-//                        is SaveState.Error -> {
-//                            dismissLoading()
-//                            withContext(Dispatchers.Main) {
-//                                showToast(R.string.save_failed_please_try_again)
-//                            }
-//                        }
-//
-//                        is SaveState.Success -> {
-//                            dismissLoading()
-//                            withContext(Dispatchers.Main) {
-//                                // Lưu path vào viewModelActivity
-//                                viewModelActivity.setSavedImagePath(result.path)
-//                                // Navigate đến ViewFragment nếu cần
-//                                // parentFragmentManager.commit {
-//                                //     replace(R.id.fragment_container, ViewFragment.newInstance())
-//                                //     addToBackStack(null)
-//                                // }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
     }
-
     companion object {
         fun newInstance(): AddCharacterFragment {
             return AddCharacterFragment()

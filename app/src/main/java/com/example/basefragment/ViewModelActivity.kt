@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewModelActivity @Inject constructor(
     private val getCatalogueUseCase: GetCatalogueUseCase,
-    private val appDataManager: AppDataManager,
+    val appDataManager: AppDataManager,
     private val quickRandomManager: QuickRandomManager
 
 ) : ViewModel() {

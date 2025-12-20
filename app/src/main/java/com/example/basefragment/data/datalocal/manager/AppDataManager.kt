@@ -19,7 +19,7 @@ class AppDataManager @Inject constructor(
     // ✅ TÁCH RIÊNG 2 file JSON
     private val templatesFileName = "templates.json"        // Templates gốc từ assets
     private val customizedFileName = "customized.json"      // Characters đã customize
-
+    private val myDesignFileName = "my_designs.json"
     companion object {
         private const val TAG = "AppDataManager"
         private const val ASSET_PREFIX = "file:///android_asset"
@@ -60,7 +60,8 @@ class AppDataManager @Inject constructor(
 
     private val _errorQuick = MutableStateFlow<String?>(null)
     val errorQuick = _errorQuick.asStateFlow()
-
+    private val _myDesignPaths = MutableStateFlow<List<String>>(emptyList())
+    val myDesignPaths: StateFlow<List<String>> = _myDesignPaths.asStateFlow()
     private var isDataLoaded = false
     private var isDataQuickLoaded = false
 
@@ -120,6 +121,7 @@ class AppDataManager @Inject constructor(
 
                 // Load assets khác
                 coroutineScope {
+                    launch { loadMyDesignData() }
                     launch { loadBackgrounds() }
                     launch { loadBackgroundTexts() }
                     launch { loadStickers() }
@@ -423,7 +425,48 @@ class AppDataManager @Inject constructor(
             Log.e(TAG, "❌ Lỗi loadSpeechs: ${e.message}", e)
         }
     }
+    private suspend fun loadMyDesignFromJson(): List<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = File(context.filesDir, myDesignFileName)
+                if (!file.exists()) return@withContext emptyList()
+                val json = file.readText()
+                val type = object : TypeToken<List<String>>() {}.type
+                Gson().fromJson<List<String>>(json, type) ?: emptyList()
+            } catch (e: Exception) {
+                Log.e(TAG, "Lỗi loadMyDesignFromJson: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    suspend fun saveMyDesignToJson(paths: List<String>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val json = Gson().toJson(paths)
+                val file = File(context.filesDir, myDesignFileName)
+                file.writeText(json)
+                Log.d(TAG, "My Designs saved to JSON (${paths.size} items)")
+            } catch (e: Exception) {
+                Log.e(TAG, "Lỗi saveMyDesignToJson: ${e.message}", e)
+            }
+        }
+    }
+    suspend fun addMyDesignPath(imagePath: String) {
+        val currentList = _myDesignPaths.value.toMutableList()
+        // Tránh trùng lặp
+        if (!currentList.contains(imagePath)) {
+            currentList.add(0, imagePath) // Thêm lên đầu để mới nhất hiện đầu tiên
+            _myDesignPaths.value = currentList
+            saveMyDesignToJson(currentList)
+            Log.d(TAG, "Added new design: $imagePath")
+        }
+    }
 
+    // Load khi khởi động
+    suspend fun loadMyDesignData() {
+        val paths = loadMyDesignFromJson()
+        _myDesignPaths.value = paths
+    }
     fun clearData() {
         _templates.value = emptyList()
         _customizedCharacters.value = emptyList()

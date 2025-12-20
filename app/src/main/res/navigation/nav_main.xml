@@ -100,12 +100,20 @@
         android:id="@+id/addCharacterFragment"
         android:name="com.example.basefragment.ui.main.add_character.AddCharacterFragment"
         android:label="fragment_add_character"
-        tools:layout="@layout/fragment_add_character" />
+        tools:layout="@layout/fragment_add_character" >
+        <action
+            android:id="@+id/action_addCharacterFragment_to_viewImageFragment"
+            app:destination="@id/viewFragment" />
+    </fragment>
     <fragment
         android:id="@+id/viewFragment"
         android:name="com.example.basefragment.ui.main.view.ViewFragment"
         android:label="fragment_view"
-        tools:layout="@layout/fragment_view" />
+        tools:layout="@layout/fragment_view" >
+        <argument
+            android:name="imagePath"
+            app:argType="string" />
+    </fragment>
 
 
 </navigation>

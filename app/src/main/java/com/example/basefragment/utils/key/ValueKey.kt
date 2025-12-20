@@ -8,4 +8,7 @@ object ValueKey {
 
     const val IMAGE_BACKGROUND = 0
     const val COLOR_BACKGROUND = 1
+    const val RANDOM_IDENTIFIER_FOR_ADDING_STICKER_TO_WHATSAPP =
+        "RANDOM_IDENTIFIER_FOR_WHATSAPP_STICKER"
+
 }

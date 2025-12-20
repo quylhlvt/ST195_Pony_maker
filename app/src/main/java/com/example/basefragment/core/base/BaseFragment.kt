@@ -6,9 +6,11 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -150,7 +152,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     ) {
         hideLoading()
 
-        dialog = Dialog(requireContext()).apply {
+        dialog = Dialog(requireContext(),R.style.BaseDialog).apply {
             val binding = DialogbaseBinding.inflate(layoutInflater)
             setContentView(binding.root)
             confirmDialogBinding = binding
@@ -178,7 +180,15 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
             }
 
             setCancelable(cancelable)
-            window?.setBackgroundDrawableResource(android.R.color.transparent)
+            window?.apply {
+                setBackgroundDrawableResource(android.R.color.transparent)
+                // Đặt layout MATCH_PARENT cho cả width và height
+                setLayout(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT
+                )
+                setGravity(Gravity.CENTER)
+            }
             show()
         }
     }

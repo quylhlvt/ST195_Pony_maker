@@ -18,7 +18,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class ViewFragment  : BaseFragment<FragmentViewBinding, ViewViewModel>( FragmentViewBinding::inflate, ViewViewModel::class.java) {
     override fun viewListener() {
 
-
     }
 
 

@@ -35,4 +35,26 @@
     <string name="do_you_want_to_reset_all">Do you want to reset all?</string>
     <string name="reset">Reset</string>
     <string name="exit">Exit</string>
+    <string name="privacy_amp_policy"><![CDATA[Privacy & Policy]]></string>
+    <string name="rate_us">Rate Us</string>
+    <string name="share_app">Share App</string>
+    <string name="image_has_been_saved_successfully">Image has been saved successfully!</string>
+    <string name="download">Download</string>
+    <string name="avatar">Avatar</string>
+    <string name="design">Design</string>
+    <string name="no_item_here">No Item Here</string>
+    <string name="add_to_whatsapp">Add To WhatsApp</string>
+    <string name="add_to_telegram">Add To Telegram</string>
+    <string name="share">Share</string>
+    <string name="no_app_found_to_handle_this_action">No app found to handle this action</string>
+    <string name="download_success">Download successful to the PFP OC Maker album</string>
+    <string name="download_fail">Download failed, please try again later!</string>
+    <string name="delete">Delete</string>
+    <string name="are_you_sure_want_to_delete_this_item">Are you sure want to delete this item?</string>
+    <string name="please_select_an_image">Please select an image</string>
+    <string name="limit_3_items">At least 3 items are required to create a sticker</string>
+    <string name="limit_30_items">Only a maximum of 30 items can be added</string>
+    <string name="invalid_action_msg">Application not installed</string>
+    <string name="invalid_action">Error</string>
+    <string name="download_failed_please_try_again_later">Download failed, please try again later!</string>
 </resources>
