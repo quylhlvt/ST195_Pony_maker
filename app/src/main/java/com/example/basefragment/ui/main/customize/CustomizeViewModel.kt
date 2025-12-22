@@ -17,6 +17,10 @@ import kotlin.random.Random
 @HiltViewModel
 class CustomizeViewModel @Inject constructor() : ViewModel() {
 
+    companion object {
+        private const val TAG = "CustomizeViewModel"
+    }
+
     private val _currentCharacter = MutableStateFlow<CustomModel?>(null)
     val currentCharacter: StateFlow<CustomModel?> = _currentCharacter.asStateFlow()
 
@@ -45,10 +49,14 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         _isFlipped.value = !_isFlipped.value
     }
 
+    /**
+     * ✅ Initialize character for editing
+     */
     fun initCharacter(
         mainViewModel: ViewModelActivity,
         index: Int? = null,
-        template: CustomModel? = null
+        template: CustomModel? = null,
+        isquick: Boolean = false
     ) {
         val character = when {
             index != null && index >= 0 -> {
@@ -62,11 +70,9 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             else -> null
         } ?: return
 
-        // ✅ KHÔNG sort, giữ nguyên thứ tự nav trong listPath
-        val sortedListPath = character.listPath.sortedBy { it.navOrder }
+        val sortedListPath = character.listPath.sortedBy { it.position }
         _currentCharacter.value = character.copy(listPath = ArrayList(sortedListPath))
 
-        // ✅ Deep copy toàn bộ dữ liệu gốc (GIỮ TẤT CẢ colors và layers)
         originalBodyParts = sortedListPath.map { bp ->
             bp.copy(
                 listPath = ArrayList(
@@ -77,25 +83,30 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             )
         }
 
-        Log.d("CustomizeViewModel", "=== Init character ===")
-        Log.d("CustomizeViewModel", "   ID: ${character.id}")
-        Log.d("CustomizeViewModel", "   Has selections: ${character.selections.isNotEmpty()}")
+        Log.d(TAG, "=== Init character ===")
+        Log.d(TAG, "   ID: ${character.id}")
+        Log.d(TAG, "   Index: $characterIndex")
+        Log.d(TAG, "   Has selections: ${character.selections.isNotEmpty()}")
+        Log.d(TAG, "   Is quick: $isquick")
 
         baseCharacter = character
         _selectedBodyParts.value = originalBodyParts
 
-        // ✅ Restore selections từ character.selections
+        // ✅ Restore selections: Ưu tiên từ myAvatars, nếu không có thì từ character
         navSelections.clear()
-        if (character.selections.isNotEmpty()) {
-            // Edit mode: restore selections
-            Log.d("CustomizeViewModel", "   📋 Restoring selections from saved character")
-            character.selections.forEach { selection ->
+        val avatarData = mainViewModel.appDataManager.myAvatars.value.find { it.custom.id == character.id }
+        val selectionsToUse = avatarData?.custom?.selections ?: character.selections
+
+        if (selectionsToUse.isNotEmpty()) {
+            // Edit mode: restore selections từ myAvatars hoặc character
+            Log.d(TAG, "   📋 Restoring selections from myAvatars or character")
+            selectionsToUse.forEach { selection ->
                 navSelections.add(selection)
-                Log.d("CustomizeViewModel", "      Nav ${selection.nav}: color=${selection.color}, layer=${selection.layer}")
+                Log.d(TAG, "      Nav ${selection.nav}: color=${selection.color}, layer=${selection.layer}")
             }
         } else {
             // New character: initialize empty selections
-            Log.d("CustomizeViewModel", "   📋 New character, initializing empty selections")
+            Log.d(TAG, "   📋 New character, initializing empty selections")
             originalBodyParts.forEachIndexed { navIndex, _ ->
                 navSelections.add(SelectionPart(nav = navIndex, color = -1, layer = -1))
             }
@@ -112,7 +123,6 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         // ✅ Apply preview cho tất cả nav đã có selection
         applyAllSelections()
     }
-
     private fun applyAllSelections() {
         navSelections.forEachIndexed { navIndex, selection ->
             if (selection.layer != -1) {
@@ -133,18 +143,21 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         if (bodyPart.listPath.isEmpty()) return
 
         val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
+        val position = bodyPart.position ?: 0
 
         if (hasColor) {
-            navSelections[navIndex] = SelectionPart(nav = navIndex, color = 0, layer = 0)
-            applyPreview(navIndex, 0, 0)
+            val layerSet = if (navIndex == 0) 2 else 0
+            navSelections[navIndex] = SelectionPart(nav = navIndex, color = 0, layer = layerSet)
+            applyPreview(navIndex, 0, layerSet)
         } else {
-            val position = bodyPart.position.toIntOrNull() ?: 0
             val realImagesCount = bodyPart.listPath.sumOf { cm ->
                 cm.listPath.count { it.contains("/") }
             }
 
             if (realImagesCount > 0) {
-                val firstRealIndex = if (position != 1) 2 else 1
+                // ✅ NAV 0 (position = 1): Bắt đầu từ index 1 (vì chỉ có "dice" ở đầu)
+                // ✅ NAV khác: Bắt đầu từ index 0 (có "none")
+                val firstRealIndex = if (position == 1) 1 else 0
                 navSelections[navIndex] = SelectionPart(nav = navIndex, color = -1, layer = firstRealIndex)
                 applyPreviewSingleImage(navIndex, firstRealIndex)
             }
@@ -182,9 +195,14 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
 
         if (!hasColor) {
-            val position = bodyPart.position.toIntOrNull() ?: 0
+            val position = bodyPart.position ?: 0
             val layerImages = mutableListOf<String>()
-            if (position != 1) layerImages.add("none")
+
+            // ✅ NAV 0 (position = 1): CHỈ có "dice"
+            // ✅ NAV khác: Có "none" và "dice"
+            if (position != 1) {
+                layerImages.add("none")
+            }
             layerImages.add("dice")
             layerImages.addAll(
                 bodyPart.listPath.mapNotNull { it.listPath.firstOrNull { p -> p.contains("/") } }
@@ -196,7 +214,8 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
                 "dice" -> {
                     val realImages = layerImages.filter { it != "none" && it != "dice" }
                     if (realImages.isNotEmpty()) {
-                        val realStartIndex = if (position != 1) 2 else 1
+                        // ✅ Tính đúng start index
+                        val realStartIndex = if (position == 1) 1 else 2
                         val randomOffset = Random.nextInt(realImages.size)
                         val fixedLayerIndex = realStartIndex + randomOffset
 
@@ -265,7 +284,7 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         val character = _currentCharacter.value ?: return
         val bodyPart = originalBodyParts.getOrNull(navIndex) ?: return
 
-        val position = bodyPart.position.toIntOrNull() ?: 0
+        val position = bodyPart.position ?: 0
         val layerImages = mutableListOf<String>()
         if (position != 1) layerImages.add("none")
         layerImages.add("dice")
@@ -301,14 +320,16 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             if (bodyPart.listPath.isEmpty()) return@forEachIndexed
 
             val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
+            val position = bodyPart.position ?: 0
 
             if (!hasColor) {
                 val realImages = bodyPart.listPath.mapNotNull {
                     it.listPath.firstOrNull { p -> p.contains("/") }
                 }
                 if (realImages.isNotEmpty()) {
-                    val position = bodyPart.position.toIntOrNull() ?: 0
-                    val realStartIndex = if (position != 1) 2 else 1
+                    // ✅ NAV 0 (position = 1): start từ 1 (vì chỉ có "dice")
+                    // ✅ NAV khác: start từ 2 (vì có "none" và "dice")
+                    val realStartIndex = if (position == 1) 1 else 2
                     val randomOffset = Random.nextInt(realImages.size)
                     val fixedLayerIndex = realStartIndex + randomOffset
 
@@ -346,9 +367,14 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
         if (!hasColor) {
             if (selection.layer == -1) return null
 
-            val position = bodyPart.position.toIntOrNull() ?: 0
+            val position = bodyPart.position ?: 0
             val layerImages = mutableListOf<String>()
-            if (position != 1) layerImages.add("none")
+
+            // ✅ NAV 0 (position = 1): CHỈ có "dice"
+            // ✅ NAV khác: Có "none" và "dice"
+            if (position != 1) {
+                layerImages.add("none")
+            }
             layerImages.add("dice")
             layerImages.addAll(
                 bodyPart.listPath.mapNotNull { it.listPath.firstOrNull { p -> p.contains("/") } }
@@ -378,38 +404,90 @@ class CustomizeViewModel @Inject constructor() : ViewModel() {
             it.listPath.firstOrNull { p -> p.contains("/") }
         }
 
+        val position = bodyPart.position ?: 0
         val list = mutableListOf<String>()
-        val position = bodyPart.position.toIntOrNull() ?: 0
-        if (position != 1) list.add("none")
+
+        // ✅ NAV 0 (position = 1): CHỈ có "dice"
+        // ✅ NAV khác: Có "none" và "dice"
+        if (position != 1) {
+            list.add("none")
+        }
         list.add("dice")
         list.addAll(realImages)
         return list
     }
 
     /**
-     * ✅ FIXED: Save character với TOÀN BỘ dữ liệu gốc + selections riêng
+     * ✅ Save character (Edit existing or Create new)
      */
-    fun saveCharacter(mainViewModel: ViewModelActivity, capturedImagePath: String = "") {
+    suspend fun saveCharacter(mainViewModel: ViewModelActivity, capturedImagePath: String = "", finalCharacterId: String = "") {
+        val base = baseCharacter ?: return
+        val current = _currentCharacter.value ?: return
+
+        // ✅ Check xem có phải đang edit customized character không
+        val isEditingCustomized = characterIndex >= 0 && !mainViewModel.isTemplate(base.id)
+
+        val dataModel = com.example.basefragment.data.model.custom.DataModel(
+            id = finalCharacterId,
+            data = "$characterIndex",
+            custom = current.copy(
+                selections = ArrayList(navSelections),
+                imageSave = capturedImagePath
+            )
+        )
+
+        Log.d(TAG, "🔄 Preparing to save: ID=$finalCharacterId, Image=$capturedImagePath, Selections=${navSelections.size}")
+
+        if (isEditingCustomized) {
+            // ✅ EDIT: Update existing character
+            mainViewModel.updateOrAddCharacter(current.copy(
+                selections = ArrayList(navSelections),
+                imageSave = capturedImagePath
+            ), index = characterIndex)
+
+            // 🔥 THÊM: Cũng save vào myAvatars.json
+            mainViewModel.appDataManager.saveMyAvatar(dataModel)
+            Log.d(TAG, "✅ Updated existing character and saved to myAvatars: $finalCharacterId")
+        } else {
+            // ✅ NEW CHARACTER: Tạo character mới từ template
+            val newCharacter = base.copy(
+                id = finalCharacterId,
+                listPath = ArrayList(originalBodyParts),
+                selections = ArrayList(navSelections),
+                imageSave = capturedImagePath,
+                updatedAt = System.currentTimeMillis()
+            )
+
+            mainViewModel.updateOrAddCharacter(newCharacter, index = -1)
+
+            // 🔥 THÊM: Save vào myAvatars.json cho new character
+            mainViewModel.appDataManager.saveMyAvatar(dataModel)
+            Log.d(TAG, "✅ Created new character and saved to myAvatars: $finalCharacterId")
+        }
+    }
+    /**
+     * ✅ Save character với ID mới (dùng cho quick random)
+     */
+    fun saveCharacterWithNewId(
+        mainViewModel: ViewModelActivity,
+        newCharacterId: String,
+        imagePath: String = ""
+    ) {
         val base = baseCharacter ?: return
 
-        // ✅ Lưu TOÀN BỘ originalBodyParts (không thay đổi)
-        val finalCharacter = base.copy(
-            listPath = ArrayList(originalBodyParts),  // ✅ Giữ nguyên TOÀN BỘ dữ liệu
-            selections = ArrayList(navSelections),     // ✅ Lưu selections riêng
-            imageSave = capturedImagePath,
+        val newCharacter = base.copy(
+            id = newCharacterId,
+            listPath = ArrayList(originalBodyParts),
+            selections = ArrayList(navSelections),
+            imageSave = imagePath,
             updatedAt = System.currentTimeMillis()
         )
 
-        mainViewModel.updateOrAddCharacter(finalCharacter, characterIndex)
+        mainViewModel.updateOrAddCharacter(newCharacter, index = -1)
 
-        Log.d("CustomizeViewModel", "✅ Character saved:")
-        Log.d("CustomizeViewModel", "   - ID: ${finalCharacter.id}")
-        Log.d("CustomizeViewModel", "   - Body parts: ${finalCharacter.listPath.size}")
-        Log.d("CustomizeViewModel", "   - Selections: ${finalCharacter.selections.size}")
-        Log.d("CustomizeViewModel", "   - Image: $capturedImagePath")
-
-        finalCharacter.selections.forEachIndexed { idx, selection ->
-            Log.d("CustomizeViewModel", "   - Selection[$idx]: nav=${selection.nav}, color=${selection.color}, layer=${selection.layer}")
-        }
+        Log.d(TAG, "✅ Character saved with specific ID:")
+        Log.d(TAG, "   - ID: $newCharacterId")
+        Log.d(TAG, "   - Body parts: ${newCharacter.listPath.size}")
+        Log.d(TAG, "   - Selections: ${newCharacter.selections.size}")
     }
 }

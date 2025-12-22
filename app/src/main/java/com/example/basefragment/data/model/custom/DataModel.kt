@@ -3,6 +3,7 @@ package com.example.basefragment.data.model.custom
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 @Parcelize
-data class DataModel(  val data: String,
+data class DataModel( val id:String,
+    val data: String,
                        val custom: CustomModel): Parcelable
 

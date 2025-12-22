@@ -45,6 +45,12 @@ class NavAdapter(
 
     inner class NavViewHolder(private val binding: ItemBottomCustomBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(bodyPart: BodyPartModel, isSelected: Boolean) {
+            binding.vFocus.visibility = if (isSelected) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+
             binding.apply {
                 loadImage(bodyPart.nav, imvImage, onDismissLoading = {
                     sflShimmer.stopShimmer()
