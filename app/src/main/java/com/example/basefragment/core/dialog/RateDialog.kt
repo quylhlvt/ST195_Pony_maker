@@ -2,6 +2,8 @@
 package com.example.basefragment.core.dialog
 
 import android.app.Activity
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +11,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.basefragment.R
+import com.example.basefragment.core.extention.hideDialogNavigation
+import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.extention.strings
 import com.example.basefragment.databinding.DialogRateBinding
 
-class RateDialog(private val activity: Activity) : DialogFragment() {
+class RateDialog() : DialogFragment() {
 
     private var _binding: DialogRateBinding? = null
     private val binding get() = _binding!!
@@ -31,6 +35,10 @@ class RateDialog(private val activity: Activity) : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         isCancelable = false
+        dialog?.window?.apply {
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
 
         initView()
         initAction()
@@ -77,7 +85,10 @@ class RateDialog(private val activity: Activity) : DialogFragment() {
             }
         }
     }
-
+    override fun onStart() {
+        super.onStart()
+        hideDialogNavigation()
+    }
     private fun setView(titleRes: Int, descRes: Int, imgRes: Int) {
         binding.tv1.text = requireContext().strings(titleRes)
         binding.tv2.text = requireContext().strings(descRes)

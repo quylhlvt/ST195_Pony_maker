@@ -33,12 +33,12 @@ import com.example.basefragment.utils.share.whatsapp.StickerPack
 import com.example.basefragment.utils.share.whatsapp.WhitelistCheck
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
-    FragmentMyPonyBinding::inflate,
-    MyPonyViewModel::class.java
+    FragmentMyPonyBinding::inflate, MyPonyViewModel::class.java
 ) {
     private lateinit var myAvatarAdapter: MyAvatarAdapter
     private lateinit var myDesignAdapter: MyDesignAdapter
@@ -65,6 +65,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         // Load initial data
         loadAvatarData()
     }
+
     private fun setupTouchListenerForResetSelection() {
         binding.apply {
             // Touch cho RecyclerView
@@ -88,6 +89,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             recycleDesign.addOnItemTouchListener(touchListener)
         }
     }
+
     private fun setupActionBar() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
@@ -100,12 +102,10 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
     private fun setupTabs() {
         binding.apply {
             btnMyAvatar.onClick {
-
                 switchTab(true)
             }
 
             btnMyDesign.onClick {
-
                 switchTab(false)
             }
         }
@@ -142,7 +142,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         // Avatar adapter
         myAvatarAdapter = MyAvatarAdapter(requireContext()).apply {
             onItemClick = { path ->
-                handleItemClick(path.path, true,1, idEdit= path.idEdit )
+                handleItemClick(path.path, path.characterId, true, 1)
             }
 
             onLongClick = { position ->
@@ -157,8 +157,8 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
                 navigateToEdit(path)
             }
 
-            onDeleteClick = { path ->
-                confirmDeleteAvatar(path)
+            onDeleteClick = { item ->
+                confirmDeleteAvatar(item)
             }
         }
 
@@ -171,7 +171,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         // Design adapter
         myDesignAdapter = MyDesignAdapter().apply {
             onItemClick = { path ->
-                handleItemClick(path, false, 2,"0")
+                handleItemClick(path, "null", false, 2)
             }
 
             onLongClick = { position ->
@@ -199,74 +199,54 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             btnWhatsapp.onClick { handleWhatsAppShare() }
             btnTelegram.onClick { handleTelegramShare() }
             btnDownload.onClick { handleDownload() }
+            btnShare.onClick { handleDownload() }
             actionBar.btnActionBarRight.onClick { handleSelectAll() }
         }
     }
 
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
-        viewModelActivity.appDataManager.myAvatars.collect { myAvatars ->
-            val list = myAvatars.map { dataModel ->
-                MyAlbumModel(
-                    path = dataModel.custom.imageSave,
-                    idEdit = dataModel.custom.id,  // ✅ Character ID để edit
-                    type = 1
-                )
+            viewModel.myAvatarList.collect { list ->
+                myAvatarAdapter.submitList(list)
+                updateUIAfterDataChange()
             }
+        }
 
-            myAvatarAdapter.submitList(list)
-            hideLoadingSafe()
-            updateEmptyState(list.isEmpty() && isAvatarTab.value)
-            updateSelectionUI()
-            Log.d("MyPonyFragment", "📊 My avatars updated: ${list.size} items")
-        }}
-
-        // ✅ Observe design list
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.myDesignList.collect { list ->
                 myDesignAdapter.submitList(list)
                 hideLoadingSafe()
-                updateEmptyState(list.isEmpty() && !isAvatarTab.value)
-                updateSelectionUI()
+                updateUIAfterDataChange()
             }
         }
 
-        // ✅ Observe download state
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadState.collect { state ->
                 when (state) {
-                    MyPonyViewModel.DownloadState.LOADING -> {
-                        // Show loading
-                        showLoadingSafe()
-                    }
-                    MyPonyViewModel.DownloadState.SUCCESS -> {
-                        showToast(R.string.download_success)
-                    }
-                    MyPonyViewModel.DownloadState.ERROR -> {
-                        showToast(R.string.download_failed_please_try_again_later)
-                    }
+                    MyPonyViewModel.DownloadState.LOADING -> showLoadingSafe()
+                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(R.string.download_success)
+                    MyPonyViewModel.DownloadState.ERROR -> showToast(R.string.download_failed_please_try_again_later)
                     else -> {}
                 }
             }
         }
     }
-
+    private fun updateUIAfterDataChange() {
+        val isAvatar = isAvatarTab.value
+        val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
+        updateEmptyState(currentList.isEmpty() && isAvatarTab.value)
+        updateSelectionUI()
+    }
     private fun updateEmptyState(isEmpty: Boolean) {
         binding.noItem.isVisible = isEmpty
     }
-
     private fun updateSelectionUI() {
-        val currentList = if (isAvatarTab.value) {
-            myAvatarAdapter.items
-        } else {
-            myDesignAdapter.items
-        }
-
-        val hasSelection = currentList.any { it.isShowSelection }
-        val allSelected = currentList.isNotEmpty() && currentList.all { it.isSelected }
+        val isAvatar = isAvatarTab.value
+        val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
+        val hasSelection = currentList.any { it.isSelected }
         val selectedCount = currentList.count { it.isSelected }
+        val allSelected = currentList.isNotEmpty() && currentList.all { it.isSelected }
 
-        // Update action bar
         binding.actionBar.apply {
             if (hasSelection) {
                 btnActionBarRight.visible()
@@ -280,23 +260,17 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             }
         }
 
-        // Update bottom bar
+        binding.lnlBottom.isVisible = hasSelection
         if (hasSelection) {
-            binding.lnlBottom.visible()
-            if (isAvatarTab.value) {
+            if (isAvatar) {
                 binding.lnlBottomTop.visible()
-                binding.btnDownload.gone()
+                binding.lnlDownload.gone()
             } else {
                 binding.lnlBottomTop.gone()
-                binding.btnDownload.visible()
+                binding.lnlDownload.visible()
             }
-        } else {
-            binding.lnlBottom.gone()
         }
     }
-
-    // ==================== Data Loading ====================
-
     private fun loadAvatarData() {
         viewModel.loadMyAvatar(requireContext(), true)
 
@@ -309,7 +283,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
 
     // ==================== Selection Management ====================
 
-    private fun handleItemClick(path: String, isAvatar: Boolean, type:Int, idEdit: String) {
+    private fun handleItemClick(path: String, idEdit: String, isAvatar: Boolean, type: Int) {
         val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
 
         if (currentList.any { it.isShowSelection }) {
@@ -320,7 +294,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             }
         } else {
             // Normal mode, navigate to view
-            navigateToView(path,type, idEdit)
+            navigateToView(path, type, idEdit)
         }
     }
 
@@ -339,32 +313,66 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             resetSelection()
         }
     }
-    // ✅ Delete Avatar từ my_avatars.json
-    private fun confirmDeleteAvatar(characterId: String) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.delete)
+
+
+    private fun confirmDeleteAvatar(characterId: String) {  // 🔥 Đổi tên parameter
+        AlertDialog.Builder(requireContext()).setTitle(R.string.delete)
             .setMessage(R.string.are_you_sure_want_to_delete_this_item)
             .setPositiveButton("Delete") { _, _ ->
                 lifecycleScope.launch {
-                    // Xóa từ my_avatars.json
-                    viewModelActivity.appDataManager.deleteMyAvatar(characterId)
-                    // Xóa file ảnh nếu cần
-                    // (Bạn có thể thêm logic xóa file ảnh ở đây nếu muốn)
-                    resetSelection()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-    private fun handleSelectAll() {
-        val currentList = if (isAvatarTab.value) {
-            myAvatarAdapter.items
-        } else {
-            myDesignAdapter.items
-        }
+                    try {
+                        Log.d("MyPonyFragment", "🗑️ Starting delete: $characterId")
 
-        val shouldSelectAll = !currentList.all { it.isSelected }
-        viewModel.selectAll(shouldSelectAll, isAvatarTab.value)
+                        // 🔥 1. Xóa từ customized.json
+                        viewModelActivity.deleteCharacter(characterId)
+
+                        // 🔥 2. Xóa từ my_avatars.json (dùng characterId)
+                        viewModelActivity.appDataManager.deleteMyAvatar(characterId)
+
+                        // 🔥 3. Xóa file ảnh
+                        val avatarData =
+                            viewModelActivity.appDataManager.myAvatars.value.find { it.characterId == characterId }  // 🔥 DÙNG characterId
+
+                        if (avatarData != null && avatarData.custom.imageSave.isNotEmpty()) {
+                            val file = java.io.File(avatarData.custom.imageSave)
+                            if (file.exists()) {
+                                val deleted = file.delete()
+                                Log.d(
+                                    "MyPonyFragment", "   🗑️ Image deleted: ${file.name} ($deleted)"
+                                )
+                            }
+                        }
+
+                        // 🔥 4. Wait cho StateFlow update
+                        kotlinx.coroutines.delay(100)
+
+                        // 🔥 5. Force reload UI
+                        viewModelActivity.appDataManager.loadMyAvatars()
+
+                        Log.d("MyPonyFragment", "✅ Delete completed")
+                        Log.d(
+                            "MyPonyFragment",
+                            "   Remaining avatars: ${viewModelActivity.appDataManager.myAvatars.value.size}"
+                        )
+                        Log.d(
+                            "MyPonyFragment",
+                            "   Remaining customized: ${viewModelActivity.customizedCharacters.value.size}"
+                        )
+
+                        resetSelection()
+                    } catch (e: Exception) {
+                        Log.e("MyPonyFragment", "❌ Delete failed: ${e.message}", e)
+                        showToast("Delete failed: ${e.message}")
+                    }
+                }
+            }.setNegativeButton("Cancel", null).show()
+    }
+
+    private fun handleSelectAll() {
+        val isAvatar = isAvatarTab.value
+        val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
+        val shouldSelectAll = currentList.any { !it.isSelected }
+        viewModel.selectAll(shouldSelectAll, isAvatar)
         updateSelectionUI()
     }
 
@@ -386,33 +394,23 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
     private fun navigateToView(path: String, type: Int, idEdit: String) {
 
 
-        val action = MyPonyFragmentDirections
-            .actionMyponyToView(path,idEdit,type)
+        val action = MyPonyFragmentDirections.actionMyponyToView(path, idEdit, type)
         findNavController().navigate(action)
         // findNavController().navigate(R.id.action_to_view, bundle)
     }
 
-    private fun navigateToEdit(path: String) {
-        val globalIndex = viewModelActivity.characters.value.indexOfFirst {
-            it.id == path
-        }
-
-        if (globalIndex >= 0) {
-            Log.d("MyPonyFragment", "🔄 Navigating to edit: ID=$path, GlobalIndex=$globalIndex")
-            findNavController().navigate(
-                R.id.action_mypony_to_custom,
-                bundleOf("characterIndex" to globalIndex)
-            )
-        } else {
-            Log.e("MyPonyFragment", "❌ Character not found in global list: $path")
-        }
+    private fun navigateToEdit(characterId: String) {  // 🔥 THAY: Nhận characterId thay vì path
+        Log.d("MyPonyFragment", "🔄 Navigating to edit: characterId=$characterId")
+        findNavController().navigate(
+            R.id.action_mypony_to_custom,
+            bundleOf("characterId" to characterId)  // 🔥 TRUYỀN characterId
+        )
     }
 
     // ==================== Actions ====================
 
     private fun confirmDelete(paths: ArrayList<String>, isAvatar: Boolean) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.delete)
+        AlertDialog.Builder(requireContext()).setTitle(R.string.delete)
             .setMessage(R.string.are_you_sure_want_to_delete_this_item)
             .setPositiveButton("Delete") { _, _ ->
                 if (isAvatar) {
@@ -421,9 +419,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
                     viewModel.deleteItemDesign(paths, requireContext())
                 }
                 resetSelection()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+            }.setNegativeButton("Cancel", null).show()
     }
 
     private fun handleDownload() {
@@ -448,10 +444,12 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
                 showToast(R.string.please_select_an_image)
                 return
             }
+
             selected.size < MIN_STICKERS_WHATSAPP -> {
                 showToast(R.string.limit_3_items)
                 return
             }
+
             selected.size > MAX_STICKERS_WHATSAPP -> {
                 showToast(R.string.limit_30_items)
                 return
@@ -477,9 +475,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
             setText("My Ponies ${System.currentTimeMillis() % 1000}")
         }
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Create Sticker Pack")
-            .setView(editText)
+        AlertDialog.Builder(requireContext()).setTitle("Create Sticker Pack").setView(editText)
             .setPositiveButton("Create") { _, _ ->
                 val name = editText.text.toString().trim()
                 if (name.isNotEmpty()) {
@@ -487,11 +483,9 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
                 } else {
                     showToast("Please enter a pack name")
                 }
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            }.setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
-            }
-            .show()
+            }.show()
     }
 
     private fun addToWhatsapp(sp: StickerPack) {
@@ -506,13 +500,13 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
         val intent = Intent()
         intent.action = "com.whatsapp.intent.action.ENABLE_STICKER_PACK"
         intent.putExtra(EXTRA_STICKER_PACK_ID, sp.identifier)
-        intent.putExtra(EXTRA_STICKER_PACK_AUTHORITY,
-            WhitelistCheck.CONTENT_PROVIDER_AUTHORITY)
+        intent.putExtra(
+            EXTRA_STICKER_PACK_AUTHORITY, WhitelistCheck.CONTENT_PROVIDER_AUTHORITY
+        )
         intent.putExtra(EXTRA_STICKER_PACK_NAME, sp.name)
 
         try {
-            @Suppress("DEPRECATION")
-            startActivityForResult(intent, ADD_PACK_REQUEST)
+            @Suppress("DEPRECATION") startActivityForResult(intent, ADD_PACK_REQUEST)
         } catch (e: ActivityNotFoundException) {
             showToast(R.string.invalid_action_msg)
         } catch (e: Exception) {
@@ -522,13 +516,10 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
     }
 
     private fun showErrorDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.invalid_action)
-            .setMessage(R.string.invalid_action_msg)
-            .setNegativeButton("OK") { dialog, _ ->
+        AlertDialog.Builder(requireContext()).setTitle(R.string.invalid_action)
+            .setMessage(R.string.invalid_action_msg).setNegativeButton("OK") { dialog, _ ->
                 dialog.dismiss()
-            }
-            .show()
+            }.show()
     }
 
     @Deprecated("Deprecated in Java")
@@ -540,6 +531,7 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
                 android.app.Activity.RESULT_OK -> {
                     showToast("Sticker pack added successfully")
                 }
+
                 android.app.Activity.RESULT_CANCELED -> {
                     val validationError = data?.getStringExtra("validation_error")
                     if (validationError != null) {
@@ -571,43 +563,41 @@ class MyPonyFragment : BaseFragment<FragmentMyPonyBinding, MyPonyViewModel>(
     // ==================== Utility ====================
 
     private fun showToast(messageResId: Int) {
-        android.widget.Toast.makeText(requireContext(), messageResId, android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(
+            requireContext(), messageResId, android.widget.Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun showToast(message: String) {
-        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT)
+            .show()
     }
 
     // ==================== View Listener ====================
 
     override fun viewListener() {
         binding.actionBar.apply {
-            btnActionBarLeft.setOnClickListener {
-                findNavController().navigateUp()
-                if (myAvatarAdapter.items.any { it.isShowSelection } ||
-                    myDesignAdapter.items.any { it.isShowSelection }) {
+            binding.actionBar.btnActionBarLeft.setOnClickListener {
+                if (getSelectedItems().isNotEmpty()) {
                     resetSelection()
-
+                } else {
+                    findNavController().navigateUp()
                 }
             }
-        }
-    }
+        }}
 
     override fun bindViewModel() {}
 
     override fun inflateBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): FragmentMyPonyBinding = FragmentMyPonyBinding.inflate(inflater, container, false)
 
     override fun onResume() {
         super.onResume()
-        // Reload data when returning to fragment
-        if (isAvatarTab.value) {
-            loadAvatarData()
-        } else {
-            loadDesignData()
+        lifecycleScope.launch {
+            viewModelActivity.refreshApiData()
+            viewModelActivity.appDataManager.loadMyAvatars()
+            if (isAvatarTab.value) loadAvatarData() else loadDesignData()
         }
     }
 }

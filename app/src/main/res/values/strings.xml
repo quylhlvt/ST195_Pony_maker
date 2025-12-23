@@ -81,4 +81,8 @@
 
     <string name="rate_us_0">You have not rated it yet!</string>
     <string name="have_rated">Thank you for rate our app</string>
+    <string name="load_success">Load Success</string>
+    <string name="load_fail">Load Fail</string>
+    <string name="the_layer_have_only_one_item">the_layer_have_only_one_item</string>
+    <string name="please_check_your_network_connection">Please check your network connection.</string>
 </resources>

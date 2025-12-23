@@ -85,7 +85,7 @@ class MyPonyViewModel @Inject constructor(
                         path = path,
                         isSelected = false,
                         isShowSelection = false,
-                        idEdit = "",
+                        characterId="",
                         type = 2
                     )
                 }
@@ -162,6 +162,9 @@ class MyPonyViewModel @Inject constructor(
     /**
      * ✅ Delete avatar - Xóa từ customized characters
      */
+    /**
+     * ✅ Delete avatar - Xóa từ CẢ customized.json VÀ my_avatars.json
+     */
     fun deleteItem(context: Context, paths: ArrayList<String>) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -173,16 +176,25 @@ class MyPonyViewModel @Inject constructor(
                         .find { it.imageSave == imagePath }
 
                     if (character != null) {
-                        // ✅ Xóa character từ AppDataManager
-                        appDataManager.deleteCustomizedCharacter(character.id)
-                        Log.d(TAG, "✅ Deleted character: ${character.id}")
+                        Log.d(TAG, "   🗑️ Deleting character: ${character.id}")
 
-                        // ✅ Xóa file ảnh
+                        // 🔥 1. Xóa từ customized.json
+                        appDataManager.deleteCustomizedCharacter(character.id)
+
+                        // 🔥 2. Xóa từ my_avatars.json
+                        appDataManager.deleteMyAvatar(character.id)
+
+                        // 🔥 3. Xóa file ảnh
                         deleteFileFromStorage(context, imagePath)
+
+                        Log.d(TAG, "   ✅ Deleted character: ${character.id}")
+                    } else {
+                        Log.w(TAG, "   ⚠️ Character not found for path: $imagePath")
                     }
                 }
 
                 withContext(Dispatchers.Main) {
+                    // 🔥 Reload data sau khi xóa
                     loadMyAvatar(context, true)
                 }
 

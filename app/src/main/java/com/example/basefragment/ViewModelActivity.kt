@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basefragment.data.datalocal.manager.AppDataManager
-import com.example.basefragment.data.datalocal.manager.QuickRandomManager
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.data.model.quick.QuickRandomProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,39 +36,65 @@ class ViewModelActivity @Inject constructor(
 
     val isLoading: StateFlow<Boolean> = appDataManager.isLoading
     val error: StateFlow<String?> = appDataManager.error
-
-    // ✅ Quick random progress
     private val _quickRandomProgress = MutableStateFlow(QuickRandomProgress(0, 0, ""))
     val quickRandomProgress: StateFlow<QuickRandomProgress> = _quickRandomProgress.asStateFlow()
 
-    init {
-        loadInitialData()
-    }
+    private val _isQuickRandomLoading = MutableStateFlow(false)
+    val isQuickRandomLoading: StateFlow<Boolean> = _isQuickRandomLoading.asStateFlow()
 
-    private fun loadInitialData() {
+    private val _isTemplatesReady = MutableStateFlow(false)
+    val isTemplatesReady: StateFlow<Boolean> = _isTemplatesReady.asStateFlow()
+
+    init {
+        loadTemplatesFirst()
+        loadQuickRandomLater()
+
+    }
+    private fun loadTemplatesFirst() {
         viewModelScope.launch {
             try {
-                Log.d(TAG, "🚀 Starting data load...")
+                Log.d(TAG, "🚀 PHASE 1: Loading templates (fast)...")
 
-                // Load main data
                 appDataManager.loadInitialData()
 
-                // Load quick random data
-                appDataManager.loadQuickData(
-                    quickRandomManager = quickRandomManager,
-                    onQuickRandomProgress = { current, total, templateName ->
-                        _quickRandomProgress.value = QuickRandomProgress(current, total, templateName)
-                        Log.d(TAG, "📊 Quick random progress: $current/$total ($templateName)")
-                    }
-                )
+                _isTemplatesReady.value = true
 
-                Log.d(TAG, "✅ All data loaded successfully")
+                Log.d(TAG, "✅ PHASE 1 COMPLETED - UI ready!")
                 Log.d(TAG, "   📊 Templates: ${templates.value.size}")
                 Log.d(TAG, "   📊 Customized: ${customizedCharacters.value.size}")
                 Log.d(TAG, "   📊 Total: ${characters.value.size}")
 
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Error loading initial data: ${e.message}", e)
+                Log.e(TAG, "❌ PHASE 1 Error: ${e.message}", e)
+            }
+        }
+    }
+    private fun loadQuickRandomLater() {
+        viewModelScope.launch {
+            try {
+                // ✅ Đợi templates load xong trước
+                isTemplatesReady.collect { ready ->
+                    if (ready) {
+                        Log.d(TAG, "🚀 PHASE 2: Loading quick random (background)...")
+                        _isQuickRandomLoading.value = true
+
+                        appDataManager.loadQuickData(
+                            quickRandomManager = quickRandomManager,
+                            onQuickRandomProgress = { current, total, templateName ->
+                                _quickRandomProgress.value = QuickRandomProgress(current, total, templateName)
+                                Log.d(TAG, "📊 Quick random: $current/$total ($templateName)")
+                            }
+                        )
+
+                        _isQuickRandomLoading.value = false
+                        Log.d(TAG, "✅ PHASE 2 COMPLETED - Quick random ready!")
+                        return@collect // ✅ Chỉ chạy 1 lần
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ PHASE 2 Error: ${e.message}", e)
+                _isQuickRandomLoading.value = false
             }
         }
     }
@@ -93,7 +118,13 @@ class ViewModelActivity @Inject constructor(
         Log.d(TAG, "getCharacterById($characterId): found=${character != null}")
         return character
     }
-
+    fun retryLoadData() {
+        if (templates.value.isEmpty() && !isLoading.value) {
+            viewModelScope.launch {
+                appDataManager.loadInitialData()
+            }
+        }
+    }
     /**
      * ✅ Check if character is a template
      */
@@ -157,27 +188,9 @@ class ViewModelActivity @Inject constructor(
      */
     fun refreshApiData() {
         viewModelScope.launch {
-            try {
-                Log.d(TAG, "🔄 Refreshing API data...")
-
-                val customizedBefore = customizedCharacters.value.size
-
-                appDataManager.refreshFromApi()
-
-                val customizedAfter = customizedCharacters.value.size
-
-                Log.d(TAG, "✅ API refresh completed")
-                Log.d(TAG, "   - Templates: ${templates.value.size}")
-                Log.d(TAG, "   - Customized (before): $customizedBefore")
-                Log.d(TAG, "   - Customized (after): $customizedAfter")
-                Log.d(TAG, "   - Total: ${characters.value.size}")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error refreshing API: ${e.message}", e)
-            }
+            appDataManager.refreshFromApi()
         }
     }
-
     /**
      * ✅ Force reload all data
      */

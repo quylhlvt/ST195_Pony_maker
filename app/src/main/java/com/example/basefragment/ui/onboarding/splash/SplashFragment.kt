@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
@@ -33,10 +35,19 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(Frag
     ): FragmentSplashBinding = FragmentSplashBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            kotlinx.coroutines.delay(2000)
-        goToHome()
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewModelActivity.isTemplatesReady.collect { ready ->
+                    if (ready) {
+                        goToHome()
+                    }
+                }
+            }
         }
+//        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+//            kotlinx.coroutines.delay(2000)
+//        goToHome()
+//        }
 //        lifecycleScope.
 
 //        binding.textView.text = "Home Fragment"

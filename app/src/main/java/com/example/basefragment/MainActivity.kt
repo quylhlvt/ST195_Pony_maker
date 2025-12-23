@@ -8,23 +8,31 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.helper.SharedPreferencesManager
+import com.example.basefragment.utils.QuickRandomEngine
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
-    private val mainViewModel: ViewModelActivity by viewModels()
-
+    @Inject
+    lateinit var quickRandomEngine: QuickRandomEngine
     override fun onCreate(savedInstanceState: Bundle?) {
         hideNavigation(true)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        lifecycleScope.launch {
+            quickRandomEngine.generateIfNeeded()
+        }
+
 //        val sharedPrefs = getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
 //        SharedPreferencesManager.sharedPreferences = sharedPrefs
 //        SharedPreferencesManager.editor = sharedPrefs.edit()

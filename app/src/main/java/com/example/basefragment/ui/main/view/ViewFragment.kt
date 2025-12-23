@@ -12,6 +12,7 @@ import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.core.extention.toHome
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.databinding.FragmentQuickBinding
 import com.example.basefragment.databinding.FragmentQuickBinding.inflate
@@ -26,7 +27,6 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
 ) {
     private val imagePath: String by lazy { arguments?.getString("imagePath") ?: "" }
     private val imageType: Int by lazy { arguments?.getInt("imageType", 0) ?: 0 }
-    private val idEdit: String by lazy { arguments?.getString("idEdit") ?: "" }
     override fun viewListener() {
         binding.apply {
         actionBar.btnActionBarLeft.onClick {
@@ -39,8 +39,8 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                 }
                 actionBar.btnActionBarRight.onClick {
                 }
-                btnBottomLeft.onClick {  }
-                btnBottomRight.onClick {  }
+                btnBottomLeft.onClick {  findNavController().navigateUp()}
+                btnBottomRight.onClick {    findNavController().navigate(R.id.action_view_to_home)  }
 
             }
 

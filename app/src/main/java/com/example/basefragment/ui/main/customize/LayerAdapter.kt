@@ -1,8 +1,6 @@
 package com.example.basefragment.ui.main.customize
 
-import android.content.Context
 import android.content.res.ColorStateList
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,94 +16,102 @@ import com.example.basefragment.data.model.custom.ColorModel
 import com.example.basefragment.databinding.ItemBottomCustomBinding
 import com.example.basefragment.databinding.ItemColorBinding
 import com.example.basefragment.databinding.ItemLayerBinding
-// NavAdapter.kt
-// NavAdapter.kt
-class NavAdapter(
-    private var bodyParts: List<BodyPartModel>,
-    private val onClick: (Int) -> Unit
-) : RecyclerView.Adapter<NavAdapter.NavViewHolder>() {
 
-    private var selectedIndex = 0
+// ==================== NavAdapter ====================
+class NavAdapter : RecyclerView.Adapter<NavAdapter.NavViewHolder>() {
 
-    fun setData(newBodyParts: List<BodyPartModel>) {
+    private var bodyParts = listOf<BodyPartModel>()
+    var posNav = 0
+    var onClick: ((Int) -> Unit)? = null
+
+    fun submitList(newBodyParts: List<BodyPartModel>) {
         bodyParts = newBodyParts
         notifyDataSetChanged()
     }
 
+    fun setPos(index: Int) {
+        if (index < 0 || index >= bodyParts.size) return
+        val old = posNav
+        posNav = index
+        notifyItemChanged(old)
+        notifyItemChanged(posNav)
+    }
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NavViewHolder {
-        val binding = ItemBottomCustomBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemBottomCustomBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return NavViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: NavViewHolder, position: Int) {
-        holder.bind(bodyParts[position], position == selectedIndex)
+        holder.bind(bodyParts[position], position == posNav)
     }
 
     override fun getItemCount() = bodyParts.size
 
-    inner class NavViewHolder(private val binding: ItemBottomCustomBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(bodyPart: BodyPartModel, isSelected: Boolean) {
-            binding.vFocus.visibility = if (isSelected) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+    inner class NavViewHolder(private val binding: ItemBottomCustomBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
+        fun bind(bodyPart: BodyPartModel, isSelected: Boolean) {
             binding.apply {
+                vFocus.visibility = if (isSelected) View.VISIBLE else View.GONE
+                sflShimmer.visibility = View.VISIBLE
+                sflShimmer.startShimmer()
                 loadImage(bodyPart.nav, imvImage, onDismissLoading = {
                     sflShimmer.stopShimmer()
                     sflShimmer.gone()
                 })
                 root.onClick(200) {
-                    val old = selectedIndex
-                    selectedIndex = adapterPosition
-                    notifyItemChanged(old)
-                    notifyItemChanged(selectedIndex)
-                    onClick(adapterPosition)
+                    val position = adapterPosition
+                    if (position == RecyclerView.NO_POSITION) return@onClick
+                    onClick?.invoke(position)
                 }
             }
         }
     }
-    fun setSelectedIndex(index: Int) {
-        val oldIndex = selectedIndex
-        selectedIndex = index.coerceIn(0, bodyParts.size - 1)
-        notifyItemChanged(oldIndex)
-        notifyItemChanged(selectedIndex)
-    }
 }
 
-// LayerAdapter.kt (VariantAdapter)
-class LayerAdapter(
-    private var imagePaths: List<String>,
-    private val onImageSelected: (Int) -> Unit,
-    private val onScrollToPosition: (Int) -> Unit
-) : RecyclerView.Adapter<LayerAdapter.LayerViewHolder>() {
+// ==================== LayerAdapter ====================
+class LayerAdapter : RecyclerView.Adapter<LayerAdapter.LayerViewHolder>() {
 
-    var selectedIndex = -1
+    private var imagePaths = listOf<String>()
+    var posPath = -1
+    var onClick: ((Int, String) -> Unit)? = null
 
-    fun setDataWithSelection(newPaths: List<String>, newSelectedIndex: Int) {
+    fun submitList(newPaths: List<String>, callback: (() -> Unit)? = null) {
         imagePaths = newPaths
-        // 🔥 KHÔNG coerceIn nữa, giữ nguyên -1 nếu không có selection
-        selectedIndex = if (newPaths.isEmpty()) {
-            -1
-        } else if (newSelectedIndex >= 0 && newSelectedIndex < newPaths.size) {
-            newSelectedIndex
-        } else {
-            -1
-        }
         notifyDataSetChanged()
-        if (selectedIndex >= 0) {
-            onScrollToPosition(selectedIndex)
+        callback?.invoke()
+    }
+
+    fun setPos(index: Int) {
+        val oldIndex = posPath
+        posPath = index
+
+        // ✅ Chỉ notify item hợp lệ
+        if (oldIndex >= 0 && oldIndex < imagePaths.size) {
+            notifyItemChanged(oldIndex)
+        }
+        if (posPath >= 0 && posPath < imagePaths.size) {
+            notifyItemChanged(posPath)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LayerViewHolder {
-        val binding = ItemLayerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemLayerBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return LayerViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: LayerViewHolder, position: Int) {
-        holder.bind(imagePaths[position], position == selectedIndex && selectedIndex >= 0)
+        holder.bind(imagePaths[position], position == posPath && posPath >= 0)
     }
 
     override fun getItemCount() = imagePaths.size
@@ -115,31 +121,28 @@ class LayerAdapter(
 
         fun bind(imagePath: String, isSelected: Boolean) {
             binding.apply {
-                // 🔥 Reset shimmer mỗi lần bind
+                // ✅ Reset shimmer
                 sflShimmer.visibility = View.VISIBLE
                 sflShimmer.startShimmer()
 
+                // ✅ Load image based on type
                 when {
                     imagePath == "none" -> {
-                        // 🔥 Hiển thị icon "none"
                         imvImage.setImageResource(R.drawable.ic_none)
                         sflShimmer.stopShimmer()
                         sflShimmer.gone()
                     }
                     imagePath == "dice" -> {
-                        // 🔥 Hiển thị icon "dice" (random)
                         imvImage.setImageResource(R.drawable.ic_random_layer)
                         sflShimmer.stopShimmer()
                         sflShimmer.gone()
                     }
                     imagePath.isBlank() -> {
-                        // 🔥 Blank path → cũng hiển thị none
                         imvImage.setImageResource(R.drawable.ic_none)
                         sflShimmer.stopShimmer()
                         sflShimmer.gone()
                     }
                     else -> {
-                        // 🔥 Load ảnh bình thường
                         loadImage(imagePath, imvImage, onDismissLoading = {
                             sflShimmer.stopShimmer()
                             sflShimmer.gone()
@@ -147,6 +150,7 @@ class LayerAdapter(
                     }
                 }
 
+                // ✅ Update stroke color based on selection
                 cardLayer.apply {
                     strokeWidth = 3.dp(context)
                     strokeColor = ContextCompat.getColor(
@@ -155,92 +159,103 @@ class LayerAdapter(
                     )
                 }
 
+                // ✅ Click listener
                 root.onClick(200) {
-                    if (adapterPosition == RecyclerView.NO_POSITION) return@onClick
+                    val position = adapterPosition
+                    if (position == RecyclerView.NO_POSITION) return@onClick
 
-                    val oldPosition = selectedIndex
-                    selectedIndex = adapterPosition
+                    val oldPosition = posPath
+                    posPath = position
 
-                    // 🔥 Chỉ notify nếu oldPosition hợp lệ
+                    // Chỉ notify item hợp lệ
                     if (oldPosition >= 0 && oldPosition < imagePaths.size) {
                         notifyItemChanged(oldPosition)
                     }
-                    notifyItemChanged(selectedIndex)
+                    notifyItemChanged(posPath)
 
-                    onImageSelected(adapterPosition)
+                    onClick?.invoke(position, imagePath)
                 }
             }
         }
     }
 }
-// ColorAdapter.kt
-class ColorAdapter(
-    private var colors: List<ColorModel>,
-    private val onColorSelected: (Int) -> Unit,
-    private val onScrollToPosition: (Int) -> Unit
-) : RecyclerView.Adapter<ColorAdapter.ColorViewHolder>() {
 
-    private var selectedIndex = -1
+// ==================== ColorAdapter ====================
+class ColorAdapter : RecyclerView.Adapter<ColorAdapter.ColorViewHolder>() {
 
-    fun setData(newColors: List<ColorModel>) {
+    private var colors = listOf<ColorModel>()
+    var posColor = -1
+    var onClick: ((Int) -> Unit)? = null
+
+    fun submitList(newColors: List<ColorModel>) {
         colors = newColors
         notifyDataSetChanged()
     }
-    fun setSelectedIndex(index: Int) {
-        val old = selectedIndex
-        // ✨ FIX: Nếu index = -1, chuyển thành 0 (default first item)
-        selectedIndex = if (index == -1 && colors.isNotEmpty()) 0 else index
 
-        // ✨ FIX: Chỉ notify và scroll khi có thay đổi thực sự
-        if (old != selectedIndex) {
-            // Chỉ notify old nếu nó hợp lệ
-            if (old >= 0 && old < colors.size) {
-                notifyItemChanged(old)
+    fun setPos(index: Int) {
+        val oldIndex = posColor
+        // ✅ Nếu index = -1 và có data, chọn item đầu tiên
+        posColor = if (index == -1 && colors.isNotEmpty()) 0 else index
+
+        // ✅ Chỉ notify khi có thay đổi
+        if (oldIndex != posColor) {
+            if (oldIndex >= 0 && oldIndex < colors.size) {
+                notifyItemChanged(oldIndex)
             }
-            // Notify và scroll item mới
-            if (selectedIndex >= 0 && selectedIndex < colors.size) {
-                notifyItemChanged(selectedIndex)
-                onScrollToPosition(selectedIndex)
+            if (posColor >= 0 && posColor < colors.size) {
+                notifyItemChanged(posColor)
             }
         }
     }
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorViewHolder {
-        val binding = ItemColorBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemColorBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return ColorViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ColorViewHolder, position: Int) {
-        holder.bind(colors[position], position == selectedIndex)
+        holder.bind(colors[position], position == posColor && posColor >= 0)
     }
 
     override fun getItemCount() = colors.size
 
-    inner class ColorViewHolder(private val binding: ItemColorBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ColorViewHolder(private val binding: ItemColorBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
         fun bind(colorModel: ColorModel, isSelected: Boolean) {
-            val backgroundColor = if (colorModel.color.isNotEmpty()) {
-                try {
-                    android.graphics.Color.parseColor("#${colorModel.color}")
+            binding.apply {
+                // ✅ Parse and set color
+                val backgroundColor = try {
+                    if (colorModel.color.isNotEmpty()) {
+                        android.graphics.Color.parseColor("#${colorModel.color}")
+                    } else {
+                        android.graphics.Color.LTGRAY
+                    }
                 } catch (e: Exception) {
                     android.graphics.Color.LTGRAY
                 }
-            } else android.graphics.Color.LTGRAY
 
-            binding.ivColorPreview.backgroundTintList = ColorStateList.valueOf(backgroundColor)
-            // 🔥 Chỉ hiện selected khi adapterPosition == selectedIndex VÀ selectedIndex >= 0
-            binding.viewSelected.visibility = if (isSelected && selectedIndex >= 0) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+                ivColorPreview.backgroundTintList = ColorStateList.valueOf(backgroundColor)
 
-            binding.root.onClick(200) {
-                val old = selectedIndex
-                selectedIndex = adapterPosition
-                notifyItemChanged(old)
-                notifyItemChanged(selectedIndex)
-                onColorSelected(adapterPosition)
+                // ✅ Show/Hide selection indicator
+                viewSelected.visibility = if (isSelected) View.VISIBLE else View.GONE
+
+                // ✅ Click listener
+                root.onClick(200) {
+                    val position = adapterPosition
+                    if (position == RecyclerView.NO_POSITION) return@onClick
+
+                    val old = posColor
+                    posColor = position
+                    notifyItemChanged(old)
+                    notifyItemChanged(posColor)
+                    onClick?.invoke(position)
+                }
             }
-        }}
+        }
+    }
 }

@@ -1,478 +1,351 @@
 package com.example.basefragment.ui.main.customize
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.Toast
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.os.bundleOf
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.example.basefragment.R
-import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.extention.drawToBitmap
-import com.example.basefragment.core.extention.gone
-import com.example.basefragment.core.extention.hideNavigation
-import com.example.basefragment.core.extention.loadImage
-import com.example.basefragment.core.extention.setImageActionBar
-import com.example.basefragment.core.extention.toggetShow
-import com.example.basefragment.data.datalocal.manager.CharacterImageManager
-import com.example.basefragment.data.model.custom.ColorModel
-import com.example.basefragment.data.model.custom.CustomModel
+import com.example.basefragment.core.extention.*
+import com.example.basefragment.data.model.custom.AvatarModel
+import com.example.basefragment.data.model.custom.BodyPartModel
 import com.example.basefragment.databinding.FragmentCustomizeBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.time.delay
-import javax.inject.Inject
 
 @AndroidEntryPoint
-class CustomizeFragment :
-    BaseFragment<FragmentCustomizeBinding, CustomizeViewModel>(
-        FragmentCustomizeBinding::inflate,
-        CustomizeViewModel::class.java
-    ) {
-    @Inject
-    lateinit var imageManager: CharacterImageManager
-    private val mainViewModel: ViewModelActivity by activityViewModels()
-    private lateinit var navAdapter: NavAdapter
-    private lateinit var layerAdapter: LayerAdapter
-    private lateinit var colorAdapter: ColorAdapter
+class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewModel>(
+    FragmentCustomizeBinding::inflate,
+    CustomizeViewModel::class.java
+) {
 
-    private var lastNavIndex = -1
-    private var checkShow = true
-    private var isQuickRandom = false
-    // 🔥 Helper function: Lấy đường dẫn ảnh thật từ ColorModel
-    private fun ColorModel.getImagePath(): String? {
-        return listPath.firstOrNull { path ->
-            path != "none" && path != "dice" && path.contains("/")
-        }
+    // Adapters
+    private val adapterColor by lazy { ColorAdapter() }
+    private val adapterNav by lazy { NavAdapter() }
+    private val adapterPart by lazy { LayerAdapter() }
+
+    // Reusable ImageViews & path cache
+    private val imageViews = mutableListOf<AppCompatImageView>()
+    private val currentRenderedPaths = mutableMapOf<Int, String>() // drawIndex -> path
+
+    // Glide options tối ưu
+    private val glideOptions by lazy {
+        RequestOptions()
+            .override(512, 512)
+            .format(com.bumptech.glide.load.DecodeFormat.PREFER_RGB_565)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
     }
+
+    // Shared RecyclerView pool
+    private val sharedPool by lazy { RecyclerView.RecycledViewPool() }
 
     override fun initView() {
         requireActivity().hideNavigation(true)
-        binding.actionBar.apply {
-            setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setImageActionBar(btnActionBarCenter, R.drawable.ic_flip_all_custom)
-            setImageActionBar(btnActionBarCenter1, R.drawable.ic_reset_all_custom)
-            setImageActionBar(btnActionBarCenter2, R.drawable.ic_show_all_custom)
-            setImageActionBar(btnActionBarRight, R.drawable.next_app)
+
+        // Lấy arguments
+        val characterIndex = arguments?.getInt("data", 0) ?: 0
+        val hotTrendArr = arguments?.getSerializable("arr") as? ArrayList<ArrayList<Int>>
+
+        // Khởi tạo ViewModel với data
+        viewModel.initialize(characterIndex, hotTrendArr?.map { it.map(Int::toInt) })
+
+        setupRecyclerViews()
+        setupAdapters()
+        setupActionButtons()
+        observeViewModel()
+    }
+
+    override fun bindViewModel() {
+
+    }
+
+    private fun setupRecyclerViews() {
+        binding.apply {
+            recyclerLayer.apply {
+                adapter = adapterPart
+                itemAnimator = null
+                setHasFixedSize(true)
+                setItemViewCacheSize(30)
+                recycledViewPool = sharedPool
+            }
+            recycleColorItem.apply {
+                adapter = adapterColor
+                itemAnimator = null
+                setHasFixedSize(true)
+                setItemViewCacheSize(20)
+                recycledViewPool = sharedPool
+            }
+            recyclerNav.apply {
+                adapter = adapterNav
+                itemAnimator = null
+                setHasFixedSize(true)
+                setItemViewCacheSize(15)
+                recycledViewPool = sharedPool
+            }
+        }
+    }
+
+    private fun setupAdapters() {
+        adapterColor.onClick = { colorPos ->
+            if (!checkNetwork()) return@onClick
+            viewModel.updateColorPosition(viewModel.selectedNavPosition.value, colorPos)
         }
 
-        val characterIndex = arguments?.getInt("characterIndex", -1) ?: -1
-        val templateIndex = arguments?.getInt("templateIndex", -1) ?: -1
-        isQuickRandom = arguments?.getBoolean("isQuickRandom", false) ?: false
-        when {
-            characterIndex >= 0 -> {
-                viewModel.initCharacter(mainViewModel, index = characterIndex, isquick = isQuickRandom)
-            }
+        adapterNav.onClick = { navPos ->
+            if (!checkNetwork()) return@onClick
+            viewModel.selectNav(navPos)
+        }
 
-            templateIndex >= 0 -> {
-                val template = mainViewModel.getCharacterByIndex(templateIndex)
-                viewModel.initCharacter(mainViewModel, template = template,isquick = isQuickRandom)
+        adapterPart.onClick = { layerPos, type ->
+            if (!checkNetwork()) return@onClick
+            val navPos = viewModel.selectedNavPosition.value
+            when (type) {
+                "none" -> viewModel.updateLayerPosition(navPos, 0)
+                "dice" -> viewModel.randomizeCurrentLayer(navPos) // Bạn có thể thêm hàm này nếu muốn random riêng layer
+                else -> viewModel.updateLayerPosition(navPos, layerPos)
             }
+        }
+    }
 
-            else -> {
-                findNavController().navigateUp()
-                return
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentCharacter.collectLatest { character ->
+                if (character != null) {
+                    setupImageViews(character.listPath.size)
+                }
             }
         }
 
-        // ✨ NAV Adapter - CÓ AUTO-SCROLL
-        binding.recyclerView2.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
-        navAdapter = NavAdapter(
-            bodyParts = emptyList(),
-            onClick = { navIndex ->
-                viewModel.selectNav(navIndex)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.selectedNavPosition.collect { pos ->
+                updateNavSelection(pos)
             }
-        )
-        binding.recyclerView2.adapter = navAdapter
+        }
 
-// ✨ COLOR Adapter - CÓ AUTO-SCROLL
-        binding.recycleColorItem.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
-        colorAdapter = ColorAdapter(
-            colors = emptyList(),
-            onColorSelected = { colorIndex ->
-                viewModel.selectColor(colorIndex, layerAdapter.selectedIndex)
-            },
-            onScrollToPosition = { position ->
-                binding.recycleColorItem.smoothScrollToPosition(position)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.layerStates.collect {
+                renderAllLayers()
+                updateColorPanelVisibility()
             }
-        )
-        binding.recycleColorItem.adapter = colorAdapter
+        }
 
-// ✨ LAYER Adapter - CÓ AUTO-SCROLL
-        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
-
-        layerAdapter = LayerAdapter(
-            imagePaths = emptyList(),
-            onImageSelected = { layerIndex ->
-                viewModel.selectLayer(layerIndex)
-            },
-            onScrollToPosition = { position ->
-                binding.recyclerView.smoothScrollToPosition(position)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isFlipped.collect {
+                renderAllLayers() // Flip ảnh hưởng toàn bộ
             }
-        )
-        binding.recyclerView.adapter = layerAdapter
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.randomCount.collect { count ->
+                binding.imgRandom.visibility = if (count < 3) View.VISIBLE else View.GONE
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isControlsHidden.collect { hidden ->
+                toggleControlsVisibility(hidden)
+            }
+        }
+    }
+
+    private fun updateNavSelection(pos: Int) {
+        adapterNav.setSelected(pos)
+
+        val part = viewModel.getCurrentPart() ?: return
+        val state = viewModel.layerStates.value.getOrNull(pos) ?: return
+
+        adapterColor.setSelected(state.colorPosition)
+        adapterColor.submitList(part.listPath)
+
+        adapterPart.setSelected(state.layerPosition)
+        adapterPart.submitList(part.listPath[state.colorPosition].listPath)
+
+        updateColorPanelVisibility()
+        renderAllLayers()
+    }
+
+    private fun setupImageViews(count: Int) {
+        if (imageViews.size == count) return
+
+        binding.characterContainer.removeAllViews()
+        imageViews.clear()
+        currentRenderedPaths.clear()
+
+        repeat(count) {
+            val iv = AppCompatImageView(requireContext()).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            }
+            binding.characterContainer.addView(iv)
+            imageViews.add(iv)
+        }
+    }
+
+    private fun renderAllLayers() {
+        val character = viewModel.currentCharacter.value ?: return
+
+        character.listPath.forEachIndexed { navIndex, part ->
+            val state = viewModel.layerStates.value.getOrNull(navIndex) ?: return@forEachIndexed
+            val path = part.listPath.getOrNull(state.colorPosition)
+                ?.listPath?.getOrNull(state.layerPosition)
+
+            // Giả sử bạn có layerOrder giống cũ (draw order từ filename), ở đây dùng navIndex làm drawIndex tạm
+            // Nếu bạn có layerDrawOrder như trước, dùng nó
+            val drawIndex = navIndex
+            val imageView = imageViews.getOrNull(drawIndex) ?: return@forEachIndexed
+
+            val finalPath = if (path == "none" || state.layerPosition == 0) "" else path.orEmpty()
+
+            if (currentRenderedPaths[drawIndex] == finalPath) return@forEachIndexed
+            currentRenderedPaths[drawIndex] = finalPath
+
+            if (finalPath.isEmpty()) {
+                imageView.gone()
+                Glide.with(requireContext()).clear(imageView)
+            } else {
+                imageView.visible()
+                Glide.with(requireContext())
+                    .load(finalPath)
+                    .apply(glideOptions)
+                    .into(imageView)
+            }
+        }
+
+        val scaleX = if (viewModel.isFlipped.value) -1f else 1f
+        imageViews.forEach { it.scaleX = scaleX }
+    }
+
+    private fun updateColorPanelVisibility() {
+        val hasMultipleColors = viewModel.getCurrentPart()?.listPath?.size ?: 1 > 1
+        binding.imgChangColor.visibility = if (hasMultipleColors) View.VISIBLE else View.INVISIBLE
+
+        val shouldShowPanel = hasMultipleColors && viewModel.showColorPanelForNav.value.getOrNull(viewModel.selectedNavPosition.value) == true
+        binding.recycleColorItem.visibility = if (shouldShowPanel) View.VISIBLE else View.GONE
+    }
+
+    private fun toggleControlsVisibility(hidden: Boolean) {
+        binding.apply {
+            val visible = !hidden
+            actionBar.btnActionBarCenter.visibility = if (visible) View.VISIBLE else View.GONE
+            actionBar.btnActionBarCenter1.visibility = if (visible) View.VISIBLE else View.GONE
+            actionBar.btnActionBarRight.visibility = if (visible) View.VISIBLE else View.GONE
+            imgChangColor.visibility = if (visible && binding.imgChangColor.visibility == View.VISIBLE) View.VISIBLE else View.GONE
+            imgRandom.visibility = if (visible && viewModel.canRandomMore()) View.VISIBLE else View.GONE
+            recyclerLayer.visibility = if (visible) View.VISIBLE else View.GONE
+            recyclerNav.visibility = if (visible) View.VISIBLE else View.GONE
+            recycleColorItem.visibility = if (visible && binding.recycleColorItem.visibility == View.VISIBLE) View.VISIBLE else View.GONE
+
+            actionBar.btnActionBarCenter2.setImageResource(
+                if (hidden) R.drawable.ic_show_all_custom else R.drawable.ic_hide_all_custom
+            )
+        }
+    }
+
+    private fun setupActionButtons() {
+        binding.apply {
+            imgChangColor.onClick {
+                viewModel.toggleColorPanel(viewModel.selectedNavPosition.value)
+            }
+
+            actionBar.btnActionBarCenter.onClick {
+                viewModel.toggleFlip()
+            }
+
+            actionBar.btnActionBarCenter1.onClick {
+                viewModel.toggleControls()
+            }
+
+            actionBar.btnActionBarCenter2.onClick {
+                showConfirmDialog(
+                    getString(R.string.reset),
+                    getString(R.string.do_you_want_to_reset_all),
+                    onYes = { viewModel.resetAll() }
+                )
+            }
+
+            imgRandom.onClick {
+                if (checkNetwork()) viewModel.randomizeAll()
+            }
+
+            actionBar.btnActionBarLeft.onClick {
+                showConfirmDialog(
+                    getString(R.string.exit),
+                    getString(R.string.haven_t_saved_it_yet_do_you_want_to_exit),
+                    onYes = { findNavController().navigateUp() }
+                )
+            }
+
+            actionBar.btnActionBarRight.onClick {
+                saveCharacter()
+            }
+        }
+    }
+
+    private fun checkNetwork(): Boolean {
+        val character = viewModel.currentCharacter.value ?: return true
+        return if (character.checkDataOnline && !isInternetAvailable(requireContext())) {
+            showToast(R.string.please_check_your_network_connection)
+            false
+        } else true
+    }
+
+    private fun saveCharacter() {
+        showLoadingSafe()
+        val fileName = arguments?.getString("fileName") ?: ""
+        val bitmap = binding.characterContainer.drawToBitmap()
+
+        saveBitmap(requireContext(), bitmap, fileName, true) { success, path, oldPath ->
+            hideLoadingSafe()
+            if (success) {
+                if (oldPath.isNotEmpty()) viewModel.deleteMyAvatar(oldPath)
+
+                val savedOrder = mutableListOf<List<Int>>()
+                layerDrawOrder.forEach { navIndex ->
+                    savedOrder.add(listOf(layerStates[navIndex].layerPos, layerStates[navIndex].colorPos))
+                }
+
+                val avatarModel = AvatarModel(
+                    path = path,
+                    avatarBase = characterData?.avatar.orEmpty(),
+                    layerOrder = savedOrder // Tùy theo model của bạn
+                )
+                viewModel.addMyAvatar(avatarModel)
+
+                findNavController().navigate(
+                    R.id.action_custom_to_addcharacter,
+                    bundleOf("imagePath" to path)
+                )
+            } else {
+                showToast(R.string.load_fail)
+            }
+        }
     }
 
     override fun viewListener() {
-        binding.actionBar.apply {
-            btnActionBarLeft.setOnClickListener {
-                // 🔥 XÓA temp character khi back mà không save
-                if (isQuickRandom) {
-                    val characterId = viewModel.currentCharacter.value?.id
-                    if (characterId != null && characterId.startsWith("temp_from_quick_")) {
-                        mainViewModel.deleteCharacter(characterId)
-                        Log.d("CustomizeFragment", "🗑️ Deleted temp character: $characterId")
-                    }
-                }
-                findNavController().navigateUp()
-            }
-            btnActionBarRight.setOnClickListener {
-                saveCharacterWithImage()
-                requireActivity().hideNavigation(true)
-
-            }
-            btnActionBarCenter.setOnClickListener {
-                viewModel.toggleFlip()
-                requireActivity().hideNavigation(true)
-
-            }
-            btnActionBarCenter1.setOnClickListener {
-                viewModel.resetCurrentVariant()
-                requireActivity().hideNavigation(true)
-
-            }
-            btnActionBarCenter2.setOnClickListener {
-                checkShow = !checkShow
-                setImageActionBar(
-                    btnActionBarCenter2,
-                    if (checkShow) R.drawable.ic_show_all_custom else R.drawable.ic_hide_all_custom
-                )
-
-                val navIndex = viewModel.currentNavIndex.value
-                val bodyPart = viewModel.selectedBodyParts.value
-                    .getOrNull(navIndex) ?: return@setOnClickListener
-                val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
-                binding.apply {
-                    imgRandom.toggetShow()
-                    frameLayer.toggetShow()
-                    recyclerView2.toggetShow()
-                    if (hasColor) {
-                        recycleColorItem.toggetShow()
-                        imgChangColor.toggetShow()
-                    }
-
-                }
-            }
-        }
-
-        binding.imgRandom.setOnClickListener {
-            viewModel.randomizeCharacter()
-            requireActivity().hideNavigation(true)
-
-        }
-
-
     }
 
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentCustomizeBinding = FragmentCustomizeBinding.inflate(inflater, container, false)
+    ): FragmentCustomizeBinding  = FragmentCustomizeBinding.inflate(inflater, container,false)
 
-    override fun observeData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.selectedBodyParts.collect { parts ->
-                navAdapter.setData(parts)
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.triggerLayerUpdate.collect { trigger ->
-                if (trigger > 0) {
-                    updateLayerRecyclerOnly(viewModel.currentNavIndex.value)
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.currentNavIndex.collect { navIndex ->
-                if (navIndex != lastNavIndex) {
-                    lastNavIndex = navIndex
-
-                    navAdapter.setSelectedIndex(navIndex)
-                    updateColorRecycler(navIndex)
-                    updateLayerRecycler(navIndex)
-                }
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.currentCharacter.collect { character ->
-                updateCharacterPreview(character)
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isFlipped.collect {
-                updateCharacterPreview(viewModel.currentCharacter.value)
-            }
-        }
-        // ✨ THÊM: Observe color update trigger
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.triggerColorUpdate.collect { trigger ->
-                if (trigger > 0) {
-                    updateColorRecycler(viewModel.currentNavIndex.value)
-                }
-            }
-        }
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        imageViews.forEach { Glide.with(this).clear(it) }
+        requireActivity().hideNavigation(false)
     }
-
-    private fun updateColorRecycler(navIndex: Int) {
-        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(navIndex) ?: return
-
-        // 🔥 Kiểm tra xem có color hay không
-        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
-
-        if (!hasColor) {
-            // 🔥 Không có color → ẩn color recycler
-            binding.recycleColorItem.visibility = View.GONE
-            binding.imgChangColor.visibility = View.GONE
-            colorAdapter.setData(emptyList())
-        } else {
-            // 🔥 Có color → hiển thị color recycler
-            binding.recycleColorItem.visibility = View.VISIBLE
-            binding.imgChangColor.visibility = View.VISIBLE
-
-            colorAdapter.setData(bodyPart.listPath)
-
-            val selection = viewModel.getSelection(navIndex)
-            colorAdapter.setSelectedIndex(selection.color)
-        }
-    }
-
-    private fun updateLayerRecyclerOnly(navIndex: Int) {
-        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(navIndex) ?: return
-
-        if (bodyPart.listPath.isEmpty()) {
-            binding.recyclerView.visibility = View.GONE
-            return
-        }
-
-        val selection = viewModel.getSelection(navIndex)
-        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
-
-        if (!hasColor) {
-            val layers = viewModel.getLayerDisplayList(navIndex)
-
-            binding.recyclerView.visibility =
-                if (layers.isEmpty()) View.GONE else View.VISIBLE
-
-            layerAdapter.setDataWithSelection(
-                layers,
-                if (selection.layer == -1) 0 else selection.layer
-            )
-
-            return
-        }
-
-        // 🔥 Có color → logic cũ (không thay đổi)
-        val actualColorIndex = if (selection.color == -1) 0 else selection.color
-        val color = bodyPart.listPath.getOrNull(actualColorIndex) ?: return
-
-        if (color.listPath.isEmpty()) {
-            binding.recyclerView.visibility = View.GONE
-            return
-        }
-
-        binding.recyclerView.visibility = View.VISIBLE
-        val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
-
-        layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
-        requireActivity().hideNavigation(true)
-
-    }
-
-    private fun updateLayerRecycler(navIndex: Int) {
-        val bodyPart = viewModel.selectedBodyParts.value.getOrNull(navIndex) ?: return
-
-        if (bodyPart.listPath.isEmpty()) {
-            binding.recyclerView.visibility = View.GONE
-            return
-        }
-
-        val selection = viewModel.getSelection(navIndex)
-        val hasColor = bodyPart.listPath.any { it.color.isNotEmpty() }
-
-        if (!hasColor) {
-            val layers = viewModel.getLayerDisplayList(navIndex)
-
-            binding.recyclerView.visibility =
-                if (layers.isEmpty()) View.GONE else View.VISIBLE
-
-            layerAdapter.setDataWithSelection(
-                layers,
-                if (selection.layer == -1) 0 else selection.layer
-            )
-
-            return
-        }
-
-        // 🔥 Có color → logic cũ (không thay đổi)
-        val actualColorIndex = if (selection.color == -1) 0 else selection.color
-        val color = bodyPart.listPath.getOrNull(actualColorIndex) ?: return
-
-        if (color.listPath.isEmpty()) {
-            binding.recyclerView.visibility = View.GONE
-            return
-        }
-
-        binding.recyclerView.visibility = View.VISIBLE
-        val actualLayerIndex = if (selection.layer == -1) 0 else selection.layer
-
-        layerAdapter.setDataWithSelection(color.listPath, actualLayerIndex)
-        requireActivity().hideNavigation(true)
-
-    }
-
-    private fun updateCharacterPreview(character: CustomModel?) {
-        val isFlipped = viewModel.isFlipped.value
-        binding.characterContainer.removeAllViews()
-        if (character == null) return
-        // 🔥 FIX: Sort theo zIndex (render order), KHÔNG phải position (nav order)
-        val sortedParts = character.listPath.sortedBy { it.zIndex }
-
-        for (bodyPart in sortedParts) {
-            // 🔥 TÌM navIndex THẬT từ character.listPath GỐC (trước khi sort)
-            val navIndex = viewModel.selectedBodyParts.value.indexOfFirst { it.position == bodyPart.position }
-            if (navIndex == -1) continue
-
-            // 🔥 Lấy path từ selection
-            val imagePath = viewModel.getImagePathForSelection(navIndex)
-
-            // 🔥 Skip nếu không có ảnh
-            if (imagePath.isNullOrBlank()) continue
-
-            // 🔥 Render layer
-            val iv = ImageView(requireContext()).apply {
-                layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                scaleType = ImageView.ScaleType.FIT_XY
-                scaleX = if (isFlipped) -1f else 1f
-            }
-            loadImage(imagePath, iv)
-            binding.characterContainer.addView(iv)
-        }
-        requireActivity().hideNavigation(true)
-    }
-    // ✅ CHỈ CẬP NHẬT HÀM saveCharacterWithImage() trong CustomizeFragment.kt
-
-    private fun saveCharacterWithImage() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                if (!viewModel.hasAnyRealImageSelected()) {
-                    Toast.makeText(requireContext(), "Please select at least one item", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                binding.characterContainer.post {
-                    try {
-                        val currentCharacter = viewModel.currentCharacter.value
-
-                        // 🔥 NẾU LÀ TEMP từ quick → TẠO ID MỚI
-                        val finalCharacterId = if (isQuickRandom &&
-                            currentCharacter?.id?.startsWith("temp_from_quick_") == true) {
-
-                            // 🔥 Xóa temp character
-                            val tempId = currentCharacter.id
-                            mainViewModel.deleteCharacter(tempId)
-                            Log.d("CustomizeFragment", "🗑️ Deleted temp character: $tempId")
-
-                            // 🔥 Tạo ID mới HOÀN TOÀN
-                            java.util.UUID.randomUUID().toString()
-                        } else {
-                            // ✅ Giữ nguyên ID (edit mode hoặc new từ template)
-                            currentCharacter?.id ?: java.util.UUID.randomUUID().toString()
-                        }
-
-                        Log.d("CustomizeFragment", "💾 Saving character:")
-                        Log.d("CustomizeFragment", "   - Old ID: ${currentCharacter?.id}")
-                        Log.d("CustomizeFragment", "   - Final ID: $finalCharacterId")
-                        Log.d("CustomizeFragment", "   - isQuickRandom: $isQuickRandom")
-
-                        // 🔥 Render bitmap
-                        val bitmap = binding.characterContainer.drawToBitmap()
-
-                        // 🔥 Delete old image (if exists)
-                        imageManager.deleteOldImage(finalCharacterId)
-
-                        // 🔥 Save new image
-                        val imagePath = imageManager.saveBitmap(bitmap, finalCharacterId)
-
-                        if (imagePath != null) {
-                            // ✅ Save character với ID phù hợp
-                            if (isQuickRandom && currentCharacter?.id?.startsWith("temp_from_quick_") == true) {
-                                // 🔥 Quick random → Save với ID mới
-                                viewModel.saveCharacterWithNewId(
-                                    mainViewModel = mainViewModel,
-                                    newCharacterId = finalCharacterId,
-                                    imagePath = imagePath
-                                )
-                            } else {
-                                lifecycleScope.launch {
-                                    viewModel.saveCharacter(mainViewModel, imagePath,finalCharacterId)
-
-                                }
-                                // ✅ Normal mode → Save bình thường
-                            }
-
-                            mainViewModel.refreshApiData()
-
-                            Log.d("CustomizeFragment", "✅ Character saved:")
-                            Log.d("CustomizeFragment", "   - ID: $finalCharacterId")
-                            Log.d("CustomizeFragment", "   - Image: $imagePath")
-                            Log.d("CustomizeFragment", "   - Total customized: ${mainViewModel.customizedCharacters.value.size}")
-
-                            Toast.makeText(requireContext(), "Character saved!", Toast.LENGTH_SHORT).show()
-
-                            findNavController().navigate(
-                                R.id.action_customizeFragment_to_addFragment,
-                                bundleOf(
-                                    "characterId" to finalCharacterId,
-                                    "imagePath" to imagePath
-                                )
-                            )
-                        } else {
-                            Log.e("CustomizeFragment", "❌ Failed to save image")
-                            Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (e: Exception) {
-                        Log.e("CustomizeFragment", "❌ Error: ${e.message}", e)
-                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("CustomizeFragment", "❌ Error: ${e.message}", e)
-                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-            requireActivity().hideNavigation(true)
-        }
-    }
-
-    override fun bindViewModel() {}
-
 }

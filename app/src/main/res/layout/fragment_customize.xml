@@ -49,7 +49,6 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/imgChangColor"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -95,11 +94,11 @@
             android:background="@drawable/img_bg_layer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/recyclerView2"
+            app:layout_constraintBottom_toTopOf="@+id/recyclerNav"
             app:layout_constraintHeight_percent="0.25">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+                android:id="@+id/recyclerLayer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingHorizontal="12dp"
@@ -113,7 +112,7 @@
 
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView2"
+            android:id="@+id/recyclerNav"
             android:layout_width="0dp"
             android:layout_height="70dp"
             android:background="@drawable/bg_nav_custom"

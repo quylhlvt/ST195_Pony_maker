@@ -16,9 +16,8 @@ object RateHelper {
         preference: SharedPreferencesManager,
         onRateResult: (RateState) -> Unit = {}
     ) {
-        val dialogRate = RateDialog(activity)
+        val dialogRate = RateDialog()
         dialogRate.show(activity.supportFragmentManager, "RateDialog")
-
         dialogRate.onRateLess3 = {
             preference.setRateRequest(true) // Mark as requested (low rating = maybe feedback)
             onRateResult(RateState.LESS3)

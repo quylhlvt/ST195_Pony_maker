@@ -50,8 +50,8 @@ class MyAvatarAdapter(val context: Context) :
                 true
             }
 
-            btnEdit.onClick { onEditClick.invoke(item.idEdit) }
-            btnDelete.onClick { onDeleteClick.invoke(item.idEdit) }
+            btnEdit.onClick { onEditClick.invoke(item.characterId) }
+            btnDelete.onClick { onDeleteClick.invoke(item.characterId) }
             btnSelect.onClick { onItemTick.invoke(position) }
         }
     }

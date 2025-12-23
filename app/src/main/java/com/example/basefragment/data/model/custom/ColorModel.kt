@@ -8,8 +8,8 @@ import okio.Path
 
 @Parcelize
 data class ColorModel(
-    val  color: String,
-    val listPath: ArrayList<String>
+    var  color: String,
+    var listPath: ArrayList<String>
 ): Parcelable{
     inline  val variationCount: Int get() =  listPath.size
     inline  fun getPath(index: Int) =listPath.getOrNull(index)

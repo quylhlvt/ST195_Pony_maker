@@ -28,6 +28,17 @@
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="false"
            />
+         <action
+            android:id="@+id/action_home_to_setting"
+            app:destination="@id/setting"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false"
+           />
+        <action
+            android:id="@+id/action_intro_to_home"
+            app:destination="@id/nav_main"
+            app:popUpTo="@id/nav_onboarding"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/createPony"
@@ -93,13 +104,14 @@
         android:name="com.example.basefragment.ui.main.customize.CustomizeFragment"
         tools:layout="@layout/fragment_customize"
         android:label="Custom">
-        <action
-            android:id="@+id/action_customizeFragment_to_addFragment"
-            app:destination="@id/addCharacterFragment" />
+        <argument
+            android:name="characterId"
+            app:argType="string"
+            android:defaultValue="" />
         <action
             android:id="@+id/action_custom_to_addcharacter"
-            app:destination="@id/custom"
-            app:popUpTo="@id/custom"
+            app:destination="@id/addCharacterFragment"
+            app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="false"
             />
 
@@ -136,5 +148,28 @@
            />
     </fragment>
 
+    <fragment
+        android:id="@+id/setting"
+        android:name="com.example.basefragment.ui.main.setting.SettingFragment"
+        tools:layout="@layout/fragment_setting"
+        android:label="My Setting" >
+        <action
+            android:id="@+id/action_setting_to_lang"
+            app:destination="@id/language"
+            app:popUpTo="@id/setting"
+            app:popUpToInclusive="false"
+            />
+    </fragment>
 
+    <fragment
+        android:id="@+id/language"
+        android:name="com.example.basefragment.ui.language.LanguageFragment"
+        android:label="Language"
+        tools:layout="@layout/fragment_language" >
+        <action
+            android:id="@+id/action_language_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/setting"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>

@@ -4,9 +4,9 @@ import com.example.basefragment.data.repository.ApiRepository
 import com.example.basefragment.utils.Resource
 import javax.inject.Inject
 
-class GetCatalogueUseCase @Inject constructor(private val catalogueRepository: ApiRepository) {
+class GetDataCustomUseCase @Inject constructor(private val datacustomRepository: ApiRepository) {
     suspend operator fun invoke() = try {
-        Resource.success(catalogueRepository.getCatalogue().body())
+        Resource.success(datacustomRepository.getDataCustom().body())
     } catch (e: Exception) {
         Resource.error(null, e.message)
     }

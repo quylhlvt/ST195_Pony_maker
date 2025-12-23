@@ -1,6 +1,6 @@
 package com.example.basefragment.data.datalocal.di
 
-import com.example.basefragment.data.datalocal.api.CatalogueApi
+import com.example.basefragment.data.datalocal.api.DataCustomApi
 import com.example.basefragment.data.datalocal.manager.AppDataManager
 import com.example.basefragment.utils.BASE_URL
 import com.example.basefragment.utils.SET_TIME_OUT_API
@@ -46,7 +46,7 @@ object DataRemoveModule {
 
     @Provides
     @Singleton
-    fun provideCatalogueApi(retrofit: Retrofit): CatalogueApi =
-        retrofit.create(CatalogueApi::class.java)
+    fun provideCatalogueApi(retrofit: Retrofit): DataCustomApi =
+        retrofit.create(DataCustomApi::class.java)
 
 }
