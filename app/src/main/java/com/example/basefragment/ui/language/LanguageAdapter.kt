@@ -1,46 +1,51 @@
 package com.example.basefragment.ui.language
 
-import android.annotation.SuppressLint
-import android.content.Context
-import com.example.basefragment.R
-import com.example.basefragment.core.base.BaseAdapter
-import com.example.basefragment.core.extention.loadImage
-import com.example.basefragment.core.extention.onClick
-import com.example.basefragment.data.model.language.LanguageModel
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.example.basefragment.data.model.LanguageModel
+import com.example.basefragment.utils.DataHelper
+import com.bumptech.glide.Glide
 import com.example.basefragment.databinding.ItemLanguageBinding
 
-class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLanguageBinding>(
-    ItemLanguageBinding::inflate
-) {
-    var onItemClick: ((String) -> Unit) = {}
-    override fun onBind(
-        binding: ItemLanguageBinding, item: LanguageModel, position: Int
-    ) {
-        binding.apply {
-            loadImage(root, item.flag, imvFlag, false)
-            tvLang.text = item.name
+class LanguageAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var onClick:((position : Int)->Unit)? = null
+    var data = listOf<LanguageModel>()
+    fun getData(mdata: List<LanguageModel>) {
+        data = mdata
+    }
 
-            val (ratio, color) = if (item.activate) {
-                R.drawable.ic_select_lang to context.getColor(R.color.white)
-            } else {
-                R.drawable.ic_un_select_lang to context.getColor(R.color.app_color)
-            }
-            loadImage(root, ratio, btnRadio, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        var binding = ItemLanguageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
+    }
 
-            flMain.setBackgroundResource(if (item.activate) R.drawable.frame_select_language else R.drawable.frame_unselect_language)
+    override fun getItemCount(): Int = data.size
 
-            tvLang.setTextColor(color)
-
-            root.onClick {
-                onItemClick.invoke(item.code)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is ViewHolder) {
+            holder.bind(position)
+            holder.binding.clLanguage.setOnClickListener {
+                onClick!!.invoke(position)
+                if (data[0].active) {
+                    data[0].active = false
+                    notifyItemChanged(0)
+                }
+                data[DataHelper.positionLanguageOld].active = false
+                notifyItemChanged(DataHelper.positionLanguageOld)
+                DataHelper.positionLanguageOld = position
+                data[position].active = true
+                notifyItemChanged(position)
             }
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun submitItem(position: Int) {
-        items.forEach { it.activate = false }
-        items[position].activate = true
-        notifyDataSetChanged()
+    inner class ViewHolder(val binding: ItemLanguageBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(position: Int) {
+            binding.languageModel = data[position]
+            Glide.with(binding.imvFlag).load(data[position].icon)
+                .into(binding.imvFlag)
+        }
     }
 }

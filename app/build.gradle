@@ -38,7 +38,9 @@ android {
 
     buildFeatures {
         viewBinding true
-        dataBinding true
+    }
+    dataBinding {
+        enabled true
     }
     bundle {
         language {

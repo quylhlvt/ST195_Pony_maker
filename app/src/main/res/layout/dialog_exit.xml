@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="16dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/bg_dialog_exit" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="32dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/itim_regular"
+                android:gravity="center"
+                android:text="@string/exit"
+                android:textColor="@color/_1f2f4f"
+                android:textSize="24sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/itim_regular"
+                android:gravity="center"
+                android:text="@string/haven_t_saved_it_yet_do_you_want_to_exit"
+                android:textColor="#991F2F4F"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:id="@+id/ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="50dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/btnNo"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_marginHorizontal="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_save"
+                    android:fontFamily="@font/itim_regular"
+                    android:gravity="center"
+                    android:text="@string/no"
+                    android:textColor="@color/white"
+                    android:textSize="21sp" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/btnYes"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    android:background="@drawable/bg_save"
+                    android:fontFamily="@font/itim_regular"
+                    android:gravity="center"
+                    android:text="@string/tv_yes"
+                    android:textColor="@color/white"
+                    android:textSize="21sp" />
+            </LinearLayout>
+            <!--            <FrameLayout-->
+            <!--                android:id="@+id/native_ads"-->
+            <!--                android:visibility="gone"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                app:layout_constraintTop_toBottomOf="@+id/ll">-->
+
+            <!--                <include layout="@layout/ads_shimmer_avg2" />-->
+            <!--            </FrameLayout>-->
+        </LinearLayout>
+    </RelativeLayout>
+</layout>

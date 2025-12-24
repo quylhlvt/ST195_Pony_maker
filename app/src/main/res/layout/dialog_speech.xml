@@ -11,7 +11,7 @@
         android:id="@+id/layoutRoot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#00FFFFFF">
+        android:background="#00000000">
 
         <FrameLayout
             android:id="@+id/layoutBubble"
@@ -40,6 +40,7 @@
                 android:background="@color/transparent"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:fontFamily="@font/nunito_bold"
                 android:imeOptions="actionDone"
                 android:maxLength="22"
                 android:maxLines="2"
@@ -56,6 +57,7 @@
                 android:layout_gravity="center"
                 android:layout_marginHorizontal="65dp"
                 android:background="@color/transparent"
+                android:fontFamily="@font/nunito_bold"
                 android:maxLength="22"
                 android:textAlignment="center"
                 android:textColor="@color/black"

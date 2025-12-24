@@ -1,21 +1,27 @@
 package com.example.basefragment.data.repository
 
-import com.example.basefragment.data.datalocal.api.DataCustomApi
-import com.example.basefragment.data.model.custom.CustomModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import retrofit2.Response
+import android.util.Log
+import com.example.basefragment.data.callapi.ApiHelper
+import com.example.basefragment.data.model.CharacterResponse
+import com.example.basefragment.utils.CONST
+import com.example.basefragment.utils.DataHelper
 import javax.inject.Inject
-import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
-/**
- * Repository chịu trách nhiệm gọi API liên quan đến CustomModel (characters)
- */
-@Singleton
-class ApiRepository @Inject constructor(
-    private val dataCustomApi: DataCustomApi) {
-    suspend fun getDataCustom() = withContext(Dispatchers.IO) {
-        dataCustomApi.getData()
+class ApiRepository @Inject constructor(private val apiHelper: ApiHelper) {
+    suspend fun getFigure(): CharacterResponse? {
+        try {
+            CONST.BASE_URL = CONST.BASE_URL_1
+            return apiHelper.apiMermaid1.getAllData()
+        } catch (e: Exception) {
+            Log.d(DataHelper.TAG, "getFigure: $e")
+            try {
+                CONST.BASE_URL = CONST.BASE_URL_2
+                return apiHelper.apiMermaid2.getAllData()
+            } catch (e: Exception) {
+                Log.d(DataHelper.TAG, "getFigure: $e")
+                return null
+            }
+        }
     }
+
 }
