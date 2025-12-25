@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "76321204818",
-    "project_id": "st192-pfpoc-maker",
-    "storage_bucket": "st192-pfpoc-maker.firebasestorage.app"
+    "project_number": "184463089092",
+    "project_id": "st95-pony-oc-maker",
+    "storage_bucket": "st95-pony-oc-maker.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:76321204818:android:47355b0734e516495e4d8b",
+        "mobilesdk_app_id": "1:184463089092:android:d3e255718b77d06ee11891",
         "android_client_info": {
-          "package_name": "com.example.basefragment"
+          "package_name": "com.oc.pony.ponymaker.create"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD7nNgnNC-_JypAFdpMOQX6206TvT67wtg"
+          "current_key": "AIzaSyCJxQBDlRpYVgesdCmqhClZzU7kcnBUUnY"
         }
       ],
       "services": {
