@@ -16,6 +16,8 @@ import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
+import io.objectbox.BoxStore
+
 class LazyTypeAdapter<T>(private val defaultValue: T) : TypeAdapter<Lazy<T>>() {
     override fun write(out: JsonWriter, value: Lazy<T>) {
         out.value(value.value.toString())  // Serialize giá trị
@@ -44,7 +46,8 @@ class AppDataManager @Inject constructor(
         private const val CUSTOMIZED_FILE = "customized.json"         // Characters do user tạo
         private const val MY_DESIGNS_FILE = "my_designs.json"         // Saved images
     }
-
+    private val gson = Gson()
+    private var boxStore: BoxStore? = null
     // ==================== TEMPLATES (Read-only, từ API/Assets) ====================
 
     private val _templates = MutableStateFlow<List<CustomModel>>(emptyList())

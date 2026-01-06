@@ -7,6 +7,7 @@ plugins {
     id ("com.google.gms.google-services")
     id ("com.google.firebase.crashlytics")
     id 'kotlin-parcelize'
+    id("io.objectbox")
 }
 
 android {
@@ -140,6 +141,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-messaging:23.3.1'
     implementation 'com.google.firebase:firebase-config:21.5.0'
+        //objectbox
+    implementation("io.objectbox:objectbox-android:4.0.0")
+    implementation("io.objectbox:objectbox-kotlin:4.0.0")
 //    //ads
 //    implementation 'com.github.LVTapp:AdsLibrary:1.5.2_beta5'
 //    implementation 'com.google.android.gms:play-services-ads:24.8.0'

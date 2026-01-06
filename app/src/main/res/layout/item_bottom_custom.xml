@@ -26,7 +26,6 @@
             android:background="@drawable/bg_10_stroke_linear_color_white"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
         <!--            imvImage-->
         <ImageView
             android:layout_margin="2dp"

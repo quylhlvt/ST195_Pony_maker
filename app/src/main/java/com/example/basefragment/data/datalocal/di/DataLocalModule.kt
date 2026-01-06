@@ -4,9 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.basefragment.core.helper.SharedPreferencesManager
+import com.example.basefragment.data.datalocal.manager.AppDataManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -35,5 +37,13 @@ object DataLocalModule {
             this.sharedPreferences = sharedPreferences
             this.editor = editor
         }
-
+    @Provides
+    @Singleton
+    fun provideObjectBoxManager(
+        @ApplicationContext context: Context
+    ): AppDataManager {
+        val manager = AppDataManager(context)
+        manager.init()
+        return manager
+    }
 }
