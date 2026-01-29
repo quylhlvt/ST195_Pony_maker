@@ -2,28 +2,59 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_setting">
+    android:id="@+id/nav_setting"
+    app:startDestination="@id/setting">
+
+    <!-- Setting làm màn hình đầu tiên -->
     <fragment
         android:id="@+id/setting"
         android:name="com.example.basefragment.ui.main.setting.SettingFragment"
         tools:layout="@layout/fragment_setting"
-        android:label="My Setting" >
+        android:label="My Setting">
+
+        <!-- Đi tới Language -->
         <action
-            android:id="@+id/action_setting_to_home"
+            android:id="@+id/action_setting_to_language"
             app:destination="@id/language"
-            app:popUpTo="@id/language"
-             />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
     </fragment>
 
+    <!-- Language fragment -->
     <fragment
         android:id="@+id/language"
         android:name="com.example.basefragment.ui.language.LanguageFragment"
-        android:label="Language"
-        tools:layout="@layout/fragment_language" >
+        tools:layout="@layout/fragment_language"
+        android:label="Language">
+
+        <!-- Back về Setting (chỉ pop 1 lần) -->
+        <action
+            android:id="@+id/action_language_to_setting"
+            app:destination="@id/setting"
+            app:popUpTo="@id/setting"
+            app:popUpToInclusive="true" />
+
+        <!-- Nếu là lần đầu → đi Intro -->
+        <!-- Nếu không phải lần đầu → đi Home -->
         <action
             android:id="@+id/action_language_to_home"
             app:destination="@id/nav_main"
-            app:popUpTo="@id/nav_setting"
+            app:popUpTo="@id/nav_main"
             app:popUpToInclusive="true" />
+
+        <!-- Nếu cần đi Intro (lần đầu) -->
+        <action
+            android:id="@+id/action_language_to_intro"
+            app:destination="@id/intro"
+        app:popUpTo="@id/nav_main"
+        app:popUpToInclusive="true" />
     </fragment>
+    <action
+        android:id="@+id/action_global_to_home"
+        app:destination="@id/nav_main"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 </navigation>

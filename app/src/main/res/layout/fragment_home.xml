@@ -42,25 +42,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!--            gl05-->
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/gl05"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.5" />
-
-            <!--            gl063-->
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/gl063"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.63" />
-
-            <!--            btnCreate-->
+            <!--            btnManual-->
             <ImageView
-                android:id="@+id/btnCreate"
+                android:id="@+id/btnManual"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
@@ -70,82 +54,86 @@
 
             <!--            tv1-->
             <TextView
+                app:layout_constraintDimensionRatio="0.87:0.48"
                 android:id="@+id/tv1"
-                style="@style/single_marquee"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="5dp"
-                android:gravity="center"
-                android:paddingStart="16dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:gravity="start"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="-10dp"
+                android:fontFamily="@font/carter_one_regular"
                 android:text="@string/pony_maker"
                 android:textColor="@color/white"
-                android:textSize="28sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnCreate"
-                app:layout_constraintEnd_toEndOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnCreate"
-                app:layout_constraintTop_toTopOf="@+id/btnCreate"
-                app:strokeJoinStyle="miter" />
+                android:textSize="24sp"
+                android:lineSpacingMultiplier="0.9"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="@+id/btnManual"
+                app:layout_constraintTop_toTopOf="@+id/btnManual"
+               />
 
-            <!--            btnQuickMaker-->
+            <!--            btnAuto-->
             <ImageView
-                android:id="@+id/btnQuickMaker"
+                android:id="@+id/btnAuto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="10dp"
                 android:adjustViewBounds="true"
                 android:src="@drawable/img_frame_home2"
-                app:layout_constraintTop_toBottomOf="@+id/btnCreate" />
+                app:layout_constraintTop_toBottomOf="@+id/btnManual" />
 
             <!--            tv2-->
+
             <TextView
+                app:layout_constraintDimensionRatio="0.65:0.48"
                 android:id="@+id/tv2"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginEnd="15dp"
-                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:gravity="start"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="-10dp"
+                android:fontFamily="@font/carter_one_regular"
                 android:text="@string/trending_custom"
                 android:textColor="@color/white"
-                android:textSize="28sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnQuickMaker"
-                app:layout_constraintEnd_toEndOf="@+id/btnQuickMaker"
-                app:layout_constraintStart_toEndOf="@id/gl05"
-                app:layout_constraintTop_toTopOf="@+id/btnQuickMaker"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                 />
-
+                android:textSize="24sp"
+                android:lineSpacingMultiplier="0.9"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="@+id/btnAuto"
+                app:layout_constraintTop_toTopOf="@+id/btnAuto"
+                />
             <!--            btnMyAlbum-->
             <ImageView
-                android:id="@+id/btnMyAlbum"
+                android:id="@+id/btnMultiplayer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="10dp"
                 android:adjustViewBounds="true"
                 android:src="@drawable/img_frame_home3"
-                app:layout_constraintTop_toBottomOf="@+id/btnQuickMaker" />
+                app:layout_constraintTop_toBottomOf="@+id/btnAuto" />
 
             <!--            tv3-->
+
             <TextView
+                app:layout_constraintDimensionRatio="1.35:0.48"
                 android:id="@+id/tv3"
-                style="@style/single_marquee"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:gravity="start"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="-10dp"
+                android:fontFamily="@font/carter_one_regular"
                 android:text="@string/my_work"
                 android:textColor="@color/white"
                 android:textSize="24sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnMyAlbum"
-                app:layout_constraintEnd_toStartOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnMyAlbum"
-                app:layout_constraintTop_toTopOf="@+id/btnMyAlbum"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                android:layout_marginHorizontal="5dp"
+                android:lineSpacingMultiplier="0.9"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="@+id/btnMultiplayer"
+                app:layout_constraintTop_toTopOf="@+id/btnMultiplayer"
                 />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>

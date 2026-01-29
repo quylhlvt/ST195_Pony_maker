@@ -1,25 +1,23 @@
-package com.example.basefragment.ui.onboarding.splash
+package com.example.basefragment.ui.main.manual
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.toIntro
 import com.example.basefragment.core.extention.toLanguage
-import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
-import com.example.basefragment.core.helper.SharedPreferencesManager.setLanuageScreen
+import com.example.basefragment.databinding.FragmentManualBinding
 import com.example.basefragment.databinding.FragmentSplashBinding
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import com.example.basefragment.databinding.FragmentSplashBinding.inflate
+import com.example.basefragment.ui.onboarding.splash.SplashViewModel
 
-@AndroidEntryPoint
-class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(FragmentSplashBinding::inflate,
-    SplashViewModel::class.java
+class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(FragmentManualBinding::inflate,
+    ManualViewModel::class.java
 ) {
     override fun viewListener() {
 
@@ -28,13 +26,10 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(Frag
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentSplashBinding = FragmentSplashBinding.inflate(inflater, container, false)
+    ): FragmentManualBinding = FragmentManualBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            kotlinx.coroutines.delay(2000)
-        goToHome()
-        }
+
 //        lifecycleScope.
 
 //        binding.textView.text = "Home Fragment"
@@ -57,11 +52,4 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(Frag
 //        }
     }
 
-    private fun goToHome() {
-        if (!isLanuageScreen()){
-            toLanguage()
-            return
-        }
-        toIntro()
-    }
 }

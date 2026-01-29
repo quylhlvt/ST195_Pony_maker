@@ -1,5 +1,4 @@
 package com.example.basefragment.core.extention
-
 // NavigationExt.kt
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
@@ -12,19 +11,18 @@ fun Fragment.nav(actionId: Int) {
         // Đã ở đích hoặc action tạm thời không tồn tại → ignore
     }
 }
-
 // Dùng trong SplashFragment
 fun Fragment.toLanguage() = nav(R.id.action_splash_to_language)
 fun Fragment.toIntro()     = nav(R.id.action_splash_to_intro)
-
 // Dùng trong IntroFragment
-fun Fragment.toPermission() = nav(R.id.action_intro_to_permission)
 fun Fragment.toHome()       = nav(R.id.action_intro_to_home) // hoặc action_permission_to_home đều được
-
 // Dùng trong PermissionFragment
-fun Fragment.toHomeFromPermission() = nav(R.id.action_permission_to_home)
-fun Fragment.toHomeFromSetting() = nav(R.id.action_setting_to_home)
-
+fun Fragment.toLangFromSetting() = nav(R.id.action_setting_to_language)
+fun Fragment.toSettingFromHome() = nav(R.id.action_home_to_setting)
+fun Fragment.toHomeFromSetting() {
+        findNavController().navigate(R.id.action_global_to_home)
+}
+fun Fragment.toSettingFromLang() = nav(R.id.action_language_to_setting)
 // Dùng trong LanguageFragment
 fun Fragment.toIntroFromLanguage() = nav(R.id.action_language_to_intro)
 fun Fragment.toHomeFromLanguage() = nav(R.id.action_language_to_home)

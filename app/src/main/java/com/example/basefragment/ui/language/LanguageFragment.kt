@@ -1,27 +1,24 @@
 package com.example.basefragment.ui.language
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.toHomeFromLanguage
 import com.example.basefragment.core.extention.toIntroFromLanguage
+import com.example.basefragment.core.extention.toSettingFromLang
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanguageKey
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
-import com.example.basefragment.core.helper.SharedPreferencesManager.sharedPreferences
 import com.example.basefragment.databinding.FragmentLanguageBinding
-import com.example.basefragment.utils.DataLocal
-import com.example.basefragment.utils.key.IntentKey
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -32,13 +29,23 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     private val languageAdapter by lazy { LanguageAdapter(requireContext()) }
 
     override fun viewListener() {
-        binding.actionBar.btnActionBarRight.onClick {
-            handleDone()
+        binding.apply {
+
+            actionBar.btnActionBarRight.onClick {
+                handleDone()
+            }
+            actionBar.btnActionBarLeft.onClick(500) { toSettingFromLang() }
         }
         handleRcv()
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            toSettingFromLang()
+        }
+    }
     override fun inflateBinding(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
@@ -120,6 +127,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             itemAnimator = null
         }
     }
+
     private fun handleRcv() {
         binding.apply {
             languageAdapter.onItemClick = { code ->
@@ -128,6 +136,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             }
         }
     }
+
     private fun handleDone() {
         val code = viewModel.codeLang.value
         if (code.isEmpty()) {

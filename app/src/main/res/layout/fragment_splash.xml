@@ -18,7 +18,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_height="212dp"
         android:adjustViewBounds="true"
-        android:src="@drawable/img_title"
+        android:src="@drawable/imv_splash"
         app:layout_constraintTop_toTopOf="parent" />
     <FrameLayout
         android:layout_width="match_parent"

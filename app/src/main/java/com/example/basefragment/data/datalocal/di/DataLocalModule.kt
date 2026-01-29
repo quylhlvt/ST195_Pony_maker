@@ -37,13 +37,5 @@ object DataLocalModule {
             this.sharedPreferences = sharedPreferences
             this.editor = editor
         }
-    @Provides
-    @Singleton
-    fun provideObjectBoxManager(
-        @ApplicationContext context: Context
-    ): AppDataManager {
-        val manager = AppDataManager(context)
-        manager.init()
-        return manager
-    }
+
 }

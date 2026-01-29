@@ -12,6 +12,8 @@ import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.core.extention.toHomeFromSetting
+import com.example.basefragment.core.extention.toSettingFromHome
 import com.example.basefragment.databinding.FragmentHomeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -27,18 +29,22 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     override fun viewListener() {
         binding.apply {
             // Click vào "Choose Character"
-            btnCreate.onClick {
+            btnManual.onClick {
                 // Navigate tới CategoryFragment
-                 findNavController().navigate(R.id.action_home_to_createPony)
+
+                 findNavController().navigate(R.id.action_home_to_manual)
             }
 
             // Click vào "Quick Mix"
-            btnQuickMaker.onClick {
+            btnAuto.onClick {
                 // Navigate tới QuickMixFragment
-                 findNavController().navigate(R.id.action_home_to_quick)
+                 findNavController().navigate(R.id.action_home_to_auto)
             }
-            btnMyAlbum.onClick {
-                findNavController().navigate(R.id.action_home_to_myPony)
+            btnMultiplayer.onClick {
+                findNavController().navigate(R.id.action_home_to_multiplayer)
+            }
+            actionBar.btnActionBarRight.onClick {
+                toSettingFromHome()
             }
         }
     }
