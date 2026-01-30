@@ -69,7 +69,6 @@ abstract class WhatsappSharingFragment<VB : ViewBinding, VM : ViewModel>(
             @Suppress("DEPRECATION")
             startActivityForResult(intent, ADD_PACK_REQUEST)
         } catch (e: ActivityNotFoundException) {
-            showToast(R.string.invalid_action_msg)
             Log.e("WhatsappSharing", "WhatsApp not installed", e)
         } catch (e: Exception) {
             showToast("Failed to add sticker pack")
@@ -78,12 +77,12 @@ abstract class WhatsappSharingFragment<VB : ViewBinding, VM : ViewModel>(
     }
 
     private fun showErrorDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.invalid_action)
-            .setMessage(R.string.invalid_action_msg)
-            .setNegativeButton("OK") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
+//        AlertDialog.Builder(requireContext())
+//            .setTitle(R.string.invalid_action)
+//            .setMessage(R.string.invalid_action_msg)
+//            .setNegativeButton("OK") { dialog, _ ->
+//                dialog.dismiss()
+//            }
+//            .show()
     }
 }

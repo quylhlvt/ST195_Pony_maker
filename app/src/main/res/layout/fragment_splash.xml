@@ -1,39 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.onboarding.splash.SplashFragment">
+
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/img_bg_splash"
-        android:scaleType="fitXY"
-        android:adjustViewBounds="true"/>
-    <ImageView
-        android:layout_marginTop="150dp"
-        android:id="@+id/tvTop"
-        android:layout_width="340dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_height="212dp"
+        android:id="@+id/imageView2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
-        android:src="@drawable/imv_splash"
+        android:scaleType="fitXY"
+        android:src="@drawable/img_bg_splash"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="66dp"
->
-        <com.airbnb.lottie.LottieAnimationView
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            app:lottie_autoPlay="true"
 
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/lottie_splash" />
+    <ImageView
+        android:id="@+id/tvTop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="150dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintDimensionRatio="3.6:1.8"
+        android:src="@drawable/imv_splash"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    </FrameLayout>
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieLoading"
+        android:layout_width="300dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/txtTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:lottie_autoPlay="false"
+        app:lottie_loop="false"
+        android:elevation="1dp"
+        app:lottie_rawRes="@raw/loading_progress" />
 
-</FrameLayout>
+
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/title_splash"
+        android:fontFamily="@font/inter_regular"
+        android:textSize="12dp"
+        android:gravity="center"
+        android:layout_marginBottom="40dp"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

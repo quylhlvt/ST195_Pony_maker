@@ -94,6 +94,8 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     override fun onResume() {
         super.onResume()
         Log.v(TAG, "onResume: $this")
+        view?.invalidate()
+
     }
 
     override fun onPause() {

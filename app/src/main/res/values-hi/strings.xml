@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">baseFragment</string>
+    <string name="next">आगे</string>
+    <string name="language">भाषा</string>
+    <string name="title_1">चरित्र बनाएँ</string>
+    <string name="title_2">चरित्र विविधता</string>
+    <string name="title_3">विविध आइटम</string>
+    <string name="not_select_lang">कृपया भाषा चुनें</string>
+    <string name="pony_maker">मैनुअल\nमोड</string>
+    <string name="trending_custom">ऑटो\nमोड</string>
+    <string name="my_work">मल्टीप्लेयर\nमोड</string>
+
+    <string name="continue_per">जारी रखें</string>
+    <string name="allow">अनुमति दें</string>
+    <string name="text">टेक्स्ट</string>
+    <string name="loading">लोड हो रहा है</string>
+    <string name="haven_t_saved_it_yet_do_you_want_to_exit">अभी तक सेव नहीं किया गया है, क्या बाहर निकलना चाहते हैं?</string>
+    <string name="no">नहीं</string>
+    <string name="yes">हाँ</string>
+    <string name="null_edt">कृपया टेक्स्ट दर्ज करें</string>
+    <string name="done">पूर्ण</string>
+    <string name="do_you_want_to_reset_all">क्या आप सब कुछ रीसेट करना चाहते हैं?</string>
+    <string name="reset">रीसेट</string>
+    <string name="exit">बाहर निकलें</string>
+    <string name="rate_us">हमें रेट करें</string>
+    <string name="share_app">ऐप साझा करें</string>
+    <string name="rate">रेट</string>
+    <string name="privacy_policy">गोपनीयता &amp; नीति</string>
+
+    <string name="zero_star_title">क्या आपको यह ऐप पसंद है?</string>
+    <string name="zero_star">अपना अनुभव हमें बताएं</string>
+
+    <string name="one_star_title">ओह नहीं!</string>
+    <string name="one_star">कृपया हमें प्रतिक्रिया दें</string>
+
+    <string name="two_star_title">ओह नहीं!</string>
+    <string name="two_star">कृपया हमें प्रतिक्रिया दें</string>
+
+    <string name="three_star_title">ओह नहीं!</string>
+    <string name="three_star">कृपया हमें प्रतिक्रिया दें</string>
+
+    <string name="four_star_title">हमें भी आपसे प्यार है!</string>
+    <string name="four_star">आपकी प्रतिक्रिया के लिए धन्यवाद</string>
+
+    <string name="five_star_title">हमें भी आपसे प्यार है!</string>
+    <string name="five_star">आपकी प्रतिक्रिया के लिए धन्यवाद</string>
+
+    <string name="rate_us_0">आपने अभी तक रेट नहीं किया है!</string>
+    <string name="have_rated">हमारे ऐप को रेट करने के लिए धन्यवाद</string>
+    <string name="hello_blank_fragment">नमस्ते खाली फ्रैगमेंट</string>
+</resources>

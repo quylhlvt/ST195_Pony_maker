@@ -216,7 +216,7 @@
                     android:layout_weight="8"
                     android:fontFamily="@font/itim_regular"
                     android:gravity="center_vertical"
-                    android:text="@string/privacy_amp_policy"
+                    android:text="@string/privacy_policy"
                     android:textColor="@color/app_color"
                     android:textSize="16sp" />
 

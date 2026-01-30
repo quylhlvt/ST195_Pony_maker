@@ -5,56 +5,41 @@
     android:id="@+id/nav_setting"
     app:startDestination="@id/setting">
 
-    <!-- Setting làm màn hình đầu tiên -->
+    <!-- ==================== SETTING ==================== -->
     <fragment
         android:id="@+id/setting"
         android:name="com.example.basefragment.ui.main.setting.SettingFragment"
-        tools:layout="@layout/fragment_setting"
-        android:label="My Setting">
+        android:label="Setting"
+        tools:layout="@layout/fragment_setting">
 
-        <!-- Đi tới Language -->
+        <!-- Navigate đến Language trong cùng graph -->
         <action
             android:id="@+id/action_setting_to_language"
-            app:destination="@id/language"
+            app:destination="@id/languageInSetting"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
 
+        <!-- XÓA action_setting_to_home - dùng popBackStack() thay thế -->
     </fragment>
 
-    <!-- Language fragment -->
+    <!-- ==================== LANGUAGE (in Setting) ==================== -->
     <fragment
-        android:id="@+id/language"
+        android:id="@+id/languageInSetting"
         android:name="com.example.basefragment.ui.language.LanguageFragment"
-        tools:layout="@layout/fragment_language"
-        android:label="Language">
+        android:label="Language"
+        tools:layout="@layout/fragment_language">
 
-        <!-- Back về Setting (chỉ pop 1 lần) -->
-        <action
-            android:id="@+id/action_language_to_setting"
-            app:destination="@id/setting"
-            app:popUpTo="@id/setting"
-            app:popUpToInclusive="true" />
 
-        <!-- Nếu là lần đầu → đi Intro -->
-        <!-- Nếu không phải lần đầu → đi Home -->
+        <!-- Hoặc nếu muốn về Home sau khi đổi ngôn ngữ -->
         <action
-            android:id="@+id/action_language_to_home"
+            android:id="@+id/action_lang_to_home"
             app:destination="@id/nav_main"
             app:popUpTo="@id/nav_main"
-            app:popUpToInclusive="true" />
-
-        <!-- Nếu cần đi Intro (lần đầu) -->
-        <action
-            android:id="@+id/action_language_to_intro"
-            app:destination="@id/intro"
-        app:popUpTo="@id/nav_main"
-        app:popUpToInclusive="true" />
+            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right" />
     </fragment>
-    <action
-        android:id="@+id/action_global_to_home"
-        app:destination="@id/nav_main"
-        app:popUpTo="@id/nav_graph"
-        app:popUpToInclusive="true" />
+
 </navigation>

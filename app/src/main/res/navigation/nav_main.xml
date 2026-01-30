@@ -5,188 +5,239 @@
     android:id="@+id/nav_main"
     app:startDestination="@id/homeFragment">
 
+    <!-- ==================== HOME ==================== -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.basefragment.ui.main.home.HomeFragment"
-        tools:layout="@layout/fragment_home"
-        android:label="Home" >
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+
+        <!-- QUAN TRỌNG: Các action này PHẢI nằm trong cùng graph -->
         <action
             android:id="@+id/action_home_to_manual"
             app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="false"
-           />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+
         <action
             android:id="@+id/action_home_to_auto"
             app:destination="@id/autoFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="false"
-           />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+
         <action
             android:id="@+id/action_home_to_multiplayer"
             app:destination="@id/multiplayerFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="false"
-           />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+
+        <!-- Navigate sang graph khác -->
         <action
             android:id="@+id/action_home_to_setting"
             app:destination="@id/nav_setting"
-        app:enterAnim="@anim/slide_in_right"
-        app:exitAnim="@anim/slide_out_left"
-            />
-
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
+    <!-- ==================== MANUAL ==================== -->
     <fragment
         android:id="@+id/manualFragment"
         android:name="com.example.basefragment.ui.main.manual.ManualFragment"
-        android:label="fragment_manual"
-        tools:layout="@layout/fragment_manual" >
+        android:label="Manual"
+        tools:layout="@layout/fragment_manual">
+
         <action
             android:id="@+id/action_manual_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_manual_to_play"
             app:destination="@id/playFragment"
             app:popUpTo="@id/manualFragment"
-            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             />
+
         <action
-            android:id="@+id/action_manual_to_uidem"
+            android:id="@+id/action_manual_to_guide"
             app:destination="@id/guideFragment"
             app:popUpTo="@id/manualFragment"
-            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             />
     </fragment>
+
+    <!-- ==================== AUTO ==================== -->
     <fragment
         android:id="@+id/autoFragment"
         android:name="com.example.basefragment.ui.main.auto.AutoFragment"
-        android:label="fragment_auto"
-        tools:layout="@layout/fragment_auto" >
+        android:label="Auto"
+        tools:layout="@layout/fragment_auto">
+
         <action
             android:id="@+id/action_auto_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_auto_to_play"
             app:destination="@id/playFragment"
             app:popUpTo="@id/autoFragment"
-            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             />
     </fragment>
+
+    <!-- ==================== MULTIPLAYER ==================== -->
     <fragment
         android:id="@+id/multiplayerFragment"
         android:name="com.example.basefragment.ui.main.multiplayer.MultiplayerFragment"
-        android:label="fragment_multiplayer"
-        tools:layout="@layout/fragment_multiplayer" >
+        android:label="Multiplayer"
+        tools:layout="@layout/fragment_multiplayer">
+
         <action
             android:id="@+id/action_multiplayer_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
+
         <action
             android:id="@+id/action_multiplayer_to_playMultiplayer"
             app:destination="@id/playMultiplayerFragment"
-            app:popUpTo="@id/multiplayerFragment"
-            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             />
+
         <action
             android:id="@+id/action_multiplayer_to_guide"
-            app:destination="@id/guideFragment"
-            app:popUpTo="@id/multiplayerFragment"
-            app:popUpToInclusive="false"
-            />
+            app:destination="@id/guideFragment" />
     </fragment>
+
+    <!-- ==================== PLAY ==================== -->
     <fragment
         android:id="@+id/playFragment"
         android:name="com.example.basefragment.ui.main.play.PlayFragment"
-        android:label="fragment_play"
-        tools:layout="@layout/fragment_play" >
-        <action
-            android:id="@+id/action_play_to_auto"
-            app:destination="@id/autoFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_play_to_manual"
-            app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+        android:label="Play"
+        tools:layout="@layout/fragment_play">
+
         <action
             android:id="@+id/action_play_to_success"
             app:destination="@id/successFragment"
-            app:popUpTo="@id/playFragment"
-            app:popUpToInclusive="false"
+
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             />
+
+        <action
+            android:id="@+id/action_play_to_auto"
+            app:destination="@id/autoFragment"
+            app:popUpTo="@id/homeFragment" />
+
+        <action
+            android:id="@+id/action_play_to_manual"
+            app:destination="@id/manualFragment"
+            app:popUpTo="@id/homeFragment" />
     </fragment>
+
+    <!-- ==================== PLAY MULTIPLAYER ==================== -->
     <fragment
         android:id="@+id/playMultiplayerFragment"
         android:name="com.example.basefragment.ui.main.playmutiplay.PlayMultiplayerFragment"
-        android:label="PlayMultiplayerFragment" >
+        android:label="Play Multiplayer"
+        tools:layout="@layout/fragment_play_mutiplay">
+
         <action
-            android:id="@+id/action_createPony_to_home"
-            app:destination="@id/multiplayerFragment"
+            android:id="@+id/action_play_mutiplay_to_home"
+            app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+
         <action
             android:id="@+id/action_playMultiplayer_to_success"
             app:destination="@id/successFragment"
-            app:popUpTo="@id/playMultiplayerFragment"
-            app:popUpToInclusive="false"
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             />
     </fragment>
+
+    <!-- ==================== SUCCESS ==================== -->
     <fragment
         android:id="@+id/successFragment"
         android:name="com.example.basefragment.ui.main.success.SuccessFragment"
-        android:label="fragment_success"
-        tools:layout="@layout/fragment_success" >
-        <action
-            android:id="@+id/action_success_to_manual"
-            app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_success_to_auto"
-            app:destination="@id/autoFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_success_to_multiplayer"
-            app:destination="@id/multiplayerFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+        android:label="Success"
+        tools:layout="@layout/fragment_success">
+
         <action
             android:id="@+id/action_success_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
 
+        <action
+            android:id="@+id/action_success_to_manual"
+            app:destination="@id/manualFragment"
+            app:popUpTo="@id/homeFragment" />
+
+        <action
+            android:id="@+id/action_success_to_auto"
+            app:destination="@id/autoFragment"
+            app:popUpTo="@id/homeFragment" />
+
+        <action
+            android:id="@+id/action_success_to_multiplayer"
+            app:destination="@id/multiplayerFragment"
+            app:popUpTo="@id/homeFragment" />
     </fragment>
+
+    <!-- ==================== GUIDE ==================== -->
     <fragment
         android:id="@+id/guideFragment"
         android:name="com.example.basefragment.ui.main.guide.GuideFragment"
-        android:label="fragment_guide"
-        tools:layout="@layout/fragment_guide" >
+        android:label="Guide"
+        tools:layout="@layout/fragment_guide">
+
+
+
         <action
             android:id="@+id/action_guide_to_manual"
             app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpTo="@id/homeFragment" />
+
         <action
             android:id="@+id/action_guide_to_home_multiplayer"
             app:destination="@id/multiplayerFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_guide_to_home"
-            app:destination="@id/homeFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpTo="@id/homeFragment" />
     </fragment>
-
-
 
 </navigation>

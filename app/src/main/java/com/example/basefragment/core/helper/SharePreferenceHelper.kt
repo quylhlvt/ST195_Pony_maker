@@ -25,6 +25,7 @@ object SharedPreferencesManager {
     private const val PERMISSION_CAMERA = "CAMERA_KEY"
     private const val COUNT_BACK_KEY = "COUNT_BACK_KEY"
     private const val RATE_KEY = "RATE_KEY"
+    private const val RATE_COUNT_KEY = "RATE_COUNT_KEY"
     fun isSplashScreen(): Boolean = getBooleanDataByKey(SPLASH_SCREEN)
     fun setSplashScreen(isSkipped: Boolean) {
         saveBooleanDataByKey(SPLASH_SCREEN, isSkipped)
@@ -56,6 +57,10 @@ object SharedPreferencesManager {
     fun isRateRequest(): Boolean = getBooleanDataByKey(RATE_KEY)
     fun setRateRequest(isSkipped: Boolean) {
         saveBooleanDataByKey(RATE_KEY, isSkipped)
+    }
+ fun isRateCountRequest(): Int = getIntDataByKey(RATE_COUNT_KEY)
+    fun setRateCountRequest(isSkipped: Int) {
+        saveIntDataByKey(RATE_COUNT_KEY, isSkipped)
     }
 
     fun isBackRequest(): Int = getIntDataByKey(COUNT_BACK_KEY)

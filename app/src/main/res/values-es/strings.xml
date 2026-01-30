@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">baseFragment</string>
+    <string name="next">Siguiente</string>
+    <string name="language">Idioma</string>
+    <string name="title_1">Crear Personaje</string>
+    <string name="title_2">Diversidad de Personajes</string>
+    <string name="title_3">Variedad de Ítems</string>
+    <string name="not_select_lang">Por favor seleccione un idioma</string>
+    <string name="pony_maker">Modo\nManual</string>
+    <string name="trending_custom">Modo\nAuto</string>
+    <string name="my_work">Modo\nMultijugador</string>
+
+    <string name="continue_per">Continuar</string>
+    <string name="allow">Permitir</string>
+    <string name="text">Texto</string>
+    <string name="loading">Cargando</string>
+    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Aún no se ha guardado, ¿desea salir?</string>
+    <string name="no">No</string>
+    <string name="yes">Sí</string>
+    <string name="null_edt">Por favor ingrese texto</string>
+    <string name="done">Hecho</string>
+    <string name="do_you_want_to_reset_all">¿Desea restablecer todo?</string>
+    <string name="reset">Restablecer</string>
+    <string name="exit">Salir</string>
+    <string name="rate_us">Califícanos</string>
+    <string name="share_app">Compartir App</string>
+    <string name="rate">Calificar</string>
+    <string name="privacy_policy">Privacidad &amp; Política</string>
+
+    <string name="zero_star_title">¿Te gusta la aplicación?</string>
+    <string name="zero_star">Cuéntanos tu experiencia</string>
+
+    <string name="one_star_title">¡Oh no!</string>
+    <string name="one_star">Por favor danos tu opinión</string>
+
+    <string name="two_star_title">¡Oh no!</string>
+    <string name="two_star">Por favor danos tu opinión</string>
+
+    <string name="three_star_title">¡Oh no!</string>
+    <string name="three_star">Por favor danos tu opinión</string>
+
+    <string name="four_star_title">¡Nosotros también te amamos!</string>
+    <string name="four_star">Gracias por tus comentarios</string>
+
+    <string name="five_star_title">¡Nosotros también te amamos!</string>
+    <string name="five_star">Gracias por tus comentarios</string>
+
+    <string name="rate_us_0">¡Aún no has calificado!</string>
+    <string name="have_rated">Gracias por calificar nuestra aplicación</string>
+    <string name="hello_blank_fragment">Hola fragmento en blanco</string>
+</resources>

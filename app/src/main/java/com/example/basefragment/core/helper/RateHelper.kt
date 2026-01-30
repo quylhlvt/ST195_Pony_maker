@@ -32,6 +32,7 @@ object RateHelper {
 
         dialogRate.onCancel = {
             onRateResult(RateState.CANCEL)
+
         }
     }
 

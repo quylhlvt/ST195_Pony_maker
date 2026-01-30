@@ -9,16 +9,20 @@ import androidx.activity.addCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.toHomeFromLanguage
 import com.example.basefragment.core.extention.toIntroFromLanguage
 import com.example.basefragment.core.extention.toSettingFromLang
 import com.example.basefragment.core.extention.visible
+import com.example.basefragment.core.helper.LanguageHelper
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanguageKey
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
 import com.example.basefragment.databinding.FragmentLanguageBinding
+import com.example.basefragment.utils.LanguageManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -27,6 +31,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     FragmentLanguageBinding::inflate, LanguageViewModel::class.java
 ) {
     private val languageAdapter by lazy { LanguageAdapter(requireContext()) }
+    private var isFromSetting = false
 
     override fun viewListener() {
         binding.apply {
@@ -34,7 +39,17 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             actionBar.btnActionBarRight.onClick {
                 handleDone()
             }
-            actionBar.btnActionBarLeft.onClick(500) { toSettingFromLang() }
+            actionBar.btnActionBarLeft.onClick(500) {
+                when {
+                isFromSetting -> {
+                    // Từ Setting -> Back về Setting
+                    toSettingFromLang()
+                }
+                else -> {
+                    // Từ Onboarding -> Back về Splash/Language
+                    popBack()
+                }
+            }}
         }
         handleRcv()
     }
@@ -51,9 +66,10 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        isFromSetting = (findNavController().currentDestination?.id == R.id.languageInSetting)
+
         binding.actionBar.apply {
             btnActionBarLeft.setImageResource(R.drawable.back_app)
-            btnActionBarRight.setImageResource(R.drawable.select_language)
         }
         initRcv()
 
@@ -89,10 +105,18 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
                 launch {
                     viewModel.isFirstLanguage.collect { isFirst ->
                         if (isFirst) {
-                            binding.actionBar.tvStart.visible()
+                            binding.actionBar.apply {
+                                tvStart.visible()
+                                btnActionBarRight.visible()
+                                btnActionBarRight.setImageResource(R.drawable.select_language)
+
+                            }
                         } else {
-                            binding.actionBar.btnActionBarLeft.visible()
-                            binding.actionBar.tvCenter.visible()
+                            binding.actionBar.apply {
+                            btnActionBarLeft.visible()
+                             tvCenter.visible()
+                            btnActionBarRight.setImageResource(R.drawable.select_language)}
+
                         }
                     }
                 }
@@ -143,16 +167,21 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             showToast(R.string.not_select_lang)
             return
         }
+
+        // Save language
         sharedPreferences.setLanguageKey(code)
 
+        // QUAN TRỌNG: Update ngôn ngữ ngay lập tức
+        LanguageHelper.setLocale(requireContext(), code)
+        LanguageManager.updateLanguage(code)
         if (viewModel.isFirstLanguage.value) {
+            // Onboarding flow
             sharedPreferences.setLanuageScreen(true)
-            Log.d("LANGa", "Set language screen = true, navigating to Intro")
-
+            Log.d("LANG", "Navigating to Intro")
             toIntroFromLanguage()
         } else {
-            Log.d("LANGa", "Navigating to Home")
-
+            // Setting flow - Navigate về Home
+            Log.d("LANG", "Navigating to Home")
             toHomeFromLanguage()
         }
     }

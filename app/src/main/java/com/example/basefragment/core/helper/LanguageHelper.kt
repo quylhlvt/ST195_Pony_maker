@@ -2,6 +2,7 @@ package com.example.basefragment.core.helper
 
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import java.util.Locale
 
 object LanguageHelper {
@@ -33,5 +34,27 @@ object LanguageHelper {
 
     fun saveLocale( lang: String) {
         SharedPreferencesManager.setLanguageKey(lang)
+    }
+
+
+    /**
+     * Cập nhật ngôn ngữ KHÔNG restart
+     */
+    fun setLocale(context: Context, languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val resources: Resources = context.resources
+        val config: Configuration = resources.configuration
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+
+    /**
+     * Lấy ngôn ngữ hiện tại
+     */
+    fun getCurrentLanguage(context: Context): String {
+        return context.resources.configuration.locales[0].language
     }
 }

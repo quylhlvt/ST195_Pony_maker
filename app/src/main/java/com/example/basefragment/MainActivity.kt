@@ -1,19 +1,17 @@
 package com.example.basefragment
 
-import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.basefragment.core.extention.hideNavigation
+import com.example.basefragment.core.helper.LanguageHelper
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -24,29 +22,53 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         hideNavigation(true)
         super.onCreate(savedInstanceState)
+
+        // QUAN TRỌNG: Khởi tạo SharedPreferences TRƯỚC khi dùng
+        initSharedPreferences()
+
+        // SAU ĐÓ mới apply language (hoặc bỏ qua vì attachBaseContext đã apply rồi)
+        // applyLanguage()
+
         setContentView(R.layout.activity_main)
-//        val sharedPrefs = getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
-//        SharedPreferencesManager.sharedPreferences = sharedPrefs
-//        SharedPreferencesManager.editor = sharedPrefs.edit()
 
         // Lấy NavController từ NavHostFragment
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-
-        // Tuỳ chọn: ẩn thanh trạng thái hoặc làm gì đó
-        // window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
     }
 
-    // QUAN TRỌNG: xử lý nút Back đúng cách
-    override fun onBackPressed() {
-        if (!navController.popBackStack()) {
-            // Không còn gì trong back stack → thoát app
-            super.onBackPressed()
-        }
+    /**
+     * QUAN TRỌNG: Khởi tạo SharedPreferences
+     */
+    private fun initSharedPreferences() {
+        val sharedPrefs = getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
+        SharedPreferencesManager.sharedPreferences = sharedPrefs
+        SharedPreferencesManager.editor = sharedPrefs.edit()
     }
 
-    // Nếu bạn dùng Toolbar + NavigationIcon (mũi tên back)
+    override fun attachBaseContext(newBase: Context) {
+        // attachBaseContext được gọi TRƯỚC onCreate
+        // Apply language ở đây (không cần SharedPreferencesManager)
+        val sharedPrefs = newBase.getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
+        val savedLanguage = sharedPrefs.getString("LANGUAGE_KEY", "en") ?: "en"
+
+        val locale = Locale(savedLanguage)
+        Locale.setDefault(locale)
+
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
+    }
+
+    // ❌ XÓA onBackPressed() - Nó conflict với Fragment's OnBackPressedDispatcher
+     override fun onBackPressed() {
+         if (!navController.popBackStack()) {
+             super.onBackPressed()
+         }
+     }
+
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }

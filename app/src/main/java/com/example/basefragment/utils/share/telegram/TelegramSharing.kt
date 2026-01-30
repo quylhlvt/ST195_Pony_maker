@@ -24,7 +24,7 @@ object TelegramSharing {
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context, context.getString(R.string.no_app_found_to_handle_this_action), Toast.LENGTH_SHORT).show()
+//            Toast.makeText(context, context.getString(R.string.no_app_found_to_handle_this_action), Toast.LENGTH_SHORT).show()
         }
     }
 }

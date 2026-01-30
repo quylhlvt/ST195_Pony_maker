@@ -34,29 +34,3 @@ fun Fragment.openImagePicker() {
     intent.type = "image/*"
     startActivityForResult(intent, RequestKey.PICK_IMAGE_REQUEST_CODE)
 }
-fun Activity.goToSettings() {
-    setLocale(this)
-    val dialog = AlertDialog.Builder(this)
-        .setTitle(R.string.go_to_setting_message)
-        .setMessage(R.string.go_to_setting_message)
-        .setPositiveButton(R.string.settings) { dialog, _ ->
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = "package:${this@goToSettings.packageName}".toUri()
-            }
-            this.startActivity(intent)
-            dialog.dismiss()
-            hideNavigation(true)
-        }
-        .setNegativeButton(R.string.cancel) { dialog, _ ->
-            dialog.dismiss()
-            hideNavigation(true)
-        }
-        .setCancelable(false)
-        .create()
-
-    dialog.show()
-    val positiveButton: Button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-    val negativeButton: Button = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-    positiveButton.setTextColor(getColor(R.color.app_color))
-    negativeButton.setTextColor(getColor(R.color.black))
-}

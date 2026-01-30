@@ -21,13 +21,13 @@ class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLa
             tvLang.text = item.name
 
             val (ratio, color) = if (item.activate) {
-                R.drawable.ic_select_lang to context.getColor(R.color.white)
+                R.drawable.ic_select_lang to context.getColor(R.color.app_color)
             } else {
                 R.drawable.ic_un_select_lang to context.getColor(R.color.app_color)
             }
             loadImage(root, ratio, btnRadio, false)
 
-            flMain.setBackgroundResource(if (item.activate) R.drawable.frame_bg_setting else R.drawable.frame_unselect_language)
+//            flMain.setBackgroundResource(if (item.activate) R.drawable.frame_bg_setting else R.drawable.frame_unselect_language)
 
             tvLang.setTextColor(color)
 
