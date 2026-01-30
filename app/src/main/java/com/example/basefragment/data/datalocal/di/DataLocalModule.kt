@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.basefragment.core.helper.SharedPreferencesManager
-import com.example.basefragment.data.datalocal.manager.AppDataManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

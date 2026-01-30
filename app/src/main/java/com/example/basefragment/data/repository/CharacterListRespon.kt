@@ -2,7 +2,6 @@ package com.example.basefragment.data.repository
 
 import android.graphics.Color
 import android.os.Message
-import com.example.basefragment.data.model.custom.BodyPartModel
 import com.google.gson.annotations.SerializedName
 
 data class CharacterListRespon(

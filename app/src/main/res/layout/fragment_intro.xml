@@ -31,21 +31,21 @@
             android:id="@+id/dotsIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            app:dotsColor="#B0B5BD"
+            app:dotsColor="@color/white"
             app:dotsCornerRadius="8dp"
             app:dotsSize="8dp"
+            android:layout_gravity="start|center_vertical"
             app:dotsSpacing="3dp"
             app:dotsWidthFactor="2.5"
             app:progressMode="false"
-            app:selectedDotColor="@color/app_color3" />
+            app:selectedDotColor="@color/app_color2" />
         <include
             android:id="@+id/btnNextPager"
             layout="@layout/bottom_bottom_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:layout_gravity="end"
+            android:layout_gravity="end|center_vertical"
             app:layout_constraintBottom_toBottomOf="parent" />
 
     </FrameLayout>

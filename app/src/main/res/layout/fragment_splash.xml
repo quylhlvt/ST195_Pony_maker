@@ -31,19 +31,59 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/lottieLoading"
-        android:layout_width="300dp"
-        android:layout_height="60dp"
+<!--    <com.airbnb.lottie.LottieAnimationView-->
+<!--        android:id="@+id/lottieLoading"-->
+<!--        android:layout_width="300dp"-->
+<!--        android:layout_height="60dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/txtTitle"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:lottie_autoPlay="false"-->
+<!--        app:lottie_loop="false"-->
+<!--        android:elevation="1dp"-->
+<!--        app:lottie_rawRes="@raw/loading_progress" />-->
+    <FrameLayout
+        android:elevation="1dp"
         android:layout_gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/txtTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:lottie_autoPlay="false"
-        app:lottie_loop="false"
-        android:elevation="1dp"
-        app:lottie_rawRes="@raw/loading_progress" />
+        android:layout_width="320dp"
+        android:layout_height="60dp">
 
+        <!-- Thanh nền -->
+        <View
+            android:id="@+id/bgBar"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_white_radius_16dp" />
+
+        <!-- Thanh load -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="0dp"
+            android:layout_gravity="center_vertical">
+            <View
+                android:id="@+id/progressBar"
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical" />
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- Nhân vật -->
+        <ImageView
+            android:id="@+id/imgCharacter"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:translationX="0dp"
+            android:src="@drawable/ic_character" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/txtTitle"

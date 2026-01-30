@@ -8,11 +8,29 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.FontRes
 import androidx.core.content.res.ResourcesCompat
+import com.example.basefragment.R
+import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.utils.DataLocal.KEY_LAST_CLICK_TIME
+import com.example.basefragment.utils.music.SoundEffect
+import com.example.basefragment.utils.music.SoundEffect.playClick
+import com.example.basefragment.utils.music.SoundEffect.playClick1
+import com.google.android.material.card.MaterialCardView
 import kotlin.math.roundToInt
 
 fun Int.dp(context: Context): Int =
     (this * context.resources.displayMetrics.density).roundToInt()
+ fun MaterialCardView.applyStrokeSelected(isSelected: Boolean) {
+     strokeColor = context.getColor(
+         if (isSelected) R.color.app_color else R.color.white
+     )
+}
+
+ fun ImageView.applySelectImage(isSelected: Boolean) {
+    setImageResource(
+        if (isSelected) R.drawable.ic_mode_set_select
+        else R.drawable.ic_mode_set_unselect
+    )
+}
 
 fun Float.dp(context: Context): Int =
     (this * context.resources.displayMetrics.density).roundToInt()
@@ -62,14 +80,18 @@ fun View.select() {
     isSelected = true
 }
 
-fun View.onClick(interval: Long = 500, action: (View) -> Unit) {
+fun View.onClick(context: Context,interval: Long = 500, noplay: Boolean?=false, action: (View) -> Unit) {
     setOnClickListener {
         val lastClickTime = (this.getTag(KEY_LAST_CLICK_TIME) as? Long) ?: 0L
         val currentTime = System.currentTimeMillis()
 
         if (currentTime - lastClickTime >= interval) {
+            if (!SharedPreferencesManager.isSound() && noplay==true){
+                playClick1(context)
+            }
+            if (noplay==false){
+            playClick(context)}
             action(it)
-
             this.setTag(KEY_LAST_CLICK_TIME, currentTime)
         }
     }

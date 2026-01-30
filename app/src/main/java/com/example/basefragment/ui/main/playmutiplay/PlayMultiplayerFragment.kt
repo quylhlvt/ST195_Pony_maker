@@ -6,7 +6,9 @@ import android.view.ViewGroup
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.databinding.FragmentMultiplayerBinding
 import com.example.basefragment.databinding.FragmentPlayMutiplayBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 
 class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMultiplayeViewModel>(FragmentPlayMutiplayBinding::inflate,
     PlayMultiplayeViewModel::class.java

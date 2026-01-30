@@ -7,14 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentAutoBinding
 import com.example.basefragment.databinding.FragmentAutoBinding.inflate
 import com.example.basefragment.databinding.FragmentPlayBinding
 import com.example.basefragment.ui.main.auto.AutoViewModel
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
 
 class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(FragmentPlayBinding::inflate,
     PlayViewModel::class.java
 ) {
+    private lateinit var selectedList: List<ManualModel>
+
     override fun viewListener() {
 
     }
@@ -25,6 +31,12 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(FragmentPl
     ): FragmentPlayBinding = FragmentPlayBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        selectedList = arguments
+            ?.getParcelableArray("selectedList")
+            ?.map { it as ManualModel }
+            ?: emptyList()
+        binding.txt.text ="${selectedList}"
+
 
 //        lifecycleScope.
 

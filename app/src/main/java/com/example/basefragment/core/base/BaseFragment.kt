@@ -20,9 +20,9 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewbinding.ViewBinding
 import com.example.basefragment.R
-import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.hideNavigation
+import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
@@ -39,7 +39,6 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     private var confirmDialogBinding: DialogbaseBinding? = null
     var onYesClick: (() -> Unit)? = null
     var onNoClick: (() -> Unit)? = null
-    protected val viewModelActivity: ViewModelActivity by activityViewModels()
     protected val viewModel: VM by lazy {
         ViewModelProvider(this)[viewModelClass]
     }
@@ -167,11 +166,11 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
                 // Hiện nút Yes/No
                 binding.btnNo.visible()
                 binding.btnYes.visible()
-                binding.btnNo.setOnClickListener {
+                binding.btnNo.onClick(requireContext()) {
                     onNoClick?.invoke()
                     dismiss()
                 }
-                binding.btnYes.setOnClickListener {
+                binding.btnYes.onClick(requireContext()) {
                     onYesClick?.invoke()
                     dismiss()
                 }

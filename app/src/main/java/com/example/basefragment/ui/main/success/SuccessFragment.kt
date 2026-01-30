@@ -11,7 +11,9 @@ import com.example.basefragment.databinding.FragmentPlayMutiplayBinding
 import com.example.basefragment.databinding.FragmentPlayMutiplayBinding.inflate
 import com.example.basefragment.databinding.FragmentSuccessBinding
 import com.example.basefragment.ui.main.playmutiplay.PlayMultiplayeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 
 class SuccessFragment  : BaseFragment<FragmentSuccessBinding,SuccessViewModel>(FragmentSuccessBinding::inflate,
     SuccessViewModel::class.java

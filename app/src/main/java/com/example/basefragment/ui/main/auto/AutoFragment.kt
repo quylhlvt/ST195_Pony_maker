@@ -1,5 +1,6 @@
 package com.example.basefragment.ui.main.auto
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -11,6 +12,9 @@ import com.example.basefragment.databinding.FragmentAutoBinding
 import com.example.basefragment.databinding.FragmentManualBinding
 import com.example.basefragment.databinding.FragmentManualBinding.inflate
 import com.example.basefragment.ui.main.manual.ManualViewModel
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
 
 class AutoFragment  : BaseFragment<FragmentAutoBinding, AutoViewModel>(FragmentAutoBinding::inflate,
     AutoViewModel::class.java
@@ -26,6 +30,12 @@ class AutoFragment  : BaseFragment<FragmentAutoBinding, AutoViewModel>(FragmentA
 
     override fun initView() {
 
+        requireActivity().requestedOrientation = if (sharedPreferences.isRotate()) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+
 //        lifecycleScope.
 
 //        binding.textView.text = "Home Fragment"
@@ -33,7 +43,20 @@ class AutoFragment  : BaseFragment<FragmentAutoBinding, AutoViewModel>(FragmentA
 //            showSnackbar("Xin chào từ Home!")
 //        }
     }
+    override fun onResume() {
+        super.onResume()
+        requireActivity().requestedOrientation =
+            if (sharedPreferences.isRotate())
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            else
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+    }
 
+    override fun onPause() {
+        super.onPause()
+        requireActivity().requestedOrientation =
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
     override fun observeData() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text

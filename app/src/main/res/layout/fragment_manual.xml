@@ -1,14 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.manual.ManualFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ImageView
+        android:id="@+id/imageView3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:adjustViewBounds="true"
+        android:elevation="-1dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/img_bg_app" />
 
-</FrameLayout>
+    <FrameLayout
+        android:elevation="1dp"
+        android:id="@+id/layoutActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/actionBar"
+            layout="@layout/layout_actionbar" />
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/frameChoose"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="2.96:3.96"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar" >
+
+
+        <FrameLayout
+            android:elevation="1dp"
+            android:id="@+id/frameTitle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_title_manual"
+            android:layout_marginHorizontal="54dp"
+            app:layout_constraintDimensionRatio="1.88:0.4"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <androidx.appcompat.widget.AppCompatTextView
+                style="@style/single_marquee"
+                app:strokeJoinStyle="miter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/player_1"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:fontFamily="@font/carter_one_regular"/>
+
+        </FrameLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:elevation="0dp"
+            android:background="@drawable/bg_tb_choose"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintDimensionRatio="2.96:3.76"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginVertical="16dp"
+                android:layout_marginHorizontal="12dp"
+                android:fontFamily="@font/carter_one_regular"
+                android:gravity="center"
+                android:text="@string/place_the_bombs_in_the_opponent_s_nplaying_field"
+                android:textColor="@color/color_content_manual"
+                android:textSize="14sp"
+                app:layout_constraintDimensionRatio="2.72:0.4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/materialCardView" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/materialCardView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="12dp"
+                app:cardCornerRadius="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:strokeWidth="0dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycleChoose"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/img_bg_choose_manual"
+                    android:padding="4dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3"
+                    android:nestedScrollingEnabled="false"
+                    tools:itemCount="9"
+                    tools:listitem="@layout/item_bomb_manual_unchoose" />
+            </com.google.android.material.card.MaterialCardView>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_marginTop="16dp"
+        android:id="@+id/tvNext"
+        style="@style/single_marquee"
+        app:strokeJoinStyle="miter"
+        app:strokeMiter="5dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:gravity="center"
+        app:layout_constraintDimensionRatio="1.56:0.52"
+        android:text="@string/next"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:elevation="1dp"
+        android:fontFamily="@font/carter_one_regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameChoose"
+        app:layout_constraintStart_toStartOf="parent"
+
+        />
+    <ImageView
+        android:id="@+id/img_tvCenter"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="@+id/tvNext"
+        app:layout_constraintEnd_toEndOf="@+id/tvNext"
+        app:layout_constraintTop_toTopOf="@+id/tvNext"
+        app:layout_constraintBottom_toBottomOf="@+id/tvNext"
+        android:src="@drawable/bg_txt_next_manual"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,11 +3,14 @@ package com.example.basefragment.ui.onboarding.intro
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.toHome
 import com.example.basefragment.databinding.FragmentIntroBinding
+import com.example.basefragment.utils.music.MusicLocal.isInSplashOrTutorial
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +24,7 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
     lateinit var introAdapter: IntroAdapter
 
     override fun viewListener() {
-        binding.btnNextPager.root.setOnClickListener {
+        binding.btnNextPager.root.onClick(requireContext()) {
             viewModel.nextPage(binding.viewPager2.currentItem, introAdapter.itemCount)
         }
 
@@ -46,6 +49,11 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
     ): FragmentIntroBinding = FragmentIntroBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        isInSplashOrTutorial = true
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            requireActivity().finish()
+        }
+
         binding.viewPager2.adapter = introAdapter
         binding.dotsIndicator.attachTo(binding.viewPager2)
         setOnChangeViewPager2()
@@ -67,7 +75,7 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
                 introAdapter.submitList(state.pagesSplash)
                 binding.apply {
                     viewPager2.currentItem = state.page
-                    btnNextPager.tvButton.text = state.textButton
+                    btnNextPager.tvButton.text = getString(state.textButtonRes)
                 }
             }
         }

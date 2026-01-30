@@ -10,32 +10,25 @@ import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.toIntro
 import com.example.basefragment.core.extention.toLanguage
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
+import com.example.basefragment.core.helper.StripeProgressHelper
 import com.example.basefragment.databinding.FragmentSplashBinding
+import com.example.basefragment.utils.music.MusicLocal.isInSplashOrTutorial
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     FragmentSplashBinding::inflate, SplashViewModel::class.java
 ) {
+
     override fun viewListener() {
 
     }
 
     fun startFakeLoading3s() {
-        binding.apply {
-            lottieLoading.progress = 0f
-
-            val animator = ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = 3000L // 3 giây
-                interpolator = LinearInterpolator()
-
-                addUpdateListener {
-                    lottieLoading.progress = it.animatedValue as Float
-                }
-            }
-
-            animator.start()
-        }
+        StripeProgressHelper.applyStripe(binding.progressBar)
+        StripeProgressHelper.animateStripe(binding.progressBar)
+        StripeProgressHelper.animateProgress(binding.bgBar, binding.progressBar)
+        StripeProgressHelper.animateCharacter(binding.bgBar, binding.progressBar, binding.imgCharacter)
     }
 
     override fun inflateBinding(
@@ -43,17 +36,13 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     ): FragmentSplashBinding = FragmentSplashBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        isInSplashOrTutorial = true
         startFakeLoading3s()
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            kotlinx.coroutines.delay(4000)
+            kotlinx.coroutines.delay(2800)
             goToHome()
         }
-//        lifecycleScope.
 
-//        binding.textView.text = "Home Fragment"
-//        binding.btnTest.setOnClickListener {
-//            showSnackbar("Xin chào từ Home!")
-//        }
     }
 
     override fun observeData() {

@@ -3,8 +3,6 @@ package com.example.basefragment.utils
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.example.basefragment.R
-import com.example.basefragment.data.model.addcharacter.SelectedAddModel
-import com.example.basefragment.data.model.color.SelectedModel
 import com.example.basefragment.data.model.intro.IntroModel
 import com.example.basefragment.data.model.language.LanguageModel
 import com.facebook.shimmer.Shimmer

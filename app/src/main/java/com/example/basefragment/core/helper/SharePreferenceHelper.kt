@@ -25,6 +25,8 @@ object SharedPreferencesManager {
     private const val PERMISSION_CAMERA = "CAMERA_KEY"
     private const val COUNT_BACK_KEY = "COUNT_BACK_KEY"
     private const val RATE_KEY = "RATE_KEY"
+    private const val SOUND_KEY = "SOUND_KEY"
+    private const val SCREEN_ROTATE_KEY = "SCREEN_ROTATE_KEY"
     private const val RATE_COUNT_KEY = "RATE_COUNT_KEY"
     fun isSplashScreen(): Boolean = getBooleanDataByKey(SPLASH_SCREEN)
     fun setSplashScreen(isSkipped: Boolean) {
@@ -34,6 +36,14 @@ object SharedPreferencesManager {
     fun isLanuageScreen(): Boolean = getBooleanDataByKey(LANGUAGE_SCREEN)
     fun setLanuageScreen(isSkipped: Boolean) {
         saveBooleanDataByKey(LANGUAGE_SCREEN, isSkipped)
+    }
+ fun isSound(): Boolean = getBooleanDataByKey(SOUND_KEY)
+    fun setSound(isSoundStatus: Boolean) {
+        saveBooleanDataByKey(SOUND_KEY, isSoundStatus)
+    }
+fun isRotate(): Boolean = getBooleanDataByKey(SCREEN_ROTATE_KEY)
+    fun setRotate(isRotateStatus: Boolean) {
+        saveBooleanDataByKey(SCREEN_ROTATE_KEY, isRotateStatus)
     }
 
     fun isPermissionScreen(): Boolean = getBooleanDataByKey(PERMISSION_SCREEN)

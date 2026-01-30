@@ -1,10 +1,13 @@
 package com.example.basefragment.ui.onboarding.intro
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.work.Data
+import com.example.basefragment.R
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.utils.DataLocal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,14 +43,20 @@ class IntroViewModel @Inject constructor( private val sharedPreferences: SharedP
     }
 
     fun getPage(currentPage: Int, totalPages: Int) {
-        val textButton = if (currentPage >= totalPages - 1) GET_STARED else NEXT
-        _uiState.update { state ->
-            state.copy(
+        val textRes =
+            if (currentPage >= totalPages - 1)
+                R.string.continue_per
+            else
+                R.string.next
+
+        _uiState.update {
+            it.copy(
                 page = currentPage,
-                textButton = textButton
+                textButtonRes = textRes
             )
         }
     }
+
 
     fun nextPage(currentPage: Int, totalPages: Int) {
         val isLastPage = currentPage >= totalPages - 1
@@ -62,7 +71,7 @@ class IntroViewModel @Inject constructor( private val sharedPreferences: SharedP
         }
     }
 
-    private companion object {
+     companion object {
         const val NEXT = "Continue"
         const val GET_STARED = "Start"
     }

@@ -10,7 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
-import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
@@ -19,6 +18,8 @@ import com.example.basefragment.core.extention.toSettingFromLang
 import com.example.basefragment.core.helper.RateHelper
 import com.example.basefragment.databinding.FragmentHomeBinding
 import com.example.basefragment.utils.LanguageManager
+import com.example.basefragment.utils.music.MusicLocal
+import com.example.basefragment.utils.music.MusicLocal.isInSplashOrTutorial
 import com.example.basefragment.utils.state.RateState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -31,26 +32,25 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     FragmentHomeBinding::inflate, HomeViewModel::class.java
 ) {
     private var countRate =0
-    private val mainViewModel: ViewModelActivity by activityViewModels()
 
     override fun viewListener() {
         binding.apply {
             // Click vào "Choose Character"
-            btnManual.onClick {
+            btnManual.onClick(requireContext()) {
                 // Navigate tới CategoryFragment
 
                  findNavController().navigate(R.id.action_home_to_manual)
             }
 
             // Click vào "Quick Mix"
-            btnAuto.onClick {
+            btnAuto.onClick(requireContext()) {
                 // Navigate tới QuickMixFragment
                  findNavController().navigate(R.id.action_home_to_auto)
             }
-            btnMultiplayer.onClick {
+            btnMultiplayer.onClick(requireContext()) {
                 findNavController().navigate(R.id.action_home_to_multiplayer)
             }
-            actionBar.btnActionBarRight.onClick {
+            actionBar.btnActionBarRight.onClick(requireContext()) {
                 toSettingFromHome()
             }
         }
@@ -62,10 +62,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     ): FragmentHomeBinding = FragmentHomeBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        MusicLocal.home = true
+        isInSplashOrTutorial = false
+        MusicLocal.play(requireContext())
         countRate = sharedPreferences.isRateCountRequest()
         binding.actionBar.apply {
             setImageActionBar(btnActionBarRight, R.drawable.ic_settings)
-            setImageActionBar(btnActionBarLeft, R.drawable.logo_app)
+//            setImageActionBar(btnActionBarLeft, R.drawable.logo_app)
         }
         binding.apply {
             tv1.isSelected = true

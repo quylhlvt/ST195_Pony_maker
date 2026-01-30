@@ -1,7 +1,6 @@
 package com.example.basefragment.data.repository
 
 import com.example.basefragment.data.datalocal.api.CatalogueApi
-import com.example.basefragment.data.model.custom.CustomModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -16,6 +15,6 @@ import kotlin.coroutines.CoroutineContext
 class ApiRepository @Inject constructor(
     private val catalogueApi: CatalogueApi) {
     suspend fun getCatalogue() = withContext(Dispatchers.IO) {
-        catalogueApi.getData()
+//        catalogueApi.getData()
     }
 }

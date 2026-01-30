@@ -50,7 +50,7 @@
         <action
             android:id="@+id/action_intro_to_home"
             app:destination="@id/nav_main"
-            app:popUpTo="@id/nav_onboarding"
+            app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 

@@ -11,7 +11,9 @@ import com.example.basefragment.databinding.FragmentManualBinding
 import com.example.basefragment.databinding.FragmentManualBinding.inflate
 import com.example.basefragment.databinding.FragmentMultiplayerBinding
 import com.example.basefragment.ui.main.manual.ManualViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 
 class MultiplayerFragment : BaseFragment<FragmentMultiplayerBinding, MultiplayerViewModel>(FragmentMultiplayerBinding::inflate,
     MultiplayerViewModel::class.java

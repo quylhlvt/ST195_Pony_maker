@@ -11,13 +11,13 @@
     <color name="red_BA">#8D67D6</color>
     <color name="yellow_F6">#F6CD46</color>
     <color name="app_color">#F3A201</color>
-    <color name="app_color2">#FFBFBF</color>
+    <color name="app_color2">#FF661A</color>
     <color name="shadown_item_cate">#E8C0F5</color>
     <color name="stroke_layercustom_select">#FFCBFF</color>
     <color name="stroke_forcus_1">#7EFEFD</color>
     <color name="stroke_forcus_2">#F5A8F6</color>
     <color name="color_content_dialog">#991F2F4F</color>
-    <color name="color_draw">#F2AAF6</color>
+    <color name="color_content_manual">#7A4D0E</color>
 
     <color name="color_1">#E2D2D2</color>
     <color name="color_2">#DCD5FF</color>

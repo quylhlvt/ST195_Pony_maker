@@ -36,10 +36,10 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     override fun viewListener() {
         binding.apply {
 
-            actionBar.btnActionBarRight.onClick {
+            actionBar.btnActionBarRight.onClick(requireContext()) {
                 handleDone()
             }
-            actionBar.btnActionBarLeft.onClick(500) {
+            actionBar.btnActionBarLeft.onClick(requireContext(),500) {
                 when {
                 isFromSetting -> {
                     // Từ Setting -> Back về Setting

@@ -141,7 +141,9 @@
         android:name="com.example.basefragment.ui.main.play.PlayFragment"
         android:label="Play"
         tools:layout="@layout/fragment_play">
-
+        <argument
+            android:name="selectedList"
+            app:argType="com.example.basefragment.data.model.manual.ManualModel[]" />
         <action
             android:id="@+id/action_play_to_success"
             app:destination="@id/successFragment"

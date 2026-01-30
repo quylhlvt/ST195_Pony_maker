@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.setting.SettingFragment">
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/img_bg_app"
-        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         android:elevation="-1dp"
-        android:adjustViewBounds="true"/>
+        android:scaleType="fitXY"
+        android:src="@drawable/img_bg_app" />
+
     <FrameLayout
         android:id="@+id/layoutActionBar"
         android:layout_width="match_parent"
@@ -36,12 +38,196 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
+                <FrameLayout
+                    android:background="@drawable/frame_bg_setting_music"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:fontFamily="@font/carter_one_regular"
+                        android:layout_gravity="start|center_vertical"
+                        android:text="@string/music"
+                        style="@style/single_marquee"
+                        app:strokeJoinStyle="miter"
+                        app:strokeMiter="5dp"
+                        android:textColor="@color/app_color"
+                        android:textSize="16sp" />
+                    <ImageView
+                        android:id="@+id/switchMusic"
+                        android:layout_width="40dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginHorizontal="16dp"
+                        android:src="@drawable/ic_switch_on" />
+
+                </FrameLayout>
+                <FrameLayout
+                    android:background="@drawable/frame_bg_setting_music"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:fontFamily="@font/carter_one_regular"
+                        android:layout_gravity="start|center_vertical"
+                        android:text="@string/sound"
+                        style="@style/single_marquee"
+                        app:strokeJoinStyle="miter"
+                        app:strokeMiter="5dp"
+                        android:textColor="@color/app_color"
+                        android:textSize="16sp" />
+                    <ImageView
+                        android:id="@+id/switchSound"
+                        android:layout_width="40dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginHorizontal="16dp"
+                        android:src="@drawable/ic_switch_on" />
+
+                </FrameLayout>
+
+
+
+
+            </LinearLayout>
+            <!--            btnScreenMode-->
+            <LinearLayout
+                android:id="@+id/btnScreenMode"
+                android:layout_width="match_parent"
+                android:layout_height="176dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/frame_bg_setting_mode"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:weightSum="176">
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="16" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="24"
+                    android:fontFamily="@font/carter_one_regular"
+                    android:gravity="center_vertical"
+                    android:text="@string/screen_mode"
+                    android:textColor="@color/app_color"
+                    android:textSize="16sp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="16" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="96">
+
+                    <FrameLayout
+                        android:id="@+id/horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/vertical"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/strokerHorizontal"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_gravity="top|center_horizontal"
+                            app:cardCornerRadius="8dp"
+                            app:strokeColor="@color/app_color"
+                            app:strokeWidth="1dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:adjustViewBounds="true"
+                                android:scaleType="fitXY"
+                                android:src="@drawable/img_horizontal" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <ImageView
+                            android:id="@+id/select_horizontal"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:src="@drawable/ic_mode_set_select" />
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/horizontal">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/strokerVertical"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_gravity="top|center_horizontal"
+                            app:cardCornerRadius="8dp"
+                            app:strokeColor="@color/white"
+                            app:strokeWidth="1dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:adjustViewBounds="true"
+                                android:scaleType="fitXY"
+                                android:src="@drawable/img_vertical" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <ImageView
+                            android:id="@+id/select_vertical"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:src="@drawable/ic_mode_set_unselect" />
+
+                    </FrameLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="24" />
+            </LinearLayout>
             <!--            btnLang-->
             <LinearLayout
                 android:id="@+id/btnLang"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/frame_bg_setting"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -57,8 +243,9 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_lang_set" />
+                        android:layout_marginVertical="16dp"
+                        android:src="@drawable/ic_lang_set"
+                        app:tint="@color/app_color" />
                 </FrameLayout>
 
                 <TextView
@@ -66,32 +253,21 @@
                     android:layout_height="match_parent"
                     android:layout_marginStart="10dp"
                     android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
+                    android:fontFamily="@font/carter_one_regular"
                     android:gravity="center_vertical"
                     android:text="@string/language"
                     android:textColor="@color/app_color"
                     android:textSize="16sp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
 
             </LinearLayout>
 
-            <!--            btnLang-->
+            <!--            btnRate-->
             <LinearLayout
                 android:id="@+id/btnRate"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/frame_bg_setting"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -107,8 +283,9 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_rate_set" />
+                        android:layout_marginVertical="16dp"
+                        android:src="@drawable/ic_rate_set"
+                        app:tint="@color/app_color" />
                 </FrameLayout>
 
                 <TextView
@@ -116,23 +293,13 @@
                     android:layout_height="match_parent"
                     android:layout_marginStart="10dp"
                     android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
+                    android:fontFamily="@font/carter_one_regular"
                     android:gravity="center_vertical"
                     android:text="@string/rate_us"
                     android:textColor="@color/app_color"
                     android:textSize="16sp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
             </LinearLayout>
 
             <!--            btnShare-->
@@ -140,7 +307,7 @@
                 android:id="@+id/btnShare"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/frame_bg_setting"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -156,8 +323,9 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_share_set" />
+                        android:layout_marginVertical="16dp"
+                        android:src="@drawable/ic_share_set"
+                        app:tint="@color/app_color" />
                 </FrameLayout>
 
                 <TextView
@@ -165,23 +333,13 @@
                     android:layout_height="match_parent"
                     android:layout_marginStart="10dp"
                     android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
+                    android:fontFamily="@font/carter_one_regular"
                     android:gravity="center_vertical"
                     android:text="@string/share_app"
                     android:textColor="@color/app_color"
                     android:textSize="16sp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
             </LinearLayout>
 
             <!--            btnPolicy-->
@@ -189,7 +347,7 @@
                 android:id="@+id/btnPolicy"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/frame_bg_setting"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -205,8 +363,9 @@
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_policy_set" />
+                        android:layout_marginVertical="16dp"
+                        android:src="@drawable/ic_policy_set"
+                        app:tint="@color/app_color" />
                 </FrameLayout>
 
                 <TextView
@@ -214,23 +373,13 @@
                     android:layout_height="match_parent"
                     android:layout_marginStart="10dp"
                     android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
+                    android:fontFamily="@font/carter_one_regular"
                     android:gravity="center_vertical"
                     android:text="@string/privacy_policy"
                     android:textColor="@color/app_color"
                     android:textSize="16sp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
             </LinearLayout>
 
 

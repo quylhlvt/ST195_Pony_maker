@@ -10,6 +10,8 @@ import androidx.navigation.fragment.NavHostFragment
 import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.helper.LanguageHelper
 import com.example.basefragment.core.helper.SharedPreferencesManager
+import com.example.basefragment.utils.music.MusicLocal
+import com.example.basefragment.utils.music.SoundEffect
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 
@@ -17,7 +19,6 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
-    private val mainViewModel: ViewModelActivity by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         hideNavigation(true)
@@ -25,18 +26,21 @@ class MainActivity : AppCompatActivity() {
 
         // QUAN TRỌNG: Khởi tạo SharedPreferences TRƯỚC khi dùng
         initSharedPreferences()
-
         // SAU ĐÓ mới apply language (hoặc bỏ qua vì attachBaseContext đã apply rồi)
         // applyLanguage()
-
         setContentView(R.layout.activity_main)
-
         // Lấy NavController từ NavHostFragment
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (!MusicLocal.isInSplashOrTutorial &&MusicLocal.home)
+            MusicLocal.play(this)
+        SoundEffect.init(this)
+    }
     /**
      * QUAN TRỌNG: Khởi tạo SharedPreferences
      */
@@ -50,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         // attachBaseContext được gọi TRƯỚC onCreate
         // Apply language ở đây (không cần SharedPreferencesManager)
         val sharedPrefs = newBase.getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
-        val savedLanguage = sharedPrefs.getString("LANGUAGE_KEY", "en") ?: "en"
+        val savedLanguage = sharedPrefs.getString("language_key", "en") ?: "en"
 
         val locale = Locale(savedLanguage)
         Locale.setDefault(locale)
@@ -69,6 +73,10 @@ class MainActivity : AppCompatActivity() {
          }
      }
 
+    override fun onStop() {
+        super.onStop()
+        MusicLocal.pause()
+    }
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }

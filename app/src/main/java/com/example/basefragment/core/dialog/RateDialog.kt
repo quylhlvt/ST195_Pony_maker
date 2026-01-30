@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.basefragment.R
+import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.strings
 import com.example.basefragment.databinding.DialogRateBinding
 
@@ -46,15 +47,15 @@ class RateDialog(private val activity: Activity) : DialogFragment() {
     }
 
     private fun initAction() {
-        binding.btnCancel.setOnClickListener {
+        binding.btnCancel.onClick(requireContext()) {
             onCancel?.invoke()
             dismiss()
         }
 
-        binding.btnVote.setOnClickListener {
+        binding.btnVote.onClick(requireContext()) {
             if (rating == 0) {
                 Toast.makeText(requireContext(), requireContext().getText(R.string.rate_us_0), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                return@onClick
             }
 
             if (rating <= 3) {

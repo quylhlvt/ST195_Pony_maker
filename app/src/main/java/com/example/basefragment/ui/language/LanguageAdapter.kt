@@ -31,7 +31,7 @@ class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLa
 
             tvLang.setTextColor(color)
 
-            root.onClick {
+            root.onClick(context) {
                 onItemClick.invoke(item.code)
             }
         }
