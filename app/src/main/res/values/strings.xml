@@ -55,5 +55,6 @@
     <string name="music">Music</string>
     <string name="sound">Sound</string>
     <string name="player_1">Player 1</string>
+    <string name="player_2">Player 2</string>
     <string name="place_the_bombs_in_the_opponent_s_nplaying_field">Place the bombs in the opponent\'s\nplaying field.</string>
 </resources>

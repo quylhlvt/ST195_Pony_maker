@@ -23,14 +23,18 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 
-class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(FragmentManualBinding::inflate,
+class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(FragmentManualBinding::inflate,
     ManualViewModel::class.java
 ) {
+    private lateinit var player1List: List<ManualModel>
+
     private val manualAdapter by lazy {
         ManualAdapter(requireContext())
     }
     override fun viewListener() {
+
         binding.tvNext.onClick(requireContext()){
+            val player2List = manualAdapter.getItems()
 
             if (manualAdapter.getSelectItems().isEmpty()) {
                 showToast("Please select 3 items")
@@ -39,13 +43,17 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(Frag
 
             val bundle = Bundle().apply {
                 putParcelableArray(
-                    "selectedList",
-                    manualAdapter.getItems().toTypedArray()
+                    "player1List",
+                    player1List.toTypedArray()
+                )
+                putParcelableArray(
+                    "player2List",
+                    player2List.toTypedArray()
                 )
             }
 
             findNavController()
-                .navigate(R.id.action_manualFragment_to_manualFragment2, bundle)
+                .navigate(R.id.action_manual_to_play, bundle)
         }
 
     }
@@ -56,7 +64,12 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(Frag
     ): FragmentManualBinding = FragmentManualBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        player1List = arguments
+            ?.getParcelableArray("selectedList")
+            ?.map { it as ManualModel }
+            ?: emptyList()
         binding.apply {
+            txtPlayer.text = getString(R.string.player_2)
             val data = List(9) { ManualModel(false) }
             recycleChoose.apply {
                 adapter = manualAdapter

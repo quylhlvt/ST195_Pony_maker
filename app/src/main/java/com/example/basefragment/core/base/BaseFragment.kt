@@ -4,6 +4,7 @@ package com.example.basefragment.core.base
 import android.app.Dialog
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -68,6 +69,8 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.v(TAG, "onViewCreated: $this")
+        requireActivity().requestedOrientation =
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         initView()
         initText()
         viewListener()

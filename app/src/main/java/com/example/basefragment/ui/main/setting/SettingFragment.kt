@@ -31,7 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
     FragmentSettingBinding::inflate, SettingViewModel::class.java
 ) {
-
+    var checkMode = false
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupBackPressHandler()
@@ -64,6 +64,9 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
             } else {
                 btnRate.visible()
             }
+             checkMode = sharedPreferences.isRotate()
+            changemode(checkMode)
+
             actionBar.tvCenter.select()
             actionBar.apply {
                 setImageActionBar(btnActionBarLeft, R.drawable.back_app)
@@ -72,7 +75,23 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
         }
 
     }
+    private fun changemode(  check: Boolean){
+        binding.apply {
+        val (strokeView, selectView) = if (!check) {
+            strokerHorizontal to selectHorizontal
+        } else {
+            strokerVertical to selectVertical
+        }
 
+        listOf(strokerHorizontal, strokerVertical)
+            .forEach { it.applyStrokeSelected(false) }
+
+        listOf(selectHorizontal, selectVertical)
+            .forEach { it.applySelectImage(false) }
+
+        strokeView.applyStrokeSelected(true)
+        selectView.applySelectImage(true)
+    }}
     override fun viewListener() {
         binding.apply {
             // Action bar left button
@@ -109,11 +128,10 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
                 updateMusicIcon(switchSound,false)
             }
             horizontal.onClick(requireContext()) {
-                ScreenMode(false)
+                screenMode(false)
             }
             vertical.onClick(requireContext()) {
-                ScreenMode(true)
-
+                screenMode(true)
             }
         }
     }
@@ -140,28 +158,11 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
             musicButtons.setImageResource(if (sound) R.drawable.ic_switch_on else R.drawable.ic_switch_off)
         }
     }
-    private fun ScreenMode(checkMode: Boolean=false) {
+    private fun screenMode(checkMode: Boolean=false) {
         if (sharedPreferences.isRotate() == checkMode) return
-
-        binding.apply {
-                val (strokeView, selectView) = if (!checkMode) {
-                    strokerHorizontal to selectHorizontal
-                } else {
-                    strokerVertical to selectVertical
-                }
-
-                listOf(strokerHorizontal, strokerVertical)
-                    .forEach { it.applyStrokeSelected(false) }
-
-                listOf(selectHorizontal, selectVertical)
-                    .forEach { it.applySelectImage(false) }
-
-                strokeView.applyStrokeSelected(true)
-                selectView.applySelectImage(true)
-                sharedPreferences.setRotate(checkMode)
-            }
+        changemode(checkMode)
+        sharedPreferences.setRotate(checkMode)
     }
-
     override fun observeData() {
         // Observe ViewModel data
     }

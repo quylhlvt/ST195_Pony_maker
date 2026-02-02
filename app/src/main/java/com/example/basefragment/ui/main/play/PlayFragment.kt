@@ -1,12 +1,15 @@
 package com.example.basefragment.ui.main.play
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentAutoBinding
 import com.example.basefragment.databinding.FragmentAutoBinding.inflate
@@ -19,8 +22,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(FragmentPlayBinding::inflate,
     PlayViewModel::class.java
 ) {
-    private lateinit var selectedList: List<ManualModel>
-
+    private lateinit var player1List: List<ManualModel>
+    private lateinit var player2List: List<ManualModel>
     override fun viewListener() {
 
     }
@@ -31,13 +34,24 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(FragmentPl
     ): FragmentPlayBinding = FragmentPlayBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        selectedList = arguments
-            ?.getParcelableArray("selectedList")
+        player1List = arguments
+            ?.getParcelableArray("player1List")
             ?.map { it as ManualModel }
             ?: emptyList()
-        binding.txt.text ="${selectedList}"
+
+        player2List = arguments
+            ?.getParcelableArray("player2List")
+            ?.map { it as ManualModel }
+            ?: emptyList()
+
+        // Log để kiểm tra
+        Log.d("PlayFragment", "Player 1 items: ${player1List}")
+        Log.d("PlayFragment", "Player 2 items: ${player2List}")
 
 
+    binding.imgTvCenter.onClick(requireContext()){
+        popBack()
+    }
 //        lifecycleScope.
 
 //        binding.textView.text = "Home Fragment"

@@ -20,7 +20,6 @@ class AutoFragment  : BaseFragment<FragmentAutoBinding, AutoViewModel>(FragmentA
     AutoViewModel::class.java
 ) {
     override fun viewListener() {
-
     }
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -33,7 +32,7 @@ class AutoFragment  : BaseFragment<FragmentAutoBinding, AutoViewModel>(FragmentA
         requireActivity().requestedOrientation = if (sharedPreferences.isRotate()) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
 
 //        lifecycleScope.
@@ -49,13 +48,15 @@ class AutoFragment  : BaseFragment<FragmentAutoBinding, AutoViewModel>(FragmentA
             if (sharedPreferences.isRotate())
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             else
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
-    override fun onPause() {
-        super.onPause()
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
         requireActivity().requestedOrientation =
-            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
     override fun observeData() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->

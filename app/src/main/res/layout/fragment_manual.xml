@@ -53,6 +53,7 @@
             <androidx.appcompat.widget.AppCompatTextView
                 style="@style/single_marquee"
                 app:strokeJoinStyle="miter"
+                android:id="@+id/txtPlayer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/player_1"
