@@ -2,23 +2,26 @@ package com.example.basefragment.ui.main.play
 
 import android.os.Bundle
 import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentPlayBinding
+import com.example.basefragment.databinding.FragmentPlayBinding.inflate
+import com.example.basefragment.databinding.FragmentPrePlayBinding
 import com.example.basefragment.ui.main.manual.ManualViewModel
 import dagger.hilt.android.AndroidEntryPoint
-
+import kotlin.getValue
 @AndroidEntryPoint
-class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
-    FragmentPlayBinding::inflate,
+class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
+    FragmentPrePlayBinding::inflate,
     PlayViewModel::class.java
 ) {
     // ✅ Sử dụng activityViewModels để access shared ViewModel
@@ -33,7 +36,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentPlayBinding = FragmentPlayBinding.inflate(inflater, container, false)
+    ): FragmentPrePlayBinding = FragmentPrePlayBinding.inflate(inflater, container, false)
 
     override fun initView() {
         setupBackPressHandler()
@@ -52,9 +55,9 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         Log.d("PlayFragment", "Player 1 selected: ${player1List.count { it.bomb }}")
         Log.d("PlayFragment", "Player 2 selected: ${player2List.count { it.bomb }}")
 
-        binding.imgBack.onClick(requireContext()) {
-            finishGame()
-        }
+//        binding.imgTvCenter.onClick(requireContext()) {
+//            finishGame()
+//        }
     }
 
     override fun observeData() {}
