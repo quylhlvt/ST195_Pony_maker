@@ -1,5 +1,6 @@
 package com.example.basefragment.ui.main.play
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -36,6 +37,11 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     ): FragmentPlayBinding = FragmentPlayBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        requireActivity().requestedOrientation = if (sharedPreferences.isRotate()) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
         setupBackPressHandler()
 
         // ✅ Nhận data từ Bundle
@@ -73,6 +79,21 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         manualViewModel.resetAll()
         popBack()
     }
+    override fun onResume() {
+        super.onResume()
+        requireActivity().requestedOrientation =
+            if (sharedPreferences.isRotate())
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            else
+                ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+    }
 
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        requireActivity().requestedOrientation =
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
     override fun bindViewModel() {}
 }
