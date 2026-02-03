@@ -6,21 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
-import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.extention.applySelectImage
-import com.example.basefragment.core.extention.applyStrokeSelected
-import com.example.basefragment.core.extention.gone
-import com.example.basefragment.core.extention.onClick
-import com.example.basefragment.core.extention.policy
-import com.example.basefragment.core.extention.popBack
-import com.example.basefragment.core.extention.select
-import com.example.basefragment.core.extention.setImageActionBar
-import com.example.basefragment.core.extention.setTextActionBar
-import com.example.basefragment.core.extention.shareApp
-import com.example.basefragment.core.extention.toLangFromSetting
-import com.example.basefragment.core.extention.visible
+import com.example.basefragment.core.extention.*
 import com.example.basefragment.core.helper.RateHelper
 import com.example.basefragment.databinding.FragmentSettingBinding
 import com.example.basefragment.utils.music.MusicLocal
@@ -31,14 +19,13 @@ import dagger.hilt.android.AndroidEntryPoint
 class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
     FragmentSettingBinding::inflate, SettingViewModel::class.java
 ) {
-    var checkMode = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupBackPressHandler()
     }
 
     private fun setupBackPressHandler() {
-        // Handle back button để quay về Home
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -57,117 +44,167 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>(
 
     override fun initView() {
         binding.apply {
-            checkStatus(switchMusic,true)
-            checkStatus(switchSound,false)
-            if (sharedPreferences.isRateRequest()) {
-                btnRate.gone()
-            } else {
-                btnRate.visible()
-            }
-             checkMode = sharedPreferences.isRotate()
-            changemode(checkMode)
-
-            actionBar.tvCenter.select()
-            actionBar.apply {
-                setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-                setTextActionBar(tvCenter, getString(R.string.settings))
-            }
+            setupActionBar()
+            setupSwitches()
+            setupRateButton()
+            setupScreenMode()
         }
-
     }
-    private fun changemode(  check: Boolean){
-        binding.apply {
-        val (strokeView, selectView) = if (!check) {
-            strokerHorizontal to selectHorizontal
-        } else {
-            strokerVertical to selectVertical
+
+    private fun FragmentSettingBinding.setupActionBar() {
+        actionBar.apply {
+            tvCenter.select()
+            setImageActionBar(btnActionBarLeft, R.drawable.back_app)
+            setTextActionBar(tvCenter, getString(R.string.settings))
         }
+    }
 
-        listOf(strokerHorizontal, strokerVertical)
-            .forEach { it.applyStrokeSelected(false) }
+    private fun FragmentSettingBinding.setupSwitches() {
+        // Lấy trạng thái từ SharedPreferences (default = true)
+        val isMusicOn = sharedPreferences.isMusic()
+        val isSoundOn = sharedPreferences.isSound()
 
-        listOf(selectHorizontal, selectVertical)
-            .forEach { it.applySelectImage(false) }
+        // Đồng bộ MusicLocal với SharedPreferences
+        MusicLocal.toggle(requireContext(), isMusicOn)
 
-        strokeView.applyStrokeSelected(true)
-        selectView.applySelectImage(true)
-    }}
+        // Update UI
+        updateSwitchIcon(switchMusic, isMusicOn)
+        updateSwitchIcon(switchSound, isSoundOn)
+    }
+
+    private fun FragmentSettingBinding.setupRateButton() {
+        if (sharedPreferences.isRateRequest()) {
+            btnRate.gone()
+        } else {
+            btnRate.visible()
+        }
+    }
+
+    private fun FragmentSettingBinding.setupScreenMode() {
+        val isVertical = sharedPreferences.isRotate()
+        updateScreenModeUI(isVertical)
+    }
+
     override fun viewListener() {
         binding.apply {
-            // Action bar left button
-            actionBar.btnActionBarLeft.onClick(requireContext()) {
-                popBack()
-            }
+            setupActionBarListeners()
+            setupNavigationListeners()
+            setupSwitchListeners()
+            setupScreenModeListeners()
+        }
+    }
 
-            // Navigate đến Language
-            btnLang.onClick(requireContext()) {
-                toLangFromSetting()
-            }
+    private fun FragmentSettingBinding.setupActionBarListeners() {
+        actionBar.btnActionBarLeft.onClick(requireContext()) {
+            popBack()
+        }
+    }
 
-            // Các button setting khác
-            btnPolicy.onClick(requireContext()) {
-                policy()
-            }
+    private fun FragmentSettingBinding.setupNavigationListeners() {
+        btnLang.onClick(requireContext()) {
+            toLangFromSetting()
+        }
 
-            btnRate.onClick(requireContext()) {
-                RateHelper.showRateDialog(requireActivity(), sharedPreferences){ state ->
-                    if (state != RateState.CANCEL){
-                        btnRate.gone()
-                        showToast(R.string.have_rated)
-                    }
+        btnPolicy.onClick(requireContext()) {
+            policy()
+        }
+
+        btnRate.onClick(requireContext()) {
+            RateHelper.showRateDialog(requireActivity(), sharedPreferences) { state ->
+                if (state != RateState.CANCEL) {
+                    btnRate.gone()
+                    showToast(R.string.have_rated)
                 }
             }
-            btnShare.onClick(requireContext()) {
-                shareApp()
-                // Handle share app
-            }
-            switchMusic.onClick(requireContext()) {
-                updateMusicIcon(switchMusic,true)
-            }
-            switchSound.onClick(requireContext(), noplay = true) {
-                updateMusicIcon(switchSound,false)
-            }
-            horizontal.onClick(requireContext()) {
-                screenMode(false)
-            }
-            vertical.onClick(requireContext()) {
-                screenMode(true)
-            }
         }
-    }
-    private fun updateMusicIcon( musicButtons: ImageView, isMusic: Boolean= false) {
-        if (isMusic) {
-            var playing = MusicLocal.status(requireContext())
-            playing = ! playing
-            MusicLocal.toggle(requireContext(),playing)
-            if (!playing) MusicLocal.pause() else MusicLocal.play(requireContext())
-            musicButtons.setImageResource(if (playing) R.drawable.ic_switch_on else R.drawable.ic_switch_off)
-        } else {
-            val sound = sharedPreferences.isSound().not()
-            sharedPreferences.setSound(sound)
-            musicButtons.setImageResource(if (sound) R.drawable.ic_switch_on else R.drawable.ic_switch_off)
+
+        btnShare.onClick(requireContext()) {
+            shareApp()
         }
-    }
-    private fun checkStatus(musicButtons: ImageView, isMusic: Boolean= false) {
-        if (isMusic) {
-            val playing = MusicLocal.status(requireContext())
-            musicButtons.setImageResource(if (playing) R.drawable.ic_switch_on else R.drawable.ic_switch_off)
-        }
-        else{
-            val sound = sharedPreferences.isSound()
-            musicButtons.setImageResource(if (sound) R.drawable.ic_switch_on else R.drawable.ic_switch_off)
-        }
-    }
-    private fun screenMode(checkMode: Boolean=false) {
-        if (sharedPreferences.isRotate() == checkMode) return
-        changemode(checkMode)
-        sharedPreferences.setRotate(checkMode)
-    }
-    override fun observeData() {
-        // Observe ViewModel data
     }
 
-    override fun bindViewModel() {
-        // Bind ViewModel
+    private fun FragmentSettingBinding.setupSwitchListeners() {
+        switchMusic.onClick(requireContext()) {
+            toggleMusic()
+        }
+
+        switchSound.onClick(requireContext(), noplay = true) {
+            toggleSound()
+        }
     }
+
+    private fun FragmentSettingBinding.setupScreenModeListeners() {
+        horizontal.onClick(requireContext()) {
+            setScreenMode(isVertical = false)
+        }
+
+        vertical.onClick(requireContext()) {
+            setScreenMode(isVertical = true)
+        }
+    }
+
+    private fun FragmentSettingBinding.toggleMusic() {
+        val currentStatus = sharedPreferences.isMusic()
+        val newStatus = !currentStatus
+
+        // Lưu vào SharedPreferences
+        sharedPreferences.setMusic(newStatus)
+
+        // Toggle MusicLocal
+        MusicLocal.toggle(requireContext(), newStatus)
+        if (newStatus) {
+            MusicLocal.play(requireContext())
+        } else {
+            MusicLocal.pause()
+        }
+
+        // Update UI
+        updateSwitchIcon(switchMusic, newStatus)
+    }
+
+    private fun FragmentSettingBinding.toggleSound() {
+        val currentSound = sharedPreferences.isSound()
+        val newSound = !currentSound
+
+        // Lưu vào SharedPreferences
+        sharedPreferences.setSound(newSound)
+
+        // Update UI
+        updateSwitchIcon(switchSound, newSound)
+    }
+
+    private fun updateSwitchIcon(imageView: ImageView, isOn: Boolean) {
+        val iconRes = if (isOn) R.drawable.ic_switch_on else R.drawable.ic_switch_off
+        imageView.setImageResource(iconRes)
+    }
+
+    private fun FragmentSettingBinding.setScreenMode(isVertical: Boolean) {
+        if (sharedPreferences.isRotate() == isVertical) return
+
+        sharedPreferences.setRotate(isVertical)
+        updateScreenModeUI(isVertical)
+    }
+
+    private fun FragmentSettingBinding.updateScreenModeUI(isVertical: Boolean) {
+        // Reset tất cả
+        listOf(strokerHorizontal, strokerVertical).forEach {
+            it.applyStrokeSelected(false)
+        }
+        listOf(selectHorizontal, selectVertical).forEach {
+            it.applySelectImage(false)
+        }
+
+        // Chọn mode hiện tại
+        if (isVertical) {
+            strokerVertical.applyStrokeSelected(true)
+            selectVertical.applySelectImage(true)
+        } else {
+            strokerHorizontal.applyStrokeSelected(true)
+            selectHorizontal.applySelectImage(true)
+        }
+    }
+
+    override fun observeData() {}
+
+    override fun bindViewModel() {}
 }

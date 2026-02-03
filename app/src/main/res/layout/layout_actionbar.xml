@@ -84,7 +84,7 @@
         android:gravity="center"
         app:layout_constraintDimensionRatio="1.32:0.48"
         android:text="@string/language"
-        android:textColor="@color/app_color3"
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:fontFamily="@font/carter_one_regular"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"

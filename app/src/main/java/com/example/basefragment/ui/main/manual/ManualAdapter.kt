@@ -15,7 +15,9 @@ class ManualAdapter(
 ) : BaseAdapter<ManualModel, ItemBombManualUnchooseBinding>(
     ItemBombManualUnchooseBinding::inflate
 ) {
-
+    fun updateList(newList: List<ManualModel>) {
+        submitList(newList)
+    }
     private val MAX_SELECT = 3
 
     var onSelectionChanged: ((List<ManualModel>) -> Unit)? = null

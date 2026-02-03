@@ -27,6 +27,7 @@ fun Fragment.toHome() = nav(R.id.action_intro_to_home)
 
 // ============ HOME FRAGMENT ============
 fun Fragment.toSettingFromHome() = nav(R.id.action_home_to_setting)
+fun Fragment.toGuideFromManual() = nav(R.id.action_manual_to_guide)
 
 // ============ SETTING FRAGMENT ============
 fun Fragment.toLangFromSetting() = nav(R.id.action_setting_to_language)

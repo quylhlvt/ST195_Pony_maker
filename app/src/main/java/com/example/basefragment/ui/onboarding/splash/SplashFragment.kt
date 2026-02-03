@@ -39,7 +39,7 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
         isInSplashOrTutorial = true
         startFakeLoading3s()
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            kotlinx.coroutines.delay(2800)
+            kotlinx.coroutines.delay(3000)
             goToHome()
         }
 
