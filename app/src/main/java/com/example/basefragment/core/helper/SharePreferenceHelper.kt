@@ -27,6 +27,7 @@ object SharedPreferencesManager {
     private const val RATE_KEY = "RATE_KEY"
     private const val SOUND_KEY = "SOUND_KEY"
     private const val MUSIC_KEY = "MUSIC_KEY"
+    private const val HowToClickFirst = "HowToClickFirst"
     private const val SCREEN_ROTATE_KEY = "SCREEN_ROTATE_KEY"
     private const val RATE_COUNT_KEY = "RATE_COUNT_KEY"
     fun isSplashScreen(): Boolean = getBooleanDataByKey(SPLASH_SCREEN)
@@ -37,6 +38,11 @@ object SharedPreferencesManager {
 
     fun setMusic(isMusicOn: Boolean) {
         saveBooleanDataByKey(MUSIC_KEY, isMusicOn)
+    }
+    fun isHowToClickFirst(): Boolean = sharedPreferences.getBoolean(MUSIC_KEY, false)
+
+    fun setHowToClickFirst(click: Boolean) {
+        saveBooleanDataByKey(HowToClickFirst, click)
     }
     fun isLanuageScreen(): Boolean = getBooleanDataByKey(LANGUAGE_SCREEN)
     fun setLanuageScreen(isSkipped: Boolean=true) {

@@ -249,9 +249,7 @@
         android:id="@+id/manualFragment2"
         android:name="com.example.basefragment.ui.main.manual.ManualFragment2"
         android:label="ManualFragment2" >
-        <argument
-            android:name="selectedList"
-            app:argType="com.example.basefragment.data.model.manual.ManualModel[]" />
+
         <action
             android:id="@+id/action_manual_to_play"
             app:destination="@id/playFragment"

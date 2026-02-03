@@ -3,6 +3,7 @@ package com.example.basefragment.ui.main.manual
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -13,6 +14,7 @@ import com.example.basefragment.core.extention.*
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentManualBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -20,12 +22,14 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
     FragmentManualBinding::inflate,
     ManualViewModel::class.java
 ) {
-    private lateinit var player1List: List<ManualModel>
+    // ✅ Sử dụng activityViewModels để share ViewModel
+    private val sharedViewModel: ManualViewModel by activityViewModels()
 
     private val manualAdapter by lazy {
         ManualAdapter(requireContext()).apply {
             onSelectionChanged = {
-                viewModel.updatePlayer2List(getItems())
+                // Update real-time khi user chọn
+                sharedViewModel.updatePlayer2List(getItems())
             }
         }
     }
@@ -36,22 +40,12 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
         savedInstanceState: Bundle?
     ): FragmentManualBinding = FragmentManualBinding.inflate(inflater, container, false)
 
-
     override fun initView() {
-        // Lấy player1List từ arguments (fallback)
-        player1List = arguments
-            ?.getParcelableArray("selectedList")
-            ?.map { it as ManualModel }
-            ?: viewModel.getCurrentPlayer1List()
-
         binding.apply {
             setupActionBar()
             setupRecyclerView()
             txtPlayer.text = getString(R.string.player_2)
         }
-
-        // Khởi tạo danh sách từ ViewModel
-        viewModel.initPlayer2List()
     }
 
     private fun FragmentManualBinding.setupActionBar() {
@@ -66,6 +60,11 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
             adapter = manualAdapter
             setHasFixedSize(true)
             isNestedScrollingEnabled = false
+            layoutManager = object : androidx.recyclerview.widget.GridLayoutManager(requireContext(), 3) {
+                override fun canScrollVertically(): Boolean = false
+                override fun canScrollHorizontally(): Boolean = false
+            }
+            itemAnimator = null
         }
     }
 
@@ -79,7 +78,12 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
     private fun FragmentManualBinding.setupActionBarListeners() {
         actionBar.apply {
             btnActionBarLeft.onClick(requireContext()) {
-                popBack()
+                lifecycleScope.launch {
+                    popBack()
+                    delay(100)
+                    sharedViewModel.resetList2()
+                }
+
             }
             btnActionBarRight.onClick(requireContext()) {
                 toGuideFromManual()
@@ -96,12 +100,13 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
                 return@onClick
             }
 
-            // Lưu state trước khi navigate
-            viewModel.updatePlayer2List(manualAdapter.getItems())
+            // ✅ Lưu selection vào ViewModel
+            sharedViewModel.updatePlayer2List(manualAdapter.getItems())
 
+            // ✅ Truyền data qua Bundle cho PlayFragment
             val bundle = Bundle().apply {
-                putParcelableArray("player1List", player1List.toTypedArray())
-                putParcelableArray("player2List", manualAdapter.getItems().toTypedArray())
+                putParcelableArray("player1List", sharedViewModel.getPlayer1List().toTypedArray())
+                putParcelableArray("player2List", sharedViewModel.getPlayer2List().toTypedArray())
             }
 
             findNavController().navigate(R.id.action_manual_to_play, bundle)
@@ -109,13 +114,10 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
     }
 
     override fun observeData() {
-        // Collect Flow để restore state
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.player2List.collect { list ->
-                    if (list.isNotEmpty()) {
-                        manualAdapter.updateList(list)
-                    }
+                sharedViewModel.player2List.collect { list ->
+                    manualAdapter.updateList(list)
                 }
             }
         }

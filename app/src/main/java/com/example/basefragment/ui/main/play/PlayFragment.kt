@@ -6,23 +6,22 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentPlayBinding
 import com.example.basefragment.ui.main.manual.ManualViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     FragmentPlayBinding::inflate,
     PlayViewModel::class.java
 ) {
+    // ✅ Sử dụng activityViewModels để access shared ViewModel
     private val manualViewModel: ManualViewModel by activityViewModels()
 
     private lateinit var player1List: List<ManualModel>
@@ -39,6 +38,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     override fun initView() {
         setupBackPressHandler()
 
+        // ✅ Nhận data từ Bundle
         player1List = arguments
             ?.getParcelableArray("player1List")
             ?.map { it as ManualModel }
@@ -49,8 +49,8 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
             ?.map { it as ManualModel }
             ?: emptyList()
 
-        Log.d("PlayFragment", "Player 1 items: $player1List")
-        Log.d("PlayFragment", "Player 2 items: $player2List")
+        Log.d("PlayFragment", "Player 1 selected: ${player1List.count { it.bomb }}")
+        Log.d("PlayFragment", "Player 2 selected: ${player2List.count { it.bomb }}")
 
         binding.imgTvCenter.onClick(requireContext()) {
             finishGame()
@@ -69,23 +69,9 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
             }
         )
     }
-
     private fun finishGame() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            // ✅ Bước 1: Reset ViewModel
-            manualViewModel.resetAllLists()
-
-            // ✅ Bước 2: Delay nhỏ để đảm bảo Flow emit
-            delay(50)
-
-            // ✅ Bước 3: Set flag
-            findNavController().previousBackStackEntry
-                ?.savedStateHandle
-                ?.set("should_reset", true)
-
-            // ✅ Bước 4: PopBack
-            findNavController().popBackStack(R.id.manualFragment, false)
-        }
+        manualViewModel.resetAll()
+        popBack()
     }
 
     override fun bindViewModel() {}
