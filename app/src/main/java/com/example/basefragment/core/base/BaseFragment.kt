@@ -44,6 +44,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         ViewModelProvider(this)[viewModelClass]
     }
     open fun setupPreViews() {}
+    open fun setupPredViews() {}
     abstract fun viewListener()
     protected var toast: Toast? = null
     @Inject
@@ -53,7 +54,9 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): VB
-
+    open fun getDefaultOrientation(): Int {
+        return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -62,15 +65,13 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         Log.v(TAG, "onCreateView: $this")
         _navController = findNavController()
         _binding = inflateBinding(inflater, container, savedInstanceState)
-        setupPreViews()
+        setupPredViews()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.v(TAG, "onViewCreated: $this")
-        requireActivity().requestedOrientation =
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         initView()
         initText()
         viewListener()
@@ -85,6 +86,8 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requireActivity().requestedOrientation = getDefaultOrientation()
+        setupPreViews()
         Log.v(TAG, "onCreate: $this")
     }
     override fun onStart() {
