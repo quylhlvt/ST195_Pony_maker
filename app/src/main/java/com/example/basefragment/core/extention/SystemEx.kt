@@ -3,6 +3,7 @@ package com.example.basefragment.core.extention
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
@@ -35,4 +36,8 @@ fun Fragment.hideSoftKeyboard() {
     val inputMethodManager = requireContext()
         .getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
     inputMethodManager?.hideSoftInputFromWindow(view?.windowToken, 0)
+}
+fun Fragment.screenRotation(){
+    requireActivity().requestedOrientation =
+        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 }

@@ -11,7 +11,7 @@ import com.example.basefragment.databinding.ItemBombManualUnchooseBinding
 import com.example.basefragment.utils.music.SoundEffect
 
 class ManualAdapter(
-    private val context: Context
+    private val context: Context, private  val checkPlay: Boolean= false
 ) : BaseAdapter<ManualModel, ItemBombManualUnchooseBinding>(
     ItemBombManualUnchooseBinding::inflate
 ) {
@@ -31,7 +31,9 @@ class ManualAdapter(
         val isLocked = selectedCount >= MAX_SELECT && !item.bomb
 
         binding.apply {
-
+            if (checkPlay){
+                imv.setBackgroundResource(R.drawable.img_unchoose_manual2)
+            }
             // Load image
             if (item.bomb) {
                 imv.setImageResource(R.drawable.ic_character)

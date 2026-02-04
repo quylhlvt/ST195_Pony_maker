@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp"
+
     android:background="@drawable/img_bg_play_hor"
     tools:context=".ui.main.play.PlayFragment">
 
@@ -12,15 +12,148 @@
         android:id="@+id/img_back"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:src="@drawable/back_app"/>
 
+
+<LinearLayout
+    android:id="@+id/linearPrePlay"
+    android:elevation="5dp"
+    android:orientation="horizontal"
+    android:weightSum="800"
+    android:background="@drawable/img_bg_preplay_hor"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+
+        android:layout_weight="276"
+        android:layout_width="0dp"
+
+        android:paddingVertical="76dp"
+        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearPrePlay1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imgpre_player1"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/txtpre_player1"
+                android:src="@drawable/img_heart_player1"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtpre_player1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/carter_one_regular"
+                android:gravity="center"
+                android:text="@string/player_1"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imgpre_player1" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+     <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_weight="248"
+        android:layout_width="0dp"
+        android:layout_height="match_parent">
+        <ImageView
+            android:elevation="0dp"
+            android:id="@+id/img_set1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/img_set2"
+            android:src="@drawable/img_set1_preplay"
+            android:scaleType="fitXY"
+            android:layout_width="0dp"
+            android:layout_height="0dp"/>
+         <ImageView
+             android:elevation="1dp"
+             android:id="@+id/img_vs"
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toEndOf="parent"
+             app:layout_constraintTop_toTopOf="parent"
+             android:src="@drawable/img_vs_preplay"
+             android:layout_width="0dp"
+             android:scaleType="fitXY"
+             android:layout_height="0dp"/>
+         <ImageView
+             android:elevation="0dp"
+             android:id="@+id/img_set2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/img_set1"
+             android:src="@drawable/img_set2_preplay"
+             android:layout_width="0dp"
+             android:scaleType="fitXY"
+             android:layout_height="0dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+
+        android:layout_weight="276"
+        android:layout_width="0dp"
+
+        android:paddingVertical="76dp"
+        android:layout_height="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/linearPrePlay2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/imgpre_player2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/img_heart_player2"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtpre_player2" />
+
+        <TextView
+            android:id="@+id/txtpre_player2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/carter_one_regular"
+            android:gravity="center"
+            android:text="@string/player_2"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+
+            app:layout_constraintBottom_toTopOf="@+id/imgpre_player2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>
     <LinearLayout
+
         android:id="@+id/linearPlayerName"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:weightSum="768"
+        android:weightSum="800"
         android:orientation="horizontal"
         android:gravity="center"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,6 +161,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/img_back"
         app:layout_constraintEnd_toEndOf="parent">
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contrainPlayer1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="128">
@@ -43,17 +177,17 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
+                android:paddingStart="5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageViewPlayer1"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/txtPlayer1"
-                    android:layout_width="wrap_content"
-                    android:paddingHorizontal="5dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/carter_one_regular"
                     android:gravity="center"
@@ -115,6 +249,7 @@
             android:layout_height="match_parent"
             android:layout_weight="260"/>
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contrainPlayer2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="128">
@@ -131,15 +266,14 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="0dp"
+                android:paddingStart="5dp"
                 android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageViewPlayer2"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/txtPlayer2"
-                    android:paddingHorizontal="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/carter_one_regular"
@@ -155,6 +289,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <LinearLayout
+
                     android:id="@+id/linearNumberWin2"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -199,10 +334,13 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
     <LinearLayout
+        android:id="@+id/linearPlay"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:weightSum="768"
         android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearPlayerName"
@@ -212,16 +350,24 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="272">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclePlay"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/materialPlay1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@color/transparent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:cardCornerRadius="12dp"
+                >
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclePlay"
+                android:layout_width="match_parent"
                 android:background="@drawable/img_bg_choose_play1"
+                android:layout_height="match_parent"
                 android:padding="4dp"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="3"
@@ -229,6 +375,7 @@
                 tools:itemCount="9"
                 tools:listitem="@layout/item_bomb_play1_unchoose"
                 />
+        </com.google.android.material.card.MaterialCardView>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -242,23 +389,30 @@
             android:layout_gravity="end"
             android:layout_weight="272">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclePlay2"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/materialPlay2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                app:cardBackgroundColor="@color/transparent"
+                app:cardCornerRadius="12dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/img_bg_choose_manual"
-                android:padding="4dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                android:nestedScrollingEnabled="false"
-                tools:itemCount="9"
-                tools:listitem="@layout/item_bomb_play2_unchoose"
-                />
+                app:strokeWidth="0dp">
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclePlay2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/img_bg_choose_manual"
+                    android:nestedScrollingEnabled="false"
+                    android:padding="4dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3"
+                    tools:itemCount="9"
+                    tools:listitem="@layout/item_bomb_play2_unchoose" />
+            </com.google.android.material.card.MaterialCardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>

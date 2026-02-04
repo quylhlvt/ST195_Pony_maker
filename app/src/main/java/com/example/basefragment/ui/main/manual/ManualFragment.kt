@@ -1,5 +1,6 @@
 package com.example.basefragment.ui.main.manual
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.*
@@ -40,6 +42,16 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
         }
     }
 
+    override fun setupPreViews() {
+        super.setupPreViews()
+
+        screenRotation()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        screenRotation()
+    }
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,6 +61,10 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
     override fun initView() {
 
         binding.apply {
+            Glide.with(requireContext())
+                .asGif()
+                .load(R.raw.touch) // hoặc R.drawable.hand_tap_fixed
+                .into(handTapAnimation)
             howtoclick.visibility = if (!isHowToClickFirst()) View.VISIBLE else View.GONE
             setupActionBar()
             setupRecyclerView()

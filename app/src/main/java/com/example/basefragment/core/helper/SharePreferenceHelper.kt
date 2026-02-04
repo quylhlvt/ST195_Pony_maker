@@ -39,7 +39,7 @@ object SharedPreferencesManager {
     fun setMusic(isMusicOn: Boolean) {
         saveBooleanDataByKey(MUSIC_KEY, isMusicOn)
     }
-    fun isHowToClickFirst(): Boolean = sharedPreferences.getBoolean(MUSIC_KEY, false)
+    fun isHowToClickFirst(): Boolean = sharedPreferences.getBoolean(HowToClickFirst, false)
 
     fun setHowToClickFirst(click: Boolean) {
         saveBooleanDataByKey(HowToClickFirst, click)

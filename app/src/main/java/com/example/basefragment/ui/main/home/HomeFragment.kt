@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.toSettingFromHome
 import com.example.basefragment.core.extention.toSettingFromLang
@@ -44,8 +45,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 
             // Click vào "Quick Mix"
             btnAuto.onClick(requireContext()) {
-                // Navigate tới QuickMixFragment
-                 findNavController().navigate(R.id.action_home_to_auto)
+                val bundle = Bundle().apply {
+                    putBoolean("isAutoMode", true)
+                }
+                findNavController().navigate(R.id.action_home_to_auto, bundle)
             }
             btnMultiplayer.onClick(requireContext()) {
                 findNavController().navigate(R.id.action_home_to_multiplayer)
@@ -54,6 +57,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                 toSettingFromHome()
             }
         }
+    }
+    override fun setupPreViews() {
+        super.setupPreViews()
+
+        screenRotation()
     }
 
 

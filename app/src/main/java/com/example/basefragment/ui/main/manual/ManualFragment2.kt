@@ -26,7 +26,7 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
     private val sharedViewModel: ManualViewModel by activityViewModels()
 
     private val manualAdapter by lazy {
-        ManualAdapter(requireContext()).apply {
+        ManualAdapter(requireContext(), true).apply {
             onSelectionChanged = {
                 // Update real-time khi user chọn
                 sharedViewModel.updatePlayer2List(getItems())
@@ -42,6 +42,7 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
 
     override fun initView() {
         binding.apply {
+            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
             setupActionBar()
             setupRecyclerView()
             txtPlayer.text = getString(R.string.player_2)
@@ -108,9 +109,14 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
                 putParcelableArray("player1List", sharedViewModel.getPlayer1List().toTypedArray())
                 putParcelableArray("player2List", sharedViewModel.getPlayer2List().toTypedArray())
             }
-
             findNavController().navigate(R.id.action_manual_to_play, bundle)
+
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sharedViewModel.resetAll()
     }
 
     override fun observeData() {

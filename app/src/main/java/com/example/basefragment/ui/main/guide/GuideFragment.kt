@@ -7,10 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.databinding.FragmentAutoBinding
-import com.example.basefragment.databinding.FragmentAutoBinding.inflate
 import com.example.basefragment.databinding.FragmentGuideBinding
-import com.example.basefragment.ui.main.auto.AutoViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

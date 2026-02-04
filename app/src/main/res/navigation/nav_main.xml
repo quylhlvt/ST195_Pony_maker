@@ -24,7 +24,8 @@
 
         <action
             android:id="@+id/action_home_to_auto"
-            app:destination="@id/autoFragment"
+            app:destination="@id/playFragment"
+            app:popUpTo="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -84,29 +85,7 @@
             />
     </fragment>
 
-    <!-- ==================== AUTO ==================== -->
-    <fragment
-        android:id="@+id/autoFragment"
-        android:name="com.example.basefragment.ui.main.auto.AutoFragment"
-        android:label="Auto"
-        tools:layout="@layout/fragment_auto">
 
-        <action
-            android:id="@+id/action_auto_to_home"
-            app:destination="@id/homeFragment"
-            app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
-
-        <action
-            android:id="@+id/action_auto_to_play"
-            app:destination="@id/playFragment"
-            app:popUpTo="@id/autoFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
-    </fragment>
 
     <!-- ==================== MULTIPLAYER ==================== -->
     <fragment
@@ -141,7 +120,11 @@
         android:name="com.example.basefragment.ui.main.play.PlayFragment"
         android:label="Play"
         tools:layout="@layout/fragment_play">
-
+        <action
+            android:id="@+id/action_auto_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_play_to_success"
             app:destination="@id/successFragment"
@@ -152,19 +135,25 @@
             app:popExitAnim="@anim/slide_out_right"
             />
 
-        <action
-            android:id="@+id/action_play_to_auto"
-            app:destination="@id/autoFragment"
-            app:popUpTo="@id/homeFragment" />
+
 
         <action
             android:id="@+id/action_play_to_manual"
             app:destination="@id/manualFragment"
             app:popUpTo="@id/homeFragment" />
         <argument
+            android:name="isAutoMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
+
+        <argument
+            app:nullable="true"
+            android:defaultValue="@null"
             android:name="player1List"
             app:argType="com.example.basefragment.data.model.manual.ManualModel[]" />
         <argument
+            app:nullable="true"
+            android:defaultValue="@null"
             android:name="player2List"
             app:argType="com.example.basefragment.data.model.manual.ManualModel[]" />
     </fragment>
@@ -217,7 +206,7 @@
 
         <action
             android:id="@+id/action_success_to_auto"
-            app:destination="@id/autoFragment"
+            app:destination="@id/playFragment"
             app:popUpTo="@id/homeFragment" />
 
         <action
@@ -253,7 +242,7 @@
         <action
             android:id="@+id/action_manual_to_play"
             app:destination="@id/playFragment"
-            app:popUpTo="@id/manualFragment"
+            app:popUpTo="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"

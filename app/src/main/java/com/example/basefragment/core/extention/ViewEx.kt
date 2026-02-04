@@ -3,11 +3,14 @@ package com.example.basefragment.core.extention
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.FontRes
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.recyclerview.widget.RecyclerView
 import com.example.basefragment.R
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.utils.DataLocal.KEY_LAST_CLICK_TIME
@@ -16,6 +19,7 @@ import com.example.basefragment.utils.music.SoundEffect.playClick
 import com.example.basefragment.utils.music.SoundEffect.playClick1
 import com.google.android.material.card.MaterialCardView
 import kotlin.math.roundToInt
+import androidx.core.graphics.drawable.toDrawable
 
 fun Int.dp(context: Context): Int =
     (this * context.resources.displayMetrics.density).roundToInt()
@@ -118,4 +122,11 @@ fun View.drawToBitmap(): Bitmap {
  */
 fun View.isLaidOut(): Boolean {
     return width > 0 && height > 0
+}
+fun RecyclerView.setForegroundColor(colorRes: Int?) {
+    foreground = if (colorRes != null) {
+        ContextCompat.getColor(context, colorRes).toDrawable()
+    } else {
+        null
+    }
 }

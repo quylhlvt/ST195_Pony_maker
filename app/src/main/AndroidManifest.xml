@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+<!--    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -20,18 +20,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.BaseFragment">
-        <meta-data
-            android:name="com.google.android.gms.ads.flag.NATIVE_AD_DEBUGGER_ENABLED"
-            android:value="false" />
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/app_id" />
-        <meta-data
-            android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"
-            android:value="true" />
-        <meta-data
-            android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"
-            android:value="true" />
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.flag.NATIVE_AD_DEBUGGER_ENABLED"-->
+<!--            android:value="false" />-->
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
+<!--            android:value="@string/app_id" />-->
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"-->
+<!--            android:value="true" />-->
+<!--        <meta-data-->
+<!--            android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"-->
+<!--            android:value="true" />-->
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTask"

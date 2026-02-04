@@ -86,7 +86,7 @@ object StripeProgressHelper {
             val maxWidth = bgBar.width
             val charHalf = character.width / 2f
 
-            ValueAnimator.ofInt(0, maxWidth-60).apply {
+            ValueAnimator.ofInt(0, maxWidth).apply {
                 duration = 2500
                 interpolator = LinearInterpolator()
 
@@ -97,21 +97,18 @@ object StripeProgressHelper {
                     val x = value - charHalf
                     character.translationX = x.coerceAtLeast(0f)
 
-                    // === NHÚN NHẢY NHẸ (RUN EFFECT) ===
+                    // === NHÚN NHẢY ===
                     val phase = (value / 20) % 2
-                    character.translationY =
-                        if (phase == 0) -4f else 0f
+                    character.translationY = if (phase == 0) -4f else 0f
 
                     // === LẮC NHẸ ===
-                    character.rotation =
-                        if (phase == 0) -6f else 6f
+                    character.rotation = if (phase == 0) -6f else 6f
                 }
 
                 start()
             }
         }
     }
-
 
     fun animateProgress(bgBar: View, progressBar: View) {
         bgBar.post {

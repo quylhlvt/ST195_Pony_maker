@@ -19,9 +19,14 @@
 
         <!--            imvImage-->
         <ImageView
+            android:elevation="1dp"
             android:background="@drawable/img_unchoose_play1"
             android:id="@+id/imv"
-            android:padding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
+        <View
+            android:background="#E59800"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY" />

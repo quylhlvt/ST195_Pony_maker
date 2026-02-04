@@ -101,23 +101,24 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:strokeWidth="0dp">
-                <FrameLayout
+                <LinearLayout
+                    android:visibility="gone"
                     android:id="@+id/howtoclick"
                     android:elevation="1dp"
+                    android:weightSum="3"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/black2"
-                    android:visibility="gone">
-                    <com.airbnb.lottie.LottieAnimationView
+                    >
+                    <ImageView
                         android:id="@+id/hand_tap_animation"
-                        android:layout_width="100dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="100dp"
-                        android:layout_gravity="center"
-                        app:lottie_rawRes="@raw/hand_tap_fixed"
                         app:lottie_autoPlay="true"
                         app:lottie_loop="true"
                         />
-                </FrameLayout>
+                </LinearLayout>
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycleChoose"
                     android:layout_width="match_parent"

@@ -5,18 +5,22 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.helper.LanguageHelper
 import com.example.basefragment.core.helper.SharedPreferencesManager
+import com.example.basefragment.ui.main.manual.ManualViewModel
 import com.example.basefragment.utils.music.MusicLocal
 import com.example.basefragment.utils.music.SoundEffect
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
+import kotlin.getValue
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    private val manualViewModel: ManualViewModel by viewModels()
 
     private lateinit var navController: NavController
 
@@ -66,10 +70,10 @@ class MainActivity : AppCompatActivity() {
         super.attachBaseContext(context)
     }
 
-    // ❌ XÓA onBackPressed() - Nó conflict với Fragment's OnBackPressedDispatcher
      override fun onBackPressed() {
          if (!navController.popBackStack()) {
              super.onBackPressed()
+
          }
      }
 
