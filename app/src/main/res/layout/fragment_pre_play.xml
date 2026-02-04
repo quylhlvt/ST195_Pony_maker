@@ -3,12 +3,403 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/img_bg_play_ver"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.play.PrePlayFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:id="@+id/linearPrePlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:elevation="5dp"
+        android:background="@drawable/img_bg_preplay_ver"
+        android:orientation="vertical"
+        android:weightSum="800">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_weight="247"
+        android:layout_height="0dp"
+        >
+        <ImageView
+            android:id="@+id/imgpre_player1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="72dp"
+            android:layout_marginStart="20dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/img_heart_player1"/>
+        <TextView
+            android:id="@+id/txtpre_player1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/carter_one_regular"
+            android:gravity="center"
+            android:text="@string/player_1"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toBottomOf="@+id/imgpre_player1"
+            app:layout_constraintStart_toEndOf="@+id/imgpre_player1"
+            app:layout_constraintTop_toTopOf="@+id/imgpre_player1" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+ <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="306"
+        >
+     <FrameLayout
+         android:id="@+id/frameSet1"
+         android:layout_width="0dp"
+         android:layout_height="0dp"
+         app:layout_constraintTop_toTopOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toStartOf="@+id/frameSet2"
+         app:layout_constraintBottom_toBottomOf="parent">
+         <ImageView
+             android:id="@+id/img_set1"
+             android:src="@drawable/img_set1_ver"
+
+             android:scaleType="fitXY"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"/>
+     </FrameLayout>
+
+     <ImageView
+         android:elevation="1dp"
+         android:id="@+id/img_vs"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintTop_toTopOf="parent"
+         android:src="@drawable/img_vs_preplay_ver"
+         android:layout_width="0dp"
+         android:scaleType="fitXY"
+         android:layout_height="0dp"/>
+     <FrameLayout
+         android:id="@+id/frameSet2"
+         android:layout_width="0dp"
+         android:layout_height="0dp"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintStart_toEndOf="@+id/frameSet1"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintTop_toTopOf="parent">
+         <ImageView
+             android:elevation="0dp"
+             android:id="@+id/img_set2"
+             android:src="@drawable/img_set2_ver"
+             android:layout_width="match_parent"
+             android:scaleType="fitXY"
+             android:layout_height="match_parent"/>
+     </FrameLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+ <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+     android:layout_weight="247"
+     android:layout_height="0dp"
+        >
+
+     <ImageView
+         android:id="@+id/imgpre_player2"
+         android:layout_width="0dp"
+         android:layout_height="0dp"
+         android:layout_marginBottom="72dp"
+         android:layout_marginEnd="20dp"
+         android:layout_marginTop="15dp"
+         android:src="@drawable/img_heart_player2"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintDimensionRatio="1:1"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintTop_toTopOf="parent" />
+
+     <TextView
+         android:id="@+id/txtpre_player2"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:fontFamily="@font/carter_one_regular"
+         android:gravity="center"
+         android:text="@string/player_2"
+         android:textColor="@color/white"
+         android:textSize="24sp"
+         android:layout_marginEnd="16dp"
+         app:layout_constraintBottom_toBottomOf="@+id/imgpre_player2"
+         app:layout_constraintEnd_toStartOf="@+id/imgpre_player2"
+         app:layout_constraintTop_toTopOf="@+id/imgpre_player2" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="800"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout
+            android:rotation="180"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:layout_weight="348">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/contrainPlayer2"
+                android:layout_weight="40">
+
+
+                <ImageView
+                    android:src="@drawable/img_heart_player2"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:layout_marginStart="16dp"
+                    android:id="@+id/imageViewPlayer2"
+                    android:layout_width="0dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    app:layout_constraintDimensionRatio="0.8:0.4"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewPlayer2"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/txtPlayer2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/carter_one_regular"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="0dp"
+                        android:lineSpacingMultiplier="1.0"
+                        android:text="@string/player_2"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:id="@+id/linearNumberWin2"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txtPlayer2">
+
+                        <ImageView
+                            android:id="@+id/imgWin2_1"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="4dp"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/img_heart_win_number_false" />
+
+                        <ImageView
+                            android:id="@+id/imgWin2_2"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="4dp"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/img_heart_win_number_false" />
+
+                        <ImageView
+                            android:id="@+id/imgWin2_3"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/img_heart_win_number_false" />
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="308">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/materialPlay2"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_height="0dp"
+                    app:cardBackgroundColor="@color/transparent"
+                    app:cardCornerRadius="12dp"
+                    android:layout_marginHorizontal="44dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:strokeWidth="0dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclePlay2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/img_bg_choose_manual"
+                        android:nestedScrollingEnabled="false"
+                        android:padding="4dp"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:spanCount="3"
+                        tools:itemCount="9"
+                        tools:listitem="@layout/item_bomb_play2_unchoose" />
+                </com.google.android.material.card.MaterialCardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+
+         <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="104">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:layout_weight="348">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/contrainPlayer1"
+                android:layout_weight="40">
+
+
+                <ImageView
+                    android:src="@drawable/img_heart_player1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:layout_marginStart="16dp"
+                    android:id="@+id/imageViewPlayer1"
+                    android:layout_width="0dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    app:layout_constraintDimensionRatio="0.8:0.4"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewPlayer1"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/txtPlayer1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/carter_one_regular"
+                        android:gravity="center"
+                        android:includeFontPadding="false"
+                        android:lineSpacingExtra="0dp"
+                        android:lineSpacingMultiplier="1.0"
+                        android:text="@string/player_1"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <LinearLayout
+                        android:id="@+id/linearNumberWin"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/txtPlayer1">
+
+                        <ImageView
+                            android:id="@+id/imgWin1_1"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="4dp"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/img_heart_win_number_false" />
+
+                        <ImageView
+                            android:id="@+id/imgWin1_2"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="4dp"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/img_heart_win_number_false" />
+
+                        <ImageView
+                            android:id="@+id/imgWin1_3"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/img_heart_win_number_false" />
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="308">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/materialPlay1"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_height="0dp"
+                    app:cardBackgroundColor="@color/transparent"
+                    app:cardCornerRadius="12dp"
+                    android:layout_marginHorizontal="44dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:strokeWidth="0dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclePlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/img_bg_choose_play1"
+                        android:nestedScrollingEnabled="false"
+                        android:padding="4dp"
+                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                        app:spanCount="3"
+                        tools:itemCount="9"
+                        tools:listitem="@layout/item_bomb_play1_unchoose" />
+                </com.google.android.material.card.MaterialCardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>

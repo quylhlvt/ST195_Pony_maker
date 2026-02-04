@@ -18,6 +18,9 @@ import com.example.basefragment.databinding.FragmentPlayBinding
 import com.example.basefragment.ui.main.manual.ManualViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.core.extention.setForegroundColor
@@ -30,7 +33,6 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     FragmentPlayBinding::inflate,
     PlayViewModel::class.java
 ) {
-    private val manualViewModel: ManualViewModel by activityViewModels()
     private var player1Wins = 0
     private var player2Wins = 0
     private var currentPlayer = 1  // ✅ Đảm bảo Player 1 chơi trước
@@ -72,7 +74,6 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         if (isAutoMode) {
             player1List = randomList()
             player2List = randomList()
-            Log.d("PlayFragment", "Auto Mode - Random lists generated")
         } else {
             player1List = arguments
                 ?.getParcelableArray("player1List")
@@ -84,8 +85,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
                 ?.map { it as ManualModel }
                 ?: emptyList()
         }
-        Log.d("PlayFragment", "Player 1 selected: ${player1List.count { it.bomb }}")
-        Log.d("PlayFragment", "Player 2 selected: ${player2List.count { it.bomb }}")
+        preloadBombGif()
 
         requireActivity().requestedOrientation = if (sharedPreferences.isRotate()) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -93,7 +93,13 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
             ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
     }
-
+    private fun preloadBombGif() {
+        Glide.with(requireContext())
+            .asGif()
+            .load(R.raw.animation)
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .preload()
+    }
     private fun randomList(): List<ManualModel> {
         val list = mutableListOf<ManualModel>()
         repeat(9) { _ ->
@@ -358,7 +364,6 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
 
         // ✅ CHẶN 4: Không đúng lượt (Player 2 chọn bàn Player 1)
         if (currentPlayer != 1) {
-            showToast("Đang là lượt của Player $currentPlayer!")
             return
         }
 
@@ -367,12 +372,9 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
 
         // Xử lý logic game
         if (item.bomb) {
-            showToast("Player 2 trúng bom! Player 1 ghi điểm!")
             player1Wins++
             updateWinIndicators()
             checkGameOver()
-        } else {
-            showToast("An toàn!")
         }
 
         // ✅ Delay chuyển lượt
@@ -382,7 +384,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
                 updateTurnState()
 
                 isProcessingClick = false // ✅ Mở khóa
-            }, 800)
+            }, 1200)
         } else {
             isProcessingClick = false
         }
@@ -407,7 +409,6 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
 
         // ✅ CHẶN 4: Không đúng lượt (Player 1 chọn bàn Player 2)
         if (currentPlayer != 2) {
-            showToast("Đang là lượt của Player $currentPlayer!")
             return
         }
 
@@ -416,12 +417,10 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
 
         // Xử lý logic game
         if (item.bomb) {
-            showToast("Player 1 trúng bom! Player 2 ghi điểm!")
             player2Wins++
             updateWinIndicators()
             checkGameOver()
         } else {
-            showToast("An toàn!")
         }
 
         // ✅ Delay chuyển lượt
@@ -430,7 +429,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
                 currentPlayer = 1
                 updateTurnState()
                 isProcessingClick = false // ✅ Mở khóa
-            }, 800)
+            }, 1200)
         } else {
             isProcessingClick = false
         }
@@ -443,34 +442,47 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
                 player2Adapter.setEnabled(false)
                 recyclePlay2.setForegroundColor(R.color.black2)
                 recyclePlay.setForegroundColor(null)
-                showToast("Lượt Player 2 - Chọn vào bàn Player 1")
-                // Player 1 chọn vào bàn Player 2
+
 
             } else {
                 player1Adapter.setEnabled(false)
                 player2Adapter.setEnabled(true)
                 recyclePlay.setForegroundColor(R.color.black2)
                 recyclePlay2.setForegroundColor(null)
-                showToast("Lượt Player 1 - Chọn vào bàn Player 2")
             }
         }
     }
 
     private fun checkGameOver() {
-        if (player1Wins >= 3) {
-            isGameOver = true
-            showToast("🎉 Player 1 Chiến Thắng! 🎉")
-            player1Adapter.setEnabled(false)
-            player2Adapter.setEnabled(false)
-            binding.recyclePlay.setForegroundColor(null)
-            binding.recyclePlay2.setForegroundColor(null)
-        } else if (player2Wins >= 3) {
-            isGameOver = true
-            showToast("🎉 Player 2 Chiến Thắng! 🎉")
-            player1Adapter.setEnabled(false)
-            player2Adapter.setEnabled(false)
-            binding.recyclePlay.setForegroundColor(null)
-            binding.recyclePlay2.setForegroundColor(null)
+        lifecycleScope.launch {
+            var win = false
+            if (player1Wins >= 3) {
+                isGameOver = true
+                player1Adapter.setEnabled(false)
+                player2Adapter.setEnabled(false)
+                binding.recyclePlay.setForegroundColor(null)
+                binding.recyclePlay2.setForegroundColor(null)
+                win = true
+                delay(2000)
+                val bundle = Bundle().apply {
+                    putBoolean("win", win)
+                }
+                findNavController().navigate(R.id.action_play_to_success, bundle)
+            } else if (player2Wins >= 3) {
+                isGameOver = true
+                player1Adapter.setEnabled(false)
+                player2Adapter.setEnabled(false)
+                binding.recyclePlay.setForegroundColor(null)
+                binding.recyclePlay2.setForegroundColor(null)
+                win = false
+                delay(2000)
+                val bundle = Bundle().apply {
+                    putBoolean("win", win)
+                    putBoolean("auto", isAutoMode)
+                }
+                findNavController().navigate(R.id.action_play_to_success, bundle)
+            }
+
         }
     }
 
@@ -521,6 +533,13 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // ✅ Reset ngay khi view bị destroy, không đợi đến onDestroy
+        screenRotation()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Giữ lại để đảm bảo
         screenRotation()
     }
 

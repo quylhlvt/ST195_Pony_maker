@@ -31,6 +31,15 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"
             />
+ <action
+            android:id="@+id/action_home_to_auto_Ver"
+            app:destination="@id/prePlayFragment"
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
 
         <action
             android:id="@+id/action_home_to_multiplayer"
@@ -128,7 +137,7 @@
         <action
             android:id="@+id/action_play_to_success"
             app:destination="@id/successFragment"
-
+            app:popUpTo="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -208,11 +217,23 @@
             android:id="@+id/action_success_to_auto"
             app:destination="@id/playFragment"
             app:popUpTo="@id/homeFragment" />
+  <action
+            android:id="@+id/action_success_to_auto_Ver"
+            app:destination="@id/prePlayFragment"
+            app:popUpTo="@id/homeFragment" />
 
         <action
             android:id="@+id/action_success_to_multiplayer"
             app:destination="@id/multiplayerFragment"
             app:popUpTo="@id/homeFragment" />
+        <argument
+            android:name="win"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="auto"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 
     <!-- ==================== GUIDE ==================== -->
@@ -248,7 +269,55 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"
             />
+        <action
+            android:id="@+id/action_manual_to_play_Ver"
+            app:destination="@id/prePlayFragment"
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
 
+    </fragment>
+    <fragment
+        android:id="@+id/prePlayFragment"
+        android:name="com.example.basefragment.ui.main.play.PrePlayFragment"
+        android:label="fragment_pre_play"
+        tools:layout="@layout/fragment_pre_play" >
+        <action
+            android:id="@+id/action_autoprePlay_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_prePlay_to_success"
+            app:destination="@id/successFragment"
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+        <action
+            android:id="@+id/action_prePlay_to_manual"
+            app:destination="@id/manualFragment"
+            app:popUpTo="@id/homeFragment" />
+        <argument
+            android:name="isAutoMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
+
+        <argument
+            app:nullable="true"
+            android:defaultValue="@null"
+            android:name="player1List"
+            app:argType="com.example.basefragment.data.model.manual.ManualModel[]" />
+        <argument
+            app:nullable="true"
+            android:defaultValue="@null"
+            android:name="player2List"
+            app:argType="com.example.basefragment.data.model.manual.ManualModel[]" />
     </fragment>
 
 </navigation>

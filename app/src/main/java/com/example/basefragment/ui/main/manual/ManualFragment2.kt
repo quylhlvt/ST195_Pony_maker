@@ -42,7 +42,7 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
 
     override fun initView() {
         binding.apply {
-            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
+//            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
             setupActionBar()
             setupRecyclerView()
             txtPlayer.text = getString(R.string.player_2)
@@ -109,7 +109,10 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
                 putParcelableArray("player1List", sharedViewModel.getPlayer1List().toTypedArray())
                 putParcelableArray("player2List", sharedViewModel.getPlayer2List().toTypedArray())
             }
+            if (!sharedPreferences.isRotate())
             findNavController().navigate(R.id.action_manual_to_play, bundle)
+            else
+                findNavController().navigate(R.id.action_manual_to_play_Ver, bundle)
 
         }
     }

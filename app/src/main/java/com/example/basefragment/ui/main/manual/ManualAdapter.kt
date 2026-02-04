@@ -31,7 +31,7 @@ class ManualAdapter(
         val isLocked = selectedCount >= MAX_SELECT && !item.bomb
 
         binding.apply {
-            if (checkPlay){
+            if (!checkPlay){
                 imv.setBackgroundResource(R.drawable.img_unchoose_manual2)
             }
             // Load image

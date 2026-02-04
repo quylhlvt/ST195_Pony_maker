@@ -39,8 +39,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             // Click vào "Choose Character"
             btnManual.onClick(requireContext()) {
                 // Navigate tới CategoryFragment
-
                  findNavController().navigate(R.id.action_home_to_manual)
+
             }
 
             // Click vào "Quick Mix"
@@ -48,7 +48,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                 val bundle = Bundle().apply {
                     putBoolean("isAutoMode", true)
                 }
-                findNavController().navigate(R.id.action_home_to_auto, bundle)
+                if (!sharedPreferences.isRotate())
+            findNavController().navigate(R.id.action_home_to_auto, bundle)
+                else
+                    findNavController().navigate(R.id.action_home_to_auto_Ver, bundle)
+
             }
             btnMultiplayer.onClick(requireContext()) {
                 findNavController().navigate(R.id.action_home_to_multiplayer)
@@ -147,5 +151,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                 requireActivity().finish()
             }
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        // ✅ Đảm bảo orientation đúng khi quay lại HomeFragment
+        screenRotation()
     }
 }

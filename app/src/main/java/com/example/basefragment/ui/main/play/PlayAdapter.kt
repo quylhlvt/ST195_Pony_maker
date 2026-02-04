@@ -7,13 +7,18 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.ItemBombPlay1UnchooseBinding
 import com.example.basefragment.databinding.ItemBombPlay2UnchooseBinding
-import kotlinx.coroutines.Dispatchers
+import android.graphics.drawable.Drawable
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.gif.GifDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 
 class PlayAdapter(
     private val context: Context,
@@ -26,15 +31,9 @@ class PlayAdapter(
     private var isAnimating = false
 
     // Thời gian delay sau khi lật xong (ms)
-    private val POST_FLIP_DELAY = 400L
+    private val POST_FLIP_DELAY = 700L
     private val BOMB_IMAGE_CHANGE_DELAY = 400L
-    init {
-        Glide.with(context)
-            .asGif()
-            .placeholder(R.drawable.img_play1_choose_bomb_die)
-            .load(R.raw.animation)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-    }
+
     fun setEnabled(enabled: Boolean) {
         isEnabled = enabled
         notifyDataSetChanged()
@@ -103,7 +102,6 @@ class PlayAdapter(
             val scale = imageView.context.resources.displayMetrics.density
             imageView.cameraDistance = 8000 * scale
 
-            // Lật nửa đầu: 0° -> 90°
             imageView.animate()
                 .rotationY(90f)
                 .scaleX(0.9f)
@@ -111,10 +109,11 @@ class PlayAdapter(
                 .setDuration(250)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
-                    // Đổi ảnh khi bài ở góc 90°
                     if (item.bomb) {
+                        // ✅ Bước 1: Hiển thị ảnh tĩnh trước
                         imageView.setImageResource(R.drawable.img_play1_choose_bomb_die)
-                        // Delay rồi đổi sang died
+
+                        // ✅ Bước 2: Sau 100ms → hiển thị GIF
                         imageView.postDelayed({
                             Glide.with(context)
                                 .asGif()
@@ -122,15 +121,16 @@ class PlayAdapter(
                                 .load(R.raw.animation)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .into(imageView)
-                        }, 100)
-                        imageView.postDelayed({
-                            imageView.setImageResource(R.drawable.img_play1_choose_died)
-                        }, BOMB_IMAGE_CHANGE_DELAY)
+
+                            // ✅ Bước 3: Sau thêm 100ms nữa → hiển thị ảnh died vĩnh viễn
+                            imageView.postDelayed({
+                                imageView.setImageResource(R.drawable.img_play1_choose_died)
+                            }, 600)
+                        }, 250)
                     } else {
                         imageView.setImageResource(R.drawable.img_play1_choose_live)
                     }
 
-                    // Lật nửa sau: 90° -> 0°
                     imageView.animate()
                         .rotationY(0f)
                         .scaleX(1.0f)
@@ -142,7 +142,6 @@ class PlayAdapter(
                             imageView.scaleX = 1.0f
                             imageView.scaleY = 1.0f
 
-                            // ✅ Delay sau khi lật xong mới cho phép click tiếp
                             imageView.postDelayed({
                                 isAnimating = false
                             }, POST_FLIP_DELAY)
@@ -190,7 +189,6 @@ class PlayAdapter(
             val scale = imageView.context.resources.displayMetrics.density
             imageView.cameraDistance = 8000 * scale
 
-            // Lật nửa đầu: 0° -> 90°
             imageView.animate()
                 .rotationY(90f)
                 .scaleX(0.9f)
@@ -198,26 +196,28 @@ class PlayAdapter(
                 .setDuration(250)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
-                    // Đổi ảnh khi bài ở góc 90°
                     if (item.bomb) {
+                        // ✅ Bước 1: Hiển thị ảnh tĩnh trước
                         imageView.setImageResource(R.drawable.img_play2_choose_bomb_die)
+
+                        // ✅ Bước 2: Sau 100ms → hiển thị GIF
                         imageView.postDelayed({
                             Glide.with(context)
                                 .asGif()
-                                .placeholder(R.drawable.img_play2_choose_bomb_die)
                                 .load(R.raw.animation)
+                                .placeholder(R.drawable.img_play2_choose_bomb_die)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                                 .into(imageView)
-                        }, 100)
-                        // Delay rồi đổi sang died
-                        imageView.postDelayed({
-                            imageView.setImageResource(R.drawable.img_play2_choose_died)
-                        }, BOMB_IMAGE_CHANGE_DELAY)
+
+                            // ✅ Bước 3: Sau thêm 100ms nữa → hiển thị ảnh died vĩnh viễn
+                            imageView.postDelayed({
+                                imageView.setImageResource(R.drawable.img_play2_choose_died)
+                            }, 600)
+                        }, 250)
                     } else {
                         imageView.setImageResource(R.drawable.img_play2_choose_live)
                     }
 
-                    // Lật nửa sau: 90° -> 0°
                     imageView.animate()
                         .rotationY(0f)
                         .scaleX(1.0f)
@@ -229,7 +229,6 @@ class PlayAdapter(
                             imageView.scaleX = 1.0f
                             imageView.scaleY = 1.0f
 
-                            // ✅ Delay sau khi lật xong mới cho phép click tiếp
                             imageView.postDelayed({
                                 isAnimating = false
                             }, POST_FLIP_DELAY)
