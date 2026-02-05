@@ -5,7 +5,10 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
+import com.example.basefragment.core.dialog.ExitDialog
+import com.example.basefragment.core.dialog.ExitDialogHor
 import com.example.basefragment.core.dialog.RateDialog
+import com.example.basefragment.utils.state.ExitState
 import com.example.basefragment.utils.state.RateState
 import com.google.android.play.core.review.ReviewManagerFactory
 
@@ -16,7 +19,7 @@ object RateHelper {
         preference: SharedPreferencesManager,
         onRateResult: (RateState) -> Unit = {}
     ) {
-        val dialogRate = RateDialog(activity)
+        val dialogRate = RateDialog()
         dialogRate.show(activity.supportFragmentManager, "RateDialog")
 
         dialogRate.onRateLess3 = {
@@ -32,6 +35,38 @@ object RateHelper {
 
         dialogRate.onCancel = {
             onRateResult(RateState.CANCEL)
+
+        }
+    }
+    fun showExitDialog(
+        activity: FragmentActivity,
+        onRateResult: (ExitState) -> Unit = {}
+    ) {
+        val dialogRate = ExitDialog()
+        dialogRate.show(activity.supportFragmentManager, "ExitDialog")
+
+        dialogRate.onExitClick = {
+            onRateResult(ExitState.EXIT)
+        }
+
+        dialogRate.onCancelClick = {
+            onRateResult(ExitState.CANCEL)
+
+        }
+    }
+    fun showExitDialogHor(
+        activity: FragmentActivity,
+        onRateResult: (ExitState) -> Unit = {}
+    ) {
+        val dialogRate = ExitDialogHor()
+        dialogRate.show(activity.supportFragmentManager, "ExitDialogHor")
+
+        dialogRate.onExitClick = {
+            onRateResult(ExitState.EXIT)
+        }
+
+        dialogRate.onCancelClick = {
+            onRateResult(ExitState.CANCEL)
 
         }
     }

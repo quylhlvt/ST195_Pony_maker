@@ -1,68 +1,48 @@
 package com.example.basefragment.core.base
 
-import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.*
-import androidx.databinding.DataBindingUtil
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import androidx.viewbinding.ViewBinding
-import androidx.core.graphics.drawable.toDrawable
-import com.example.basefragment.core.helper.LanguageHelper
-import kotlin.apply
 
-abstract class BaseDialog<VB : ViewBinding>(
-    context: Context,
-    private val gravity: Int = Gravity.CENTER,
-    private val maxWidth: Boolean = false,
-    private val maxHeight: Boolean = false
-) : Dialog(context) {
+abstract class BaseDialog<VB : ViewBinding> : DialogFragment() {
 
-    protected lateinit var binding: VB
-    abstract val layoutId: Int
-    abstract val isCancelOnTouchOutside: Boolean
-    abstract val isCancelableByBack: Boolean
+    private var _binding: VB? = null
+    protected val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        LanguageHelper.setLocale(context)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
+    abstract fun createBinding(inflater: LayoutInflater, container: ViewGroup?): VB
+    abstract fun initView()
+    abstract fun initAction()
 
-        binding = DataBindingUtil.inflate(LayoutInflater.from(context), layoutId, null, false)
-        setContentView(binding.root)
+    open val isCancelableDialog: Boolean = true
 
-        setCancelable(isCancelableByBack)
-        setCanceledOnTouchOutside(isCancelOnTouchOutside)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = createBinding(inflater, container)
+        return binding.root
+    }
 
-        setupWindow()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Set background transparent
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        isCancelable = isCancelableDialog
+
         initView()
         initAction()
     }
-    private fun setupWindow() {
-        window?.apply {
-            setGravity(gravity)
 
-            val width = if (maxWidth) WindowManager.LayoutParams.MATCH_PARENT
-            else WindowManager.LayoutParams.WRAP_CONTENT
-            val height = if (maxHeight) WindowManager.LayoutParams.MATCH_PARENT
-            else WindowManager.LayoutParams.WRAP_CONTENT
-            setLayout(width, height)
-
-            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-            decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
-
-    override fun dismiss() {
-        super.dismiss()
-        onDismissListener()
-    }
-
-    abstract fun initView()
-    abstract fun initAction()
-    abstract fun onDismissListener()
 }

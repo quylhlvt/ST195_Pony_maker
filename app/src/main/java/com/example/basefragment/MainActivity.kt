@@ -3,11 +3,14 @@ package com.example.basefragment
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.helper.LanguageHelper
 import com.example.basefragment.core.helper.SharedPreferencesManager
@@ -37,6 +40,25 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Kiểm tra xem Fragment hiện tại có xử lý back không
+                val currentFragment = navHostFragment.childFragmentManager.fragments.firstOrNull()
+
+                if (currentFragment is BackPressHandler) {
+                    val handled = currentFragment.onBackPressed()
+                    if (handled) {
+                        // Fragment đã xử lý, không làm gì
+                        return
+                    }
+                }
+
+                // Fragment không xử lý hoặc không implement interface
+                if (!navController.popBackStack()) {
+                    finish()
+                }
+            }
+        })
     }
 
     override fun onStart() {
@@ -70,12 +92,12 @@ class MainActivity : AppCompatActivity() {
         super.attachBaseContext(context)
     }
 
-     override fun onBackPressed() {
-         if (!navController.popBackStack()) {
-             super.onBackPressed()
-
-         }
-     }
+//     override fun onBackPressed() {
+//         if (!navController.popBackStack()) {
+//             super.onBackPressed()
+//
+//         }
+//     }
 
     override fun onStop() {
         super.onStop()

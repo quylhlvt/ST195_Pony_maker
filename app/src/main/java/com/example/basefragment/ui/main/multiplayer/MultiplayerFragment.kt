@@ -10,7 +10,6 @@ import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.setImageActionBar
-import com.example.basefragment.core.extention.toGuideFromMutial
 import com.example.basefragment.databinding.FragmentMultiplayerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -71,7 +70,10 @@ class MultiplayerFragment : BaseFragment<FragmentMultiplayerBinding, Multiplayer
                 }
             }
             btnActionBarRight.onClick(requireContext()) {
-                toGuideFromMutial()
+                val bundle = Bundle().apply {
+                    putBoolean("isMuti", true)
+                }
+                    findNavController().navigate(R.id.action_multiplayer_to_guide, bundle)
             }
         }
     }

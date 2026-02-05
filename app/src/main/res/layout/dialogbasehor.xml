@@ -1,11 +1,12 @@
-
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <LinearLayout
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black2"
-        android:weightSum="800"
+        android:weightSum="360"
         android:orientation="vertical"
         android:gravity="center">
 
@@ -14,7 +15,7 @@
             android:layout_height="0dp"
             android:id="@+id/linearSetBomb"
             android:layout_weight="172"
-            android:layout_marginHorizontal="32dp"
+            android:layout_marginHorizontal="250dp"
             app:layout_constraintDimensionRatio="2.96:1.72"
             app:layout_constraintTop_toBottomOf="@+id/layoutActionBar">
 
@@ -90,30 +91,36 @@
                     <TextView
                         android:id="@+id/btnExit"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="0dp"
                         android:background="@drawable/img_success_home"
                         android:fontFamily="@font/carter_one_regular"
                         android:gravity="center"
                         android:text="@string/exit"
                         android:textColor="@color/white"
                         android:textSize="20sp"
-                        app:layout_constraintEnd_toStartOf="@+id/btnCancel"
+                        android:layout_marginEnd="6dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="1.22:0.4"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintEnd_toStartOf="@+id/btnCancel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/btnCancel"
                         android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="0dp"
                         android:background="@drawable/img_success_restart"
                         android:fontFamily="@font/carter_one_regular"
                         android:gravity="center"
                         android:text="@string/cancel"
+                        android:layout_marginStart="6dp"
                         android:textColor="@color/white"
                         android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="1.22:0.4"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/btnExit" />
+                        app:layout_constraintStart_toEndOf="@+id/btnExit"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
                 <Space
@@ -128,3 +135,4 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
+</layout>

@@ -21,10 +21,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.basefragment.core.base.BackPressHandler
+import com.example.basefragment.core.dialog.ExitDialog
+import com.example.basefragment.core.dialog.ExitDialogHor
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.core.extention.setForegroundColor
 import com.example.basefragment.core.extention.visible
+import com.example.basefragment.core.helper.RateHelper
+import com.example.basefragment.core.helper.RateHelper.showExitDialogHor
+import com.example.basefragment.core.helper.RateHelper.showRateDialog
+import com.example.basefragment.utils.state.ExitState
+import com.example.basefragment.utils.state.RateState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -32,7 +40,7 @@ import kotlinx.coroutines.launch
 class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     FragmentPlayBinding::inflate,
     PlayViewModel::class.java
-) {
+), BackPressHandler {
     private var player1Wins = 0
     private var player2Wins = 0
     private var currentPlayer = 1
@@ -42,10 +50,13 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     private var isProcessingClick = false
     private lateinit var player1List: List<ManualModel>
     private lateinit var player2List: List<ManualModel>
-
     // ✅ Handler để quản lý delay
     private val handler = Handler(Looper.getMainLooper())
-
+    override fun onBackPressed(): Boolean {
+        if (isAnimationRunning) return true
+        showExitDialog()
+        return true
+    }
     private val player1Adapter by lazy {
         PlayAdapter(requireContext(), isPlayer1 = true).apply {
             onItemClick = { item, position ->
@@ -61,12 +72,40 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
             }
         }
     }
+    // PlayFragment
+    private fun showExitDialog() {
+        val dialogExit = ExitDialogHor()
+        dialogExit.show(childFragmentManager, "ExitDialogHor")
+
+        dialogExit.onExitClick = {
+            finishGame()
+        }
+
+        dialogExit.onCancelClick = {
+            // Optional: do something on cancel
+        }
+    }
 
     override fun viewListener() {
         binding.apply {
             imgBack.onClick(requireContext()) {
                 if (!isAnimationRunning) {
-                    finishGame()
+//                    showRateDialog(requireActivity(), sharedPreferences) { state ->
+//                        if (state != RateState.CANCEL) {
+//                            showToast(R.string.have_rated)
+//                        }
+//                        requireActivity().finish()
+//
+//                        // User cancel -> Không làm gì (ở lại app)
+//                    }
+                    showExitDialogHor(requireActivity()) { state ->
+                        if (state != ExitState.EXIT) {
+
+                            requireActivity().finish()
+                        }
+                        // User cancel -> Không làm gì (ở lại app)
+                    }
+                //                    showExitDialog()
                 }
             }
         }
@@ -158,7 +197,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     override fun initView() {
         isAnimationRunning = true
         checkStatusPreView(false)
-        setupBackPressHandler()
+//        setupBackPressHandler()
         setupRecyclerViews()
         updateWinIndicators()
 
@@ -501,7 +540,8 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     }
 
     override fun onDestroyView() {
-        
+        handler.removeCallbacksAndMessages(null)
+
         super.onDestroyView()
         screenRotation()
     }

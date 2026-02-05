@@ -75,5 +75,12 @@
     <string name="choose_the_number_of_bombs_to_place_in_the_trap">Choose the number of bombs to place in the trap.</string>
     <string name="_1">1</string>
     <string name="cancel">Cancel</string>
+    <string name="best_player">Best player</string>
+    <string name="rules">Rules</string>
+    <string name="this_mode_is_for_large_groups_of_friends_so_gather_your_friends_and_play_together">This mode is for large groups of friends, so gather your friends and play together!</string>
+    <string name="people_sit_together_in_a_circle_or_around_a_table">People sit together in a circle or around a table.</string>
+    <string name="choose_the_appropriate_number_of_bombs_based_on_the_number_of_participants">Choose the appropriate number of bombs based on the number of participants.</string>
+    <string name="one_by_one_each_person_flips_their_card_when_it_s_their_turn">One by one, each person flips their card when it\'s their turn.</string>
+    <string name="whoever_flips_the_bomb_card_is_eliminated_from_the_round_flipping_the_french_fries_card_is_safe">Whoever flips the bomb card is eliminated from the round. Flipping the french fries card is safe.</string>
     <!--    <string name="game_description">• This mode is for two players to compete against each other.\n• One person wears a yellow team and one person wears a blue team.</string>-->
 </resources>

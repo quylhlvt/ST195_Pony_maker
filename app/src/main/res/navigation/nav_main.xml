@@ -261,6 +261,10 @@
         tools:layout="@layout/fragment_guide">
 
 
+        <argument
+            android:name="isMuti"
+            app:argType="boolean"
+            android:defaultValue="false" />
 
         <action
             android:id="@+id/action_guide_to_manual"

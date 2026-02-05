@@ -4,39 +4,33 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.extention.gone
-import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.dialog.ExitDialog
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.core.extention.setForegroundColor
 import com.example.basefragment.core.extention.visible
+import com.example.basefragment.core.helper.RateHelper.showExitDialogHor
 import com.example.basefragment.data.model.manual.ManualModel
-import com.example.basefragment.databinding.FragmentPlayBinding
-import com.example.basefragment.databinding.FragmentPlayBinding.inflate
 import com.example.basefragment.databinding.FragmentPrePlayBinding
-import com.example.basefragment.ui.main.manual.ManualViewModel
+import com.example.basefragment.utils.state.ExitState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.getValue
+
 @AndroidEntryPoint
-class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
-    FragmentPrePlayBinding::inflate,
-    PlayViewModel::class.java
-) {
+class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
+    FragmentPrePlayBinding::inflate, PlayViewModel::class.java
+), BackPressHandler {
     private var player1Wins = 0
     private var player2Wins = 0
     private var currentPlayer = 1
@@ -66,8 +60,25 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
         }
     }
 
+    override fun onBackPressed(): Boolean {
+        if (isAnimationRunning) return true
+        showExitDialog()
+        return true
+    }
+
+    // PrePlayFragment
+    private fun showExitDialog() {
+        showExitDialogHor(requireActivity()) { state ->
+            if (state != ExitState.EXIT) {
+                requireActivity().finish()
+            }
+            // User cancel -> Không làm gì (ở lại app)
+        }
+    }
+
     override fun viewListener() {
         binding.apply {
+
 //            imgBack.onClick(requireContext()) {
 //                if (!isAnimationRunning) {
 //                    finishGame()
@@ -84,14 +95,10 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             player1List = randomList()
             player2List = randomList()
         } else {
-            player2List = arguments
-                ?.getParcelableArray("player1List")
-                ?.map { it as ManualModel }
+            player2List = arguments?.getParcelableArray("player1List")?.map { it as ManualModel }
                 ?: emptyList()
 
-            player1List = arguments
-                ?.getParcelableArray("player2List")
-                ?.map { it as ManualModel }
+            player1List = arguments?.getParcelableArray("player2List")?.map { it as ManualModel }
                 ?: emptyList()
         }
         preloadBombGif()
@@ -104,11 +111,8 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
     }
 
     private fun preloadBombGif() {
-        Glide.with(requireContext())
-            .asGif()
-            .load(R.raw.animation)
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .preload()
+        Glide.with(requireContext()).asGif().load(R.raw.animation)
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).preload()
     }
 
     private fun randomList(): List<ManualModel> {
@@ -155,15 +159,13 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
     }
 
     override fun inflateBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): FragmentPrePlayBinding = FragmentPrePlayBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        isAnimationRunning = true // ✅ Bắt đầu chặn
+        isAnimationRunning = true
+
         checkStatusPreView(false)
-        setupBackPressHandler()
         setupRecyclerViews()
         updateWinIndicators()
         // ✅ KHÔNG gọi updateTurnState() ở đây - sẽ gọi sau animation
@@ -191,22 +193,15 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     imgprePlayer1.alpha = 0f
                     imgprePlayer1.visible()
 
-                    imgprePlayer1.animate()
-                        .translationY(0f)
-                        .alpha(1f)
-                        .setDuration(1000)
-                        .setInterpolator(android.view.animation.DecelerateInterpolator())
-                        .start()
+                    imgprePlayer1.animate().translationY(0f).alpha(1f).setDuration(1000)
+                        .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
                 }
 
                 txtprePlayer1.post {
                     txtprePlayer1.alpha = 0f
                     txtprePlayer1.visible()
 
-                    txtprePlayer1.animate()
-                        .alpha(1f)
-                        .setDuration(1000)
-                        .start()
+                    txtprePlayer1.animate().alpha(1f).setDuration(1000).start()
                 }
 
                 // Animation cho imgSet1 (từ trái)
@@ -215,17 +210,12 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     imgSet1.alpha = 0f
                     imgSet1.visible()
 
-                    imgSet1.animate()
-                        .translationX(0f)
-                        .alpha(1f)
-                        .setDuration(800)
-                        .setInterpolator(android.view.animation.DecelerateInterpolator())
-                        .start()
+                    imgSet1.animate().translationX(0f).alpha(1f).setDuration(800)
+                        .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
                 }
 
 
                 // Animation cho VS icon (zoom in)
-
 
 
                 // Animation cho imgSet2 (từ phải)
@@ -234,12 +224,8 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     imgSet2.alpha = 0f
                     imgSet2.visible()
 
-                    imgSet2.animate()
-                        .translationX(0f)
-                        .alpha(1f)
-                        .setDuration(800)
-                        .setInterpolator(android.view.animation.DecelerateInterpolator())
-                        .start()
+                    imgSet2.animate().translationX(0f).alpha(1f).setDuration(800)
+                        .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
                 }
                 delay(200)
                 imgVs.post {
@@ -248,13 +234,8 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     imgVs.alpha = 0f
                     imgVs.visible()
 
-                    imgVs.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .alpha(1f)
-                        .setDuration(1200)
-                        .setInterpolator(android.view.animation.OvershootInterpolator())
-                        .start()
+                    imgVs.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(1200)
+                        .setInterpolator(android.view.animation.OvershootInterpolator()).start()
                 }
                 // Animation cho imgprePlayer2 (từ dưới lên - phải)
                 imgprePlayer2.post {
@@ -262,22 +243,15 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     imgprePlayer2.alpha = 0f
                     imgprePlayer2.visible()
 
-                    imgprePlayer2.animate()
-                        .translationY(0f)
-                        .alpha(1f)
-                        .setDuration(1000)
-                        .setInterpolator(android.view.animation.DecelerateInterpolator())
-                        .start()
+                    imgprePlayer2.animate().translationY(0f).alpha(1f).setDuration(1000)
+                        .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
                 }
 
                 txtprePlayer2.post {
                     txtprePlayer2.alpha = 0f
                     txtprePlayer2.visible()
 
-                    txtprePlayer2.animate()
-                        .alpha(1f)
-                        .setDuration(1000)
-                        .start()
+                    txtprePlayer2.animate().alpha(1f).setDuration(1000).start()
                 }
 
                 // ========== PHASE 2: Giữ pre-play hiển thị ==========
@@ -286,53 +260,28 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                 // ========== PHASE 3: Ẩn pre-play views ==========
 
                 // Ẩn player 1 section
-                imgprePlayer1.animate()
-                    .translationY(-imgprePlayer1.height.toFloat())
-                    .alpha(0f)
+                imgprePlayer1.animate().translationY(-imgprePlayer1.height.toFloat()).alpha(0f)
                     .setDuration(800)
-                    .setInterpolator(android.view.animation.AccelerateInterpolator())
-                    .start()
+                    .setInterpolator(android.view.animation.AccelerateInterpolator()).start()
 
-                txtprePlayer1.animate()
-                    .alpha(0f)
-                    .setDuration(800)
-                    .start()
+                txtprePlayer1.animate().alpha(0f).setDuration(800).start()
 
                 // Ẩn player 2 section
-                imgprePlayer2.animate()
-                    .translationY(imgprePlayer2.height.toFloat())
-                    .alpha(0f)
+                imgprePlayer2.animate().translationY(imgprePlayer2.height.toFloat()).alpha(0f)
                     .setDuration(800)
-                    .setInterpolator(android.view.animation.AccelerateInterpolator())
-                    .start()
+                    .setInterpolator(android.view.animation.AccelerateInterpolator()).start()
 
-                txtprePlayer2.animate()
-                    .alpha(0f)
-                    .setDuration(800)
-                    .start()
+                txtprePlayer2.animate().alpha(0f).setDuration(800).start()
 
                 // Ẩn set images và VS
-                imgSet1.animate()
-                    .translationX(-imgSet1.width.toFloat())
-                    .alpha(0f)
-                    .setDuration(800)
-                    .setInterpolator(android.view.animation.AccelerateInterpolator())
-                    .start()
+                imgSet1.animate().translationX(-imgSet1.width.toFloat()).alpha(0f).setDuration(800)
+                    .setInterpolator(android.view.animation.AccelerateInterpolator()).start()
 
-                imgSet2.animate()
-                    .translationX(imgSet2.width.toFloat())
-                    .alpha(0f)
-                    .setDuration(800)
-                    .setInterpolator(android.view.animation.AccelerateInterpolator())
-                    .start()
+                imgSet2.animate().translationX(imgSet2.width.toFloat()).alpha(0f).setDuration(800)
+                    .setInterpolator(android.view.animation.AccelerateInterpolator()).start()
 
-                imgVs.animate()
-                    .scaleX(0f)
-                    .scaleY(0f)
-                    .alpha(0f)
-                    .setDuration(800)
-                    .setInterpolator(android.view.animation.AnticipateInterpolator())
-                    .start()
+                imgVs.animate().scaleX(0f).scaleY(0f).alpha(0f).setDuration(800)
+                    .setInterpolator(android.view.animation.AnticipateInterpolator()).start()
 
 
                 delay(800)
@@ -345,15 +294,11 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     materialPlay2.alpha = 0f
                     materialPlay2.visible()
 
-                    materialPlay2.animate()
-                        .translationY(0f)
-                        .alpha(1f)
-                        .setDuration(1000)
+                    materialPlay2.animate().translationY(0f).alpha(1f).setDuration(1000)
                         .setInterpolator(android.view.animation.DecelerateInterpolator())
                         .withEndAction {
                             recyclePlay2.visible()
-                        }
-                        .start()
+                        }.start()
                 }
 
                 delay(200)
@@ -364,34 +309,27 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                     materialPlay1.alpha = 0f
                     materialPlay1.visible()
 
-                    materialPlay1.animate()
-                        .translationY(0f)
-                        .alpha(1f)
-                        .setDuration(1000)
+                    materialPlay1.animate().translationY(0f).alpha(1f).setDuration(1000)
                         .setInterpolator(android.view.animation.DecelerateInterpolator())
                         .withEndAction {
                             recyclePlay.visible()
-                        }
-                        .start()
+                        }.start()
                 }
                 delay(200)
-                linearPrePlay.animate()
-                    .scaleX(0f)
-                    .scaleY(0f)
-                    .alpha(0f)
-                    .setDuration(800)
-                    .setInterpolator(android.view.animation.AnticipateInterpolator())
-                    .start()
+                linearPrePlay.animate().scaleX(0f).scaleY(0f).alpha(0f).setDuration(800)
+                    .setInterpolator(android.view.animation.AnticipateInterpolator()).start()
                 delay(2200)
 
                 // ✅ Animation hoàn tất - mở khóa
                 isAnimationRunning = false
                 checkStatusPreView(true)
-                currentPlayer = 1  // ✅ Đảm bảo Player 1 chơi trước sau animation
-                updateTurnState() // ✅ Gọi updateTurnState sau khi animation xong
+
+                currentPlayer = 1
+                updateTurnState()
             }
         }
     }
+
     private fun checkStatusPreView(status: Boolean) {
         binding.apply {
 //            imgBack.isEnabled = status
@@ -542,18 +480,6 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
 
     override fun observeData() {}
 
-    private fun setupBackPressHandler() {
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (!isAnimationRunning) {
-                        finishGame()
-                    }
-                }
-            }
-        )
-    }
 
     private fun finishGame() {
         handler.removeCallbacksAndMessages(null)
@@ -562,6 +488,7 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
 
     override fun onDestroyView() {
         handler.removeCallbacksAndMessages(null)
+
         super.onDestroyView()
         screenRotation()
     }

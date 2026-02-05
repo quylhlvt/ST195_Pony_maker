@@ -2,6 +2,8 @@
 package com.example.basefragment.core.dialog
 
 import android.app.Activity
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +15,7 @@ import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.strings
 import com.example.basefragment.databinding.DialogRateBinding
 
-class RateDialog(private val activity: Activity) : DialogFragment() {
+class RateDialog() : DialogFragment() {
 
     private var _binding: DialogRateBinding? = null
     private val binding get() = _binding!!
@@ -31,6 +33,8 @@ class RateDialog(private val activity: Activity) : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
         isCancelable = false
 
         initView()
