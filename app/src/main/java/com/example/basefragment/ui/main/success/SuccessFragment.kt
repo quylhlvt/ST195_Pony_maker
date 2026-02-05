@@ -20,25 +20,47 @@ class SuccessFragment : BaseFragment<FragmentSuccessBinding, SuccessViewModel>(
 ) {
     private var isWin = false
     private var isAuto = false
+    private var isplaymulti = false
 
     override fun viewListener() {
         binding.apply {
-
             btnHome.onClick(requireContext()) {
-                popBack()
+                // ✅ Navigate về Home và clear back stack
+                findNavController().navigate(
+                    R.id.action_success_to_home,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.homeFragment, true)
+                        .build()
+                )
             }
+
             btnRestart.onClick(requireContext()) {
-                if (!isAuto) {
-                    findNavController().navigate(R.id.action_success_to_manual)
-                } else {
+                if (isAuto) {
                     val bundle = Bundle().apply {
                         putBoolean("isAutoMode", true)
                     }
-                    if (!sharedPreferences.isRotate())
-                        findNavController().navigate(R.id.action_success_to_auto, bundle)
-                    else
-                        findNavController().navigate(R.id.action_success_to_auto_Ver, bundle)
+                    val targetDestination = if (sharedPreferences.isRotate()) {
+                        R.id.action_success_to_auto_Ver
+                    } else {
+                        R.id.action_success_to_auto
+                    }
 
+                    findNavController().navigate(
+                        targetDestination,
+                        bundle
+                    )
+                } else {
+
+                    if (isplaymulti) {
+                        findNavController().navigate(
+                            R.id.action_success_to_multiplayer
+                        )
+                    } else {
+                        findNavController().navigate(
+                            R.id.action_success_to_manual
+                        )
+                    }
                 }
             }
         }
@@ -54,6 +76,8 @@ class SuccessFragment : BaseFragment<FragmentSuccessBinding, SuccessViewModel>(
         super.setupPreViews()
         isWin = arguments?.getBoolean("win", false) ?: false
         isAuto = arguments?.getBoolean("auto", false) ?: false
+        isplaymulti = arguments?.getBoolean("playmulti", false) ?: false
+
         screenRotation()
     }
 

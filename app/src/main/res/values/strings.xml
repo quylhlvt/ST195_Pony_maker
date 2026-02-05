@@ -14,12 +14,11 @@
     <string name="allow">Allow</string>
     <string name="text">Text</string>
     <string name="loading">Loading</string>
-    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Haven’t saved it yet, do you want to exit?</string>
+    <string name="do_you_want_to_exit">The game isn\'t over yet, are you still going to leave?</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-    <string name="null_edt">Please enter text</string>
     <string name="done">Done</string>
-    <string name="do_you_want_to_reset_all">Do you want to reset all?</string>
+    <string name="do_you_want_to_play_again">Do you want to play again?</string>
     <string name="reset">Reset</string>
     <string name="exit">Exit</string>
     <string name="rate_us">Rate Us</string>
@@ -47,7 +46,6 @@
 
     <string name="rate_us_0">You have not rated it yet!</string>
     <string name="have_rated">Thank you for rate our app</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="settings">Settings</string>
     <string name="title_splash">This action can contain ads</string>
@@ -58,6 +56,24 @@
     <string name="player_2">Player 2</string>
     <string name="place_the_bombs_in_the_opponent_s_nplaying_field">Place the bombs in the opponent\'s\nplaying field.</string>
     <string name="play_again">Play again</string>
+    <string name="play">Play</string>
     <string name="home">Home</string>
-
+    <string name="_1_how_to_start">1. How to start ?</string>
+    <string name="_2_set_bombs">2. Set bombs</string>
+    <string name="_3_let_s_play">3. Let’s play</string>
+    <string name="_4_who_is_winner">4. Who is winner?</string>
+    <string name="this_mode_is_for_two_players_to_compete_against_each_other">This mode is for two players to compete against each other.</string>
+    <string name="one_person_wears_a_yellow_team_and_one_person_wears_a_blue_team">One person wears a yellow team and one person wears a blue team.</string>
+    <string name="the_two_players_take_turns_placing_three_bombs_in_their_opponent_s_playing_area">The two players take turns placing three bombs in their opponent\'s playing area.</string>
+    <string name="remember_not_to_let_your_enemy_know_the_location_of_the_bomb_you_planted">Remember not to let your enemy know the location of the bomb you planted.</string>
+    <string name="in_this_mode_each_player_will_have_3_lives">In this mode, each player will have 3 lives.</string>
+    <string name="the_two_players_take_turns_flipping_cards_on_their_respective_sides_of_the_field">The two players take turns flipping cards on their respective sides of the field.</string>
+    <string name="whoever_flips_the_bomb_card_loses_a_life_flipping_the_french_fries_card_leaves_them_safe">Whoever flips the bomb card loses a life. Flipping the french fries card leaves them safe.</string>
+    <string name="the_last_person_remaining_will_be_the_winner_congratulations">The last person remaining will be the winner, congratulations!</string>
+    <string name="please_select_3_items">Please select 3 items</string>
+    <string name="set_bombs">Set bombs</string>
+    <string name="choose_the_number_of_bombs_to_place_in_the_trap">Choose the number of bombs to place in the trap.</string>
+    <string name="_1">1</string>
+    <string name="cancel">Cancel</string>
+    <!--    <string name="game_description">• This mode is for two players to compete against each other.\n• One person wears a yellow team and one person wears a blue team.</string>-->
 </resources>

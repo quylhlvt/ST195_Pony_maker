@@ -97,11 +97,5 @@ fun loadThumbnail(view: ImageView, url: String){
         .load(file)
         .frame(1000000)
         .into(view)
-}
-fun ImageView.loadFromAsset(assetPath: String) {  // assetPath = "bg/1.png"
-    Glide.with(this)
-        .load(Uri.parse("$assetPath"))
-        .placeholder(ShimmerDrawable().apply { setShimmer(DataLocal.shimmer) })
-        .error(R.drawable.logo_app)  // Để debug nếu path sai
-        .into(this)
+
 }

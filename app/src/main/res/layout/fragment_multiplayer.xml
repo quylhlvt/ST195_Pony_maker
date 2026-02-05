@@ -1,14 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/img_bg_multiplay"
     tools:context=".ui.main.multiplayer.MultiplayerFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <FrameLayout
+        android:id="@+id/layoutActionBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
 
-</FrameLayout>
+        <include
+            android:id="@+id/actionBar"
+            layout="@layout/layout_actionbar" />
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/linearSetBomb"
+        android:layout_marginHorizontal="32dp"
+        app:layout_constraintDimensionRatio="2.96:1.72"
+        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="54dp"
+            android:background="@drawable/img_bg_multiplay_title"
+            android:elevation="2dp"
+            android:fontFamily="@font/carter_one_regular"
+            android:gravity="center"
+            android:text="@string/set_bombs"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintDimensionRatio="1.88:0.4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Space
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="2.69:0.2"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/img_bg_multiplay_desception"
+            android:orientation="vertical"
+            android:weightSum="152"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view">
+
+            <Space
+                android:id="@+id/space1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="36" />
+
+            <TextView
+                android:id="@+id/txtDesception"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="40"
+                android:paddingHorizontal="10dp"
+                android:layout_marginHorizontal="35dp"
+                android:fontFamily="@font/carter_one_regular"
+                android:textSize="14sp"
+                android:textColor="@color/color_content_manual"
+                android:gravity="center"
+                android:text="@string/choose_the_number_of_bombs_to_place_in_the_trap"
+                />
+            <Space
+                android:id="@+id/space2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="16" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="36"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+
+                <ImageView
+                    app:layout_constraintEnd_toStartOf="@+id/tvMinus"
+                    android:id="@+id/minus"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/img_minus"
+                    app:layout_constraintDimensionRatio="1:1"
+                     />
+
+                <TextView
+                    android:id="@+id/tvMinus"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_white_radius_16dp_stroker"
+                    android:fontFamily="@font/carter_one_regular"
+                    android:gravity="center"
+                    android:text="@string/_1"
+                    android:textColor="@color/black3"
+                    android:textSize="20sp"
+                    app:layout_constraintDimensionRatio="0.88:0.36"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <ImageView
+                    android:id="@+id/plus"
+                    android:layout_width="0dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/img_plus"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toEndOf="@+id/tvMinus" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <Space
+                android:id="@+id/space3"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="24"
+             />
+        </LinearLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/txtPlayAgain"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="80dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/img_success_restart"
+        android:elevation="3dp"
+        android:fontFamily="@font/carter_one_regular"
+        android:gravity="center"
+        android:text="@string/play"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        app:layout_constraintDimensionRatio="1.56:0.52"
+        app:layout_constraintEnd_toEndOf="@+id/linearSetBomb"
+        app:layout_constraintHorizontal_bias="0.562"
+        app:layout_constraintStart_toStartOf="@+id/linearSetBomb"
+        app:layout_constraintTop_toBottomOf="@+id/linearSetBomb" />
+</androidx.constraintlayout.widget.ConstraintLayout>

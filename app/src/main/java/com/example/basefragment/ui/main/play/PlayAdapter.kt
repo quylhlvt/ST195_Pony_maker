@@ -2,6 +2,7 @@ package com.example.basefragment.ui.main.play
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.recyclerview.widget.DiffUtil
@@ -11,14 +12,9 @@ import com.example.basefragment.R
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.ItemBombPlay1UnchooseBinding
 import com.example.basefragment.databinding.ItemBombPlay2UnchooseBinding
-import android.graphics.drawable.Drawable
+import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.load.resource.gif.GifDrawable
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 
 class PlayAdapter(
     private val context: Context,
@@ -28,15 +24,15 @@ class PlayAdapter(
     var onItemClick: ((ManualModel, Int) -> Unit)? = null
     private val clickedPositions = mutableSetOf<Int>()
     private var isEnabled = true
-    private var isAnimating = false
-
-    // Thời gian delay sau khi lật xong (ms)
-    private val POST_FLIP_DELAY = 700L
-    private val BOMB_IMAGE_CHANGE_DELAY = 400L
+    private var isProcessing = false // ✅ Đổi tên từ isAnimating → isProcessing
 
     fun setEnabled(enabled: Boolean) {
         isEnabled = enabled
         notifyDataSetChanged()
+    }
+
+    fun setProcessing(processing: Boolean) {
+        isProcessing = processing
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -71,6 +67,9 @@ class PlayAdapter(
 
         fun bind(item: ManualModel, position: Int) {
             binding.apply {
+                // ✅ Reset GIF layer
+                imvGif.visibility = View.INVISIBLE
+
                 if (clickedPositions.contains(position)) {
                     if (item.bomb) {
                         imv.setImageResource(R.drawable.img_play1_choose_died)
@@ -84,49 +83,66 @@ class PlayAdapter(
                 root.alpha = if (isEnabled) 1.0f else 0.5f
 
                 root.setOnClickListener {
-                    if (!isEnabled || isAnimating) {
+                    // ✅ CHẶN 1: Adapter disabled
+                    if (!isEnabled) {
                         return@setOnClickListener
                     }
 
-                    if (!clickedPositions.contains(position)) {
-                        isAnimating = true
-                        clickedPositions.add(position)
-                        flipCardRealistic(imv, item)
-                        onItemClick?.invoke(item, position)
+                    // ✅ CHẶN 2: Đang xử lý click khác
+                    if (isProcessing) {
+                        return@setOnClickListener
                     }
+
+                    // ✅ CHẶN 3: Position đã click (atomic check + add)
+                    if (!clickedPositions.add(position)) {
+                        return@setOnClickListener
+                    }
+
+                    isProcessing = true
+                    flipCardRealistic(imv, imvGif, item)
+                    onItemClick?.invoke(item, position)
                 }
             }
         }
 
-        private fun flipCardRealistic(imageView: android.widget.ImageView, item: ManualModel) {
+        private fun flipCardRealistic(imageView: ImageView, imageViewGif: ImageView, item: ManualModel) {
             val scale = imageView.context.resources.displayMetrics.density
             imageView.cameraDistance = 8000 * scale
+            imageViewGif.cameraDistance = 8000 * scale
 
+            // ✅ Đồng bộ animation cho CẢ 2 ImageView
             imageView.animate()
                 .rotationY(90f)
                 .scaleX(0.9f)
                 .scaleY(0.9f)
-                .setDuration(250)
+                .setDuration(150)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
+
+            imageViewGif.animate()
+                .rotationY(90f)
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .setDuration(150)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     if (item.bomb) {
-                        // ✅ Bước 1: Hiển thị ảnh tĩnh trước
                         imageView.setImageResource(R.drawable.img_play1_choose_bomb_die)
 
-                        // ✅ Bước 2: Sau 100ms → hiển thị GIF
-                        imageView.postDelayed({
+                        imageViewGif.postDelayed({
+                            imageViewGif.visibility = View.VISIBLE
                             Glide.with(context)
                                 .asGif()
-                                .placeholder(R.drawable.img_play1_choose_bomb_die)
                                 .load(R.raw.animation)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(imageView)
-
-                            // ✅ Bước 3: Sau thêm 100ms nữa → hiển thị ảnh died vĩnh viễn
-                            imageView.postDelayed({
-                                imageView.setImageResource(R.drawable.img_play1_choose_died)
-                            }, 600)
+                                .into(imageViewGif)
                         }, 250)
+
+                        imageView.postDelayed({
+                            Glide.with(context).clear(imageViewGif)
+                            imageViewGif.visibility = View.INVISIBLE
+                            imageView.setImageResource(R.drawable.img_play1_choose_died)
+                        }, 850)
                     } else {
                         imageView.setImageResource(R.drawable.img_play1_choose_live)
                     }
@@ -135,16 +151,25 @@ class PlayAdapter(
                         .rotationY(0f)
                         .scaleX(1.0f)
                         .scaleY(1.0f)
-                        .setDuration(250)
+                        .setDuration(150)
                         .setInterpolator(AccelerateDecelerateInterpolator())
                         .withEndAction {
                             imageView.rotationY = 0f
                             imageView.scaleX = 1.0f
                             imageView.scaleY = 1.0f
+                        }
+                        .start()
 
-                            imageView.postDelayed({
-                                isAnimating = false
-                            }, POST_FLIP_DELAY)
+                    imageViewGif.animate()
+                        .rotationY(0f)
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(150)
+                        .setInterpolator(AccelerateDecelerateInterpolator())
+                        .withEndAction {
+                            imageViewGif.rotationY = 0f
+                            imageViewGif.scaleX = 1.0f
+                            imageViewGif.scaleY = 1.0f
                         }
                         .start()
                 }
@@ -158,6 +183,9 @@ class PlayAdapter(
 
         fun bind(item: ManualModel, position: Int) {
             binding.apply {
+                // ✅ Reset GIF layer
+                imvGif.visibility = View.INVISIBLE
+
                 if (clickedPositions.contains(position)) {
                     if (item.bomb) {
                         imv.setImageResource(R.drawable.img_play2_choose_died)
@@ -171,49 +199,65 @@ class PlayAdapter(
                 root.alpha = if (isEnabled) 1.0f else 0.5f
 
                 root.setOnClickListener {
-                    if (!isEnabled || isAnimating) {
+                    // ✅ CHẶN 1: Adapter disabled
+                    if (!isEnabled) {
                         return@setOnClickListener
                     }
 
-                    if (!clickedPositions.contains(position)) {
-                        isAnimating = true
-                        clickedPositions.add(position)
-                        flipCardRealistic(imv, item)
-                        onItemClick?.invoke(item, position)
+                    // ✅ CHẶN 2: Đang xử lý click khác
+                    if (isProcessing) {
+                        return@setOnClickListener
                     }
+
+                    // ✅ CHẶN 3: Position đã click (atomic check + add)
+                    if (!clickedPositions.add(position)) {
+                        return@setOnClickListener
+                    }
+
+                    isProcessing = true
+                    flipCardRealistic(imv, imvGif, item)
+                    onItemClick?.invoke(item, position)
                 }
             }
         }
 
-        private fun flipCardRealistic(imageView: android.widget.ImageView, item: ManualModel) {
+        private fun flipCardRealistic(imageView: ImageView, imageViewGif: ImageView, item: ManualModel) {
             val scale = imageView.context.resources.displayMetrics.density
             imageView.cameraDistance = 8000 * scale
+            imageViewGif.cameraDistance = 8000 * scale
 
             imageView.animate()
                 .rotationY(90f)
                 .scaleX(0.9f)
                 .scaleY(0.9f)
-                .setDuration(250)
+                .setDuration(150)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
+
+            imageViewGif.animate()
+                .rotationY(90f)
+                .scaleX(0.9f)
+                .scaleY(0.9f)
+                .setDuration(150)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     if (item.bomb) {
-                        // ✅ Bước 1: Hiển thị ảnh tĩnh trước
                         imageView.setImageResource(R.drawable.img_play2_choose_bomb_die)
 
-                        // ✅ Bước 2: Sau 100ms → hiển thị GIF
-                        imageView.postDelayed({
+                        imageViewGif.postDelayed({
+                            imageViewGif.visibility = View.VISIBLE
                             Glide.with(context)
                                 .asGif()
                                 .load(R.raw.animation)
-                                .placeholder(R.drawable.img_play2_choose_bomb_die)
                                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .into(imageView)
-
-                            // ✅ Bước 3: Sau thêm 100ms nữa → hiển thị ảnh died vĩnh viễn
-                            imageView.postDelayed({
-                                imageView.setImageResource(R.drawable.img_play2_choose_died)
-                            }, 600)
+                                .into(imageViewGif)
                         }, 250)
+
+                        imageView.postDelayed({
+                            Glide.with(context).clear(imageViewGif)
+                            imageViewGif.visibility = View.INVISIBLE
+                            imageView.setImageResource(R.drawable.img_play2_choose_died)
+                        }, 850)
                     } else {
                         imageView.setImageResource(R.drawable.img_play2_choose_live)
                     }
@@ -222,16 +266,25 @@ class PlayAdapter(
                         .rotationY(0f)
                         .scaleX(1.0f)
                         .scaleY(1.0f)
-                        .setDuration(250)
+                        .setDuration(150)
                         .setInterpolator(AccelerateDecelerateInterpolator())
                         .withEndAction {
                             imageView.rotationY = 0f
                             imageView.scaleX = 1.0f
                             imageView.scaleY = 1.0f
+                        }
+                        .start()
 
-                            imageView.postDelayed({
-                                isAnimating = false
-                            }, POST_FLIP_DELAY)
+                    imageViewGif.animate()
+                        .rotationY(0f)
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .setDuration(150)
+                        .setInterpolator(AccelerateDecelerateInterpolator())
+                        .withEndAction {
+                            imageViewGif.rotationY = 0f
+                            imageViewGif.scaleX = 1.0f
+                            imageViewGif.scaleY = 1.0f
                         }
                         .start()
                 }
@@ -241,7 +294,7 @@ class PlayAdapter(
 
     fun resetClicked() {
         clickedPositions.clear()
-        isAnimating = false
+        isProcessing = false
         notifyDataSetChanged()
     }
 

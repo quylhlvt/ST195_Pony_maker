@@ -112,6 +112,7 @@
         <action
             android:id="@+id/action_multiplayer_to_playMultiplayer"
             app:destination="@id/playMultiplayerFragment"
+            app:popUpTo="@id/multiplayerFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -120,7 +121,9 @@
 
         <action
             android:id="@+id/action_multiplayer_to_guide"
-            app:destination="@id/guideFragment" />
+            app:destination="@id/guideFragment"
+            app:popUpTo="@id/multiplayerFragment"
+            />
     </fragment>
 
     <!-- ==================== PLAY ==================== -->
@@ -173,6 +176,10 @@
         android:name="com.example.basefragment.ui.main.playmutiplay.PlayMultiplayerFragment"
         android:label="Play Multiplayer"
         tools:layout="@layout/fragment_play_mutiplay">
+        <argument
+            android:name="count"
+            app:argType="integer"
+            android:defaultValue="1" />
 
         <action
             android:id="@+id/action_play_mutiplay_to_home"
@@ -212,15 +219,21 @@
             android:id="@+id/action_success_to_manual"
             app:destination="@id/manualFragment"
             app:popUpTo="@id/homeFragment" />
+        <action
+            android:id="@+id/action_success_to_mutial"
+            app:destination="@id/multiplayerFragment"
+            app:popUpTo="@id/homeFragment" />
 
         <action
             android:id="@+id/action_success_to_auto"
             app:destination="@id/playFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false"/>
   <action
             android:id="@+id/action_success_to_auto_Ver"
             app:destination="@id/prePlayFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+      app:popUpToInclusive="false"/>
 
         <action
             android:id="@+id/action_success_to_multiplayer"
@@ -228,6 +241,10 @@
             app:popUpTo="@id/homeFragment" />
         <argument
             android:name="win"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
+            android:name="playmulti"
             app:argType="boolean"
             android:defaultValue="false" />
         <argument

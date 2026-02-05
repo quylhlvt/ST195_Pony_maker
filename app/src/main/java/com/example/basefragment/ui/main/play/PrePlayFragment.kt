@@ -39,13 +39,16 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
 ) {
     private var player1Wins = 0
     private var player2Wins = 0
-    private var currentPlayer = 1  // ✅ Đảm bảo Player 1 chơi trước
+    private var currentPlayer = 1
     private var isGameOver = false
     private var isAutoMode = false
-    private var isAnimationRunning = true // ✅ Flag chặn click khi animation
-    private var isProcessingClick = false // ✅ Flag chặn click liên tục
+    private var isAnimationRunning = true
+    private var isProcessingClick = false
     private lateinit var player1List: List<ManualModel>
     private lateinit var player2List: List<ManualModel>
+
+    // ✅ Handler để quản lý delay
+    private val handler = Handler(Looper.getMainLooper())
 
     private val player1Adapter by lazy {
         PlayAdapter(requireContext(), isPlayer1 = true).apply {
@@ -74,25 +77,24 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
     }
 
     override fun setupPreViews() {
+//        resetGameState()
+//        resetAllAnimations()
         isAutoMode = arguments?.getBoolean("isAutoMode", false) ?: false
         if (isAutoMode) {
             player1List = randomList()
             player2List = randomList()
-            Log.d("PlayFragment", "Auto Mode - Random lists generated")
         } else {
-            player1List = arguments
+            player2List = arguments
                 ?.getParcelableArray("player1List")
                 ?.map { it as ManualModel }
                 ?: emptyList()
 
-            player2List = arguments
+            player1List = arguments
                 ?.getParcelableArray("player2List")
                 ?.map { it as ManualModel }
                 ?: emptyList()
         }
         preloadBombGif()
-        Log.d("PlayFragment", "Player 1 selected: ${player1List.count { it.bomb }}")
-        Log.d("PlayFragment", "Player 2 selected: ${player2List.count { it.bomb }}")
 
         requireActivity().requestedOrientation = if (sharedPreferences.isRotate()) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -100,6 +102,7 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
     }
+
     private fun preloadBombGif() {
         Glide.with(requireContext())
             .asGif()
@@ -107,6 +110,7 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .preload()
     }
+
     private fun randomList(): List<ManualModel> {
         val list = mutableListOf<ManualModel>()
         repeat(9) { _ ->
@@ -388,7 +392,6 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             }
         }
     }
-
     private fun checkStatusPreView(status: Boolean) {
         binding.apply {
 //            imgBack.isEnabled = status
@@ -404,90 +407,58 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
         }
     }
 
-    // ✅ Player 2 chọn vào bàn của Player 1
     private fun handlePlayer1Click(item: ManualModel, position: Int) {
-        // ✅ CHẶN 1: Đang animation
-        if (isAnimationRunning) {
-            return
-        }
+        if (isAnimationRunning) return
+        if (isProcessingClick) return
+        if (isGameOver) return
+        if (currentPlayer != 1) return
 
-        // ✅ CHẶN 2: Đang xử lý click trước đó
-        if (isProcessingClick) {
-            return
-        }
-
-        // ✅ CHẶN 3: Game đã kết thúc
-        if (isGameOver) {
-            return
-        }
-
-        // ✅ CHẶN 4: Không đúng lượt (Player 2 chọn bàn Player 1)
-        if (currentPlayer != 1) {
-            return
-        }
-
-        // ✅ Đánh dấu đang xử lý
         isProcessingClick = true
 
-        // Xử lý logic game
         if (item.bomb) {
             player1Wins++
             updateWinIndicators()
             checkGameOver()
         }
 
-        // ✅ Delay chuyển lượt
         if (!isGameOver) {
-            Handler(Looper.getMainLooper()).postDelayed({
+            handler.postDelayed({
                 currentPlayer = 2
                 updateTurnState()
 
-                isProcessingClick = false // ✅ Mở khóa
+                // ✅ Reset processing cho CẢ 2 adapter
+                player1Adapter.setProcessing(false)
+                player2Adapter.setProcessing(false)
+                isProcessingClick = false
             }, 1200)
         } else {
             isProcessingClick = false
         }
     }
 
-    // ✅ Player 1 chọn vào bàn của Player 2
     private fun handlePlayer2Click(item: ManualModel, position: Int) {
-        // ✅ CHẶN 1: Đang animation
-        if (isAnimationRunning) {
-            return
-        }
+        if (isAnimationRunning) return
+        if (isProcessingClick) return
+        if (isGameOver) return
+        if (currentPlayer != 2) return
 
-        // ✅ CHẶN 2: Đang xử lý click trước đó
-        if (isProcessingClick) {
-            return
-        }
-
-        // ✅ CHẶN 3: Game đã kết thúc
-        if (isGameOver) {
-            return
-        }
-
-        // ✅ CHẶN 4: Không đúng lượt (Player 1 chọn bàn Player 2)
-        if (currentPlayer != 2) {
-            return
-        }
-
-        // ✅ Đánh dấu đang xử lý
         isProcessingClick = true
 
-        // Xử lý logic game
         if (item.bomb) {
             player2Wins++
             updateWinIndicators()
             checkGameOver()
-        } else {
         }
 
-        // ✅ Delay chuyển lượt
         if (!isGameOver) {
-            Handler(Looper.getMainLooper()).postDelayed({
+            handler.postDelayed({
                 currentPlayer = 1
                 updateTurnState()
-                isProcessingClick = false // ✅ Mở khóa
+
+                // ✅ Reset processing cho CẢ 2 adapter
+                player1Adapter.setProcessing(false)
+                player2Adapter.setProcessing(false)
+                isProcessingClick = false
             }, 1200)
         } else {
             isProcessingClick = false
@@ -501,8 +472,6 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                 player2Adapter.setEnabled(false)
                 recyclePlay2.setForegroundColor(R.color.black2)
                 recyclePlay.setForegroundColor(null)
-
-
             } else {
                 player1Adapter.setEnabled(false)
                 player2Adapter.setEnabled(true)
@@ -542,7 +511,6 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
                 }
                 findNavController().navigate(R.id.action_prePlay_to_success, bundle)
             }
-
         }
     }
 
@@ -588,7 +556,14 @@ class PrePlayFragment  : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
     }
 
     private fun finishGame() {
+        handler.removeCallbacksAndMessages(null)
         popBack()
+    }
+
+    override fun onDestroyView() {
+        handler.removeCallbacksAndMessages(null)
+        super.onDestroyView()
+        screenRotation()
     }
 
     override fun onDestroy() {

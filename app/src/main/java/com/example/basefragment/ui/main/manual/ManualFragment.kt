@@ -61,7 +61,7 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
     override fun initView() {
 
         binding.apply {
-            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
+//            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
 
             Glide.with(requireContext())
                 .asGif()
@@ -122,7 +122,7 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
             val selectedItems = manualAdapter.getSelectItems()
 
             if (selectedItems.size < 3) {
-                showToast("Please select 3 items")
+                showToast(getString(R.string.please_select_3_items))
                 return@onClick
             }
 

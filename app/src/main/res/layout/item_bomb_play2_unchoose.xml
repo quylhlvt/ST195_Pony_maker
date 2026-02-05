@@ -16,11 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:strokeWidth="0dp">
-        <View
-            android:background="#0098E5"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY" />
+
         <!--            imvImage-->
         <ImageView
             android:elevation="1dp"
@@ -29,7 +25,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY" />
-
+        <ImageView
+            android:elevation="2dp"
+            android:id="@+id/imvGif"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
+        <View
+            android:background="#0098E5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
     </com.google.android.material.card.MaterialCardView>
 
 

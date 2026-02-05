@@ -11,7 +11,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="40dp"
-            android:background="@drawable/frame_bg_dialog">
+            android:background="@drawable/bg_tb_choose">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/imvAvtRate"
@@ -92,7 +92,7 @@
                     android:layout_height="40dp"
                     android:layout_marginTop="20dp"
                     app:cardCornerRadius="10dp"
-                    android:background="@drawable/frame_bg_rate"
+                    android:background="@drawable/img_bg_multiplay_title"
                     app:cardElevation="6dp">
 
                     <TextView

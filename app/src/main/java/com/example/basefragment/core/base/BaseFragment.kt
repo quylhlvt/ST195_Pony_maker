@@ -166,24 +166,24 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
 
             // Cập nhật text
             title?.let { binding.txtTitle.text = it } // nếu có TextView title
-            binding.txtContent.text = message ?: ""
+            binding.txtDesception.text = message ?: ""
 
             if (select) {
                 // Hiện nút Yes/No
-                binding.btnNo.visible()
-                binding.btnYes.visible()
-                binding.btnNo.onClick(requireContext()) {
+                binding.btnCancel.visible()
+                binding.btnExit.visible()
+                binding.btnCancel.onClick(requireContext()) {
                     onNoClick?.invoke()
                     dismiss()
                 }
-                binding.btnYes.onClick(requireContext()) {
+                binding.btnExit.onClick(requireContext()) {
                     onYesClick?.invoke()
                     dismiss()
                 }
             } else {
                 // Ẩn nút Yes/No (chỉ loading)
-                binding.btnNo.gone()
-                binding.btnYes.gone()
+                binding.btnCancel.gone()
+                binding.btnExit.gone()
             }
 
             setCancelable(cancelable)

@@ -4,6 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.ColorDrawable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.BulletSpan
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -20,6 +24,7 @@ import com.example.basefragment.utils.music.SoundEffect.playClick1
 import com.google.android.material.card.MaterialCardView
 import kotlin.math.roundToInt
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.toColorInt
 
 fun Int.dp(context: Context): Int =
     (this * context.resources.displayMetrics.density).roundToInt()
@@ -129,4 +134,20 @@ fun RecyclerView.setForegroundColor(colorRes: Int?) {
     } else {
         null
     }
+}
+fun TextView.setBulletList(
+    items: String,
+    bulletRadius: Int = 8
+) {
+    val builder = SpannableStringBuilder()
+        val spannable = SpannableString(items)
+
+        spannable.setSpan(
+            BulletSpan(5.dp(context), "#0E567A".toColorInt(), bulletRadius),
+            0,
+            items.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        builder.append(spannable)
+    this.text = builder
 }

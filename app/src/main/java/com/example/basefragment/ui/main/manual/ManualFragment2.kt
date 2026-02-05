@@ -42,7 +42,7 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
 
     override fun initView() {
         binding.apply {
-//            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
+            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
             setupActionBar()
             setupRecyclerView()
             txtPlayer.text = getString(R.string.player_2)
