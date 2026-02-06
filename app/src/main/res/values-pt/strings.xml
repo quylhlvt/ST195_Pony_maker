@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">baseFragment</string>
+    <string name="app_name">Bomb ChipBomb</string>
     <string name="next">Próximo</string>
     <string name="language">Idioma</string>
-    <string name="title_1">Criar Personagem</string>
-    <string name="title_2">Diversidade de Personagens</string>
-    <string name="title_3">Variedade de Itens</string>
-    <string name="not_select_lang">Por favor, selecione um idioma</string>
+    <string name="title_1">Desafie seus amigos a participar.</string>
+    <string name="title_2">Virar as cartas é cheio de suspense</string>
+    <string name="title_3">É mais divertido com o modo multijogador.</string>
+    <string name="not_select_lang">Por favor selecione um idioma</string>
     <string name="pony_maker">Modo\nManual</string>
     <string name="trending_custom">Modo\nAutomático</string>
     <string name="my_work">Modo\nMultijogador</string>
@@ -15,38 +15,72 @@
     <string name="allow">Permitir</string>
     <string name="text">Texto</string>
     <string name="loading">Carregando</string>
-    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Ainda não foi salvo, deseja sair?</string>
+    <string name="do_you_want_to_exit">O jogo ainda não acabou, você ainda vai sair?</string>
     <string name="no">Não</string>
     <string name="yes">Sim</string>
-    <string name="null_edt">Por favor, insira o texto</string>
     <string name="done">Concluído</string>
-    <string name="do_you_want_to_reset_all">Deseja redefinir tudo?</string>
-    <string name="reset">Redefinir</string>
+    <string name="do_you_want_to_play_again">Você quer jogar novamente?</string>
+    <string name="reset">Resetar</string>
     <string name="exit">Sair</string>
     <string name="rate_us">Avalie-nos</string>
     <string name="share_app">Compartilhar App</string>
     <string name="rate">Avaliar</string>
-    <string name="privacy_policy">Privacidade &amp; Política</string>
+    <string name="privacy_policy"><![CDATA[Privacidade e Política]]></string>
 
     <string name="zero_star_title">Você gosta do aplicativo?</string>
     <string name="zero_star">Conte-nos sua experiência</string>
 
-    <string name="one_star_title">Oh não!</string>
-    <string name="one_star">Por favor, envie seu feedback</string>
+    <string name="one_star_title">Oh, não!</string>
+    <string name="one_star">Por favor, dê-nos seu feedback</string>
 
-    <string name="two_star_title">Oh não!</string>
-    <string name="two_star">Por favor, envie seu feedback</string>
+    <string name="two_star_title">Oh, não!</string>
+    <string name="two_star">Por favor, dê-nos seu feedback</string>
 
-    <string name="three_star_title">Oh não!</string>
-    <string name="three_star">Por favor, envie seu feedback</string>
+    <string name="three_star_title">Oh, não!</string>
+    <string name="three_star">Por favor, dê-nos seu feedback</string>
 
-    <string name="four_star_title">Nós também amamos você!</string>
+    <string name="four_star_title">Nós também te amamos!</string>
     <string name="four_star">Obrigado pelo seu feedback</string>
 
-    <string name="five_star_title">Nós também amamos você!</string>
+    <string name="five_star_title">Nós também te amamos!</string>
     <string name="five_star">Obrigado pelo seu feedback</string>
 
     <string name="rate_us_0">Você ainda não avaliou!</string>
     <string name="have_rated">Obrigado por avaliar nosso aplicativo</string>
     <string name="hello_blank_fragment">Olá fragmento vazio</string>
+    <string name="settings">Configurações</string>
+    <string name="title_splash">Esta ação pode conter anúncios</string>
+    <string name="screen_mode">Modo de tela</string>
+    <string name="music">Música</string>
+    <string name="sound">Som</string>
+    <string name="player_1">Jogador 1</string>
+    <string name="player_2">Jogador 2</string>
+    <string name="place_the_bombs_in_the_opponent_s_nplaying_field">Coloque as bombas no\ncampo de jogo do oponente.</string>
+    <string name="play_again">Jogar novamente</string>
+    <string name="play">Jogar</string>
+    <string name="home">Início</string>
+    <string name="_1_how_to_start">1. Como começar?</string>
+    <string name="_2_set_bombs">2. Colocar bombas</string>
+    <string name="_3_let_s_play">3. Vamos jogar</string>
+    <string name="_4_who_is_winner">4. Quem é o vencedor?</string>
+    <string name="this_mode_is_for_two_players_to_compete_against_each_other">Este modo é para dois jogadores competirem entre si.</string>
+    <string name="one_person_wears_a_yellow_team_and_one_person_wears_a_blue_team">Uma pessoa usa uma equipe amarela e uma pessoa usa uma equipe azul.</string>
+    <string name="the_two_players_take_turns_placing_three_bombs_in_their_opponent_s_playing_area">Os dois jogadores se revezam colocando três bombas na área de jogo do oponente.</string>
+    <string name="remember_not_to_let_your_enemy_know_the_location_of_the_bomb_you_planted">Lembre-se de não deixar seu inimigo saber a localização da bomba que você plantou.</string>
+    <string name="in_this_mode_each_player_will_have_3_lives">Neste modo, cada jogador terá 3 vidas.</string>
+    <string name="the_two_players_take_turns_flipping_cards_on_their_respective_sides_of_the_field">Os dois jogadores se revezam virando cartas em seus respectivos lados do campo.</string>
+    <string name="whoever_flips_the_bomb_card_loses_a_life_flipping_the_french_fries_card_leaves_them_safe">Quem virar a carta de bomba perde uma vida. Virar a carta de batatas fritas os deixa seguros.</string>
+    <string name="the_last_person_remaining_will_be_the_winner_congratulations">A última pessoa restante será a vencedora, parabéns!</string>
+    <string name="please_select_3_items">Por favor selecione 3 itens</string>
+    <string name="set_bombs">Colocar bombas</string>
+    <string name="choose_the_number_of_bombs_to_place_in_the_trap">Escolha o número de bombas para colocar na armadilha.</string>
+    <string name="_1">1</string>
+    <string name="cancel">Cancelar</string>
+    <string name="best_player">Melhor jogador</string>
+    <string name="rules">Regras</string>
+    <string name="this_mode_is_for_large_groups_of_friends_so_gather_your_friends_and_play_together">Este modo é para grandes grupos de amigos, então reúna seus amigos e joguem juntos!</string>
+    <string name="people_sit_together_in_a_circle_or_around_a_table">As pessoas sentam juntas em um círculo ou ao redor de uma mesa.</string>
+    <string name="choose_the_appropriate_number_of_bombs_based_on_the_number_of_participants">Escolha o número apropriado de bombas com base no número de participantes.</string>
+    <string name="one_by_one_each_person_flips_their_card_when_it_s_their_turn">Um por um, cada pessoa vira sua carta quando é sua vez.</string>
+    <string name="whoever_flips_the_bomb_card_is_eliminated_from_the_round_flipping_the_french_fries_card_is_safe">Quem virar a carta de bomba é eliminado da rodada. Virar a carta de batatas fritas é seguro.</string>
 </resources>

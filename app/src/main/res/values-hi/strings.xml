@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">baseFragment</string>
+    <string name="app_name">Bomb ChipBomb</string>
     <string name="next">आगे</string>
     <string name="language">भाषा</string>
-    <string name="title_1">चरित्र बनाएँ</string>
-    <string name="title_2">चरित्र विविधता</string>
-    <string name="title_3">विविध आइटम</string>
-    <string name="not_select_lang">कृपया भाषा चुनें</string>
+    <string name="title_1">अपने दोस्तों को शामिल होने के लिए चुनौती दें।</string>
+    <string name="title_2">कार्ड पलटना रोमांच से भरा है</string>
+    <string name="title_3">मल्टी-प्लेयर मोड के साथ यह और भी मज़ेदार है।</string>
+    <string name="not_select_lang">कृपया एक भाषा चुनें</string>
     <string name="pony_maker">मैनुअल\nमोड</string>
     <string name="trending_custom">ऑटो\nमोड</string>
     <string name="my_work">मल्टीप्लेयर\nमोड</string>
@@ -15,38 +15,73 @@
     <string name="allow">अनुमति दें</string>
     <string name="text">टेक्स्ट</string>
     <string name="loading">लोड हो रहा है</string>
-    <string name="haven_t_saved_it_yet_do_you_want_to_exit">अभी तक सेव नहीं किया गया है, क्या बाहर निकलना चाहते हैं?</string>
+    <string name="do_you_want_to_exit">गेम अभी खत्म नहीं हुआ है, क्या आप फिर भी जाना चाहते हैं?</string>
     <string name="no">नहीं</string>
     <string name="yes">हाँ</string>
-    <string name="null_edt">कृपया टेक्स्ट दर्ज करें</string>
     <string name="done">पूर्ण</string>
-    <string name="do_you_want_to_reset_all">क्या आप सब कुछ रीसेट करना चाहते हैं?</string>
-    <string name="reset">रीसेट</string>
+    <string name="do_you_want_to_play_again">क्या आप फिर से खेलना चाहते हैं?</string>
+    <string name="reset">रीसेट करें</string>
     <string name="exit">बाहर निकलें</string>
     <string name="rate_us">हमें रेट करें</string>
-    <string name="share_app">ऐप साझा करें</string>
-    <string name="rate">रेट</string>
-    <string name="privacy_policy">गोपनीयता &amp; नीति</string>
+    <string name="share_app">ऐप शेयर करें</string>
+    <string name="rate">रेट करें</string>
+    <string name="privacy_policy"><![CDATA[गोपनीयता और नीति]]></string>
 
-    <string name="zero_star_title">क्या आपको यह ऐप पसंद है?</string>
-    <string name="zero_star">अपना अनुभव हमें बताएं</string>
+    <string name="zero_star_title">क्या आपको ऐप पसंद है?</string>
+    <string name="zero_star">हमें अपना अनुभव बताएं</string>
 
-    <string name="one_star_title">ओह नहीं!</string>
-    <string name="one_star">कृपया हमें प्रतिक्रिया दें</string>
+    <string name="one_star_title">ओह, नहीं!</string>
+    <string name="one_star">कृपया हमें अपनी प्रतिक्रिया दें</string>
 
-    <string name="two_star_title">ओह नहीं!</string>
-    <string name="two_star">कृपया हमें प्रतिक्रिया दें</string>
+    <string name="two_star_title">ओह, नहीं!</string>
+    <string name="two_star">कृपया हमें अपनी प्रतिक्रिया दें</string>
 
-    <string name="three_star_title">ओह नहीं!</string>
-    <string name="three_star">कृपया हमें प्रतिक्रिया दें</string>
+    <string name="three_star_title">ओह, नहीं!</string>
+    <string name="three_star">कृपया हमें अपनी प्रतिक्रिया दें</string>
 
-    <string name="four_star_title">हमें भी आपसे प्यार है!</string>
+    <string name="four_star_title">हम भी आपसे प्यार करते हैं!</string>
     <string name="four_star">आपकी प्रतिक्रिया के लिए धन्यवाद</string>
 
-    <string name="five_star_title">हमें भी आपसे प्यार है!</string>
+    <string name="five_star_title">हम भी आपसे प्यार करते हैं!</string>
     <string name="five_star">आपकी प्रतिक्रिया के लिए धन्यवाद</string>
 
     <string name="rate_us_0">आपने अभी तक रेट नहीं किया है!</string>
     <string name="have_rated">हमारे ऐप को रेट करने के लिए धन्यवाद</string>
-    <string name="hello_blank_fragment">नमस्ते खाली फ्रैगमेंट</string>
+    <string name="hello_blank_fragment">हैलो खाली फ्रैगमेंट</string>
+    <string name="settings">सेटिंग्स</string>
+    <string name="title_splash">इस क्रिया में विज्ञापन हो सकते हैं</string>
+    <string name="screen_mode">स्क्रीन मोड</string>
+    <string name="music">संगीत</string>
+    <string name="sound">ध्वनि</string>
+    <string name="player_1">खिलाड़ी 1</string>
+    <string name="player_2">खिलाड़ी 2</string>
+    <string name="place_the_bombs_in_the_opponent_s_nplaying_field">विरोधी के खेल के\nमैदान में बम रखें।</string>
+    <string name="play_again">फिर से खेलें</string>
+    <string name="play">खेलें</string>
+    <string name="home">होम</string>
+    <string name="_1_how_to_start">1. कैसे शुरू करें?</string>
+    <string name="_2_set_bombs">2. बम सेट करें</string>
+    <string name="_3_let_s_play">3. चलो खेलते हैं</string>
+    <string name="_4_who_is_winner">4. विजेता कौन है?</string>
+    <string name="this_mode_is_for_two_players_to_compete_against_each_other">यह मोड दो खिलाड़ियों के एक-दूसरे के खिलाफ प्रतिस्पर्धा करने के लिए है।</string>
+    <string name="one_person_wears_a_yellow_team_and_one_person_wears_a_blue_team">एक व्यक्ति पीली टीम पहनता है और एक व्यक्ति नीली टीम पहनता है।</string>
+    <string name="the_two_players_take_turns_placing_three_bombs_in_their_opponent_s_playing_area">दोनों खिलाड़ी बारी-बारी से अपने प्रतिद्वंद्वी के खेल क्षेत्र में तीन बम रखते हैं।</string>
+    <string name="remember_not_to_let_your_enemy_know_the_location_of_the_bomb_you_planted">याद रखें कि अपने दुश्मन को उस बम का स्थान न बताएं जो आपने लगाया है।</string>
+    <string name="in_this_mode_each_player_will_have_3_lives">इस मोड में, प्रत्येक खिलाड़ी के पास 3 जीवन होंगे।</string>
+    <string name="the_two_players_take_turns_flipping_cards_on_their_respective_sides_of_the_field">दोनों खिलाड़ी बारी-बारी से मैदान के अपने-अपने पक्ष पर कार्ड पलटते हैं।</string>
+    <string name="whoever_flips_the_bomb_card_loses_a_life_flipping_the_french_fries_card_leaves_them_safe">जो कोई भी बम कार्ड पलटता है वह एक जीवन खो देता है। फ्रेंच फ्राइज़ कार्ड पलटने पर वे सुरक्षित रहते हैं।</string>
+    <string name="the_last_person_remaining_will_be_the_winner_congratulations">अंतिम बचा हुआ व्यक्ति विजेता होगा, बधाई हो!</string>
+    <string name="please_select_3_items">कृपया 3 आइटम चुनें</string>
+    <string name="set_bombs">बम सेट करें</string>
+    <string name="choose_the_number_of_bombs_to_place_in_the_trap">जाल में रखने के लिए बमों की संख्या चुनें।</string>
+    <string name="_1">1</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="best_player">सर्वश्रेष्ठ खिलाड़ी</string>
+    <string name="rules">नियम</string>
+    <string name="this_mode_is_for_large_groups_of_friends_so_gather_your_friends_and_play_together">यह मोड दोस्तों के बड़े समूहों के लिए है, इसलिए अपने दोस्तों को इकट्ठा करें और एक साथ खेलें!</string>
+    <string name="people_sit_together_in_a_circle_or_around_a_table">लोग एक घेरे में या मेज के चारों ओर एक साथ बैठते हैं।</string>
+    <string name="choose_the_appropriate_number_of_bombs_based_on_the_number_of_participants">प्रतिभागियों की संख्या के आधार पर बमों की उपयुक्त संख्या चुनें।</string>
+    <string name="one_by_one_each_person_flips_their_card_when_it_s_their_turn">एक-एक करके, प्रत्येक व्यक्ति अपनी बारी आने पर अपना कार्ड पलटता है।</string>
+    <string name="whoever_flips_the_bomb_card_is_eliminated_from_the_round_flipping_the_french_fries_card_is_safe">जो कोई भी बम कार्ड पलटता है वह राउंड से बाहर हो जाता है। फ्रेंच फ्राइज़ कार्ड पलटना सुरक्षित है।</string>
+
 </resources>

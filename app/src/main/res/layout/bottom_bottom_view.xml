@@ -14,6 +14,7 @@
         android:gravity="center"
         android:includeFontPadding="false"
         android:padding="16dp"
+        android:fontFamily="@font/inter_bold"
         android:textColor="@color/app_color2"
         android:textSize="16dp"
         tools:text="Next" />

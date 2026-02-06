@@ -56,10 +56,16 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             }
         }
     }
-
+    private fun showDialogExit() {
+        showConfirmDialog(
+            onYes = {
+                finishGame()
+            }
+        )
+    }
     override fun onBackPressed(): Boolean {
         if (isAnimationRunning) return true
-        showLoading()
+        showDialogExit()
         return true
     }
 
@@ -447,9 +453,9 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             winImages1.forEachIndexed { index, imageView ->
                 imageView.setImageResource(
                     if (index < player1Wins) {
-                        R.drawable.img_heart_win_number_true_play1
-                    } else {
                         R.drawable.img_heart_win_number_false
+                    } else {
+                        R.drawable.img_heart_win_number_true_play1
                     }
                 )
             }
@@ -458,9 +464,9 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             winImages2.forEachIndexed { index, imageView ->
                 imageView.setImageResource(
                     if (index < player2Wins) {
-                        R.drawable.img_heart_win_number_true_play2
-                    } else {
                         R.drawable.img_heart_win_number_false
+                    } else {
+                        R.drawable.img_heart_win_number_true_play2
                     }
                 )
             }

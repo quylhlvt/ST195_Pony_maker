@@ -322,6 +322,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/contrain_Guide2"
                 >
                 <ImageView
                     android:elevation="1dp"
@@ -330,8 +331,7 @@
                     android:layout_height="0dp"
                     android:src="@drawable/img5_guide"
                     app:layout_constraintDimensionRatio="1:1"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/contrain_Guide"/>
+                    app:layout_constraintBottom_toBottomOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

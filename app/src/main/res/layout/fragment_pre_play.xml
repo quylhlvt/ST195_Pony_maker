@@ -180,7 +180,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/carter_one_regular"
-                        android:gravity="center"
+                        android:gravity="start"
                         android:includeFontPadding="false"
                         android:lineSpacingExtra="0dp"
                         android:lineSpacingMultiplier="1.0"
@@ -197,8 +197,8 @@
                         android:layout_height="0dp"
                         android:orientation="horizontal"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="@+id/txtPlayer2"
+                        app:layout_constraintStart_toStartOf="@+id/txtPlayer2"
                         app:layout_constraintTop_toBottomOf="@+id/txtPlayer2">
 
                         <ImageView
@@ -209,7 +209,7 @@
                             android:layout_weight="1"
                             android:adjustViewBounds="true"
                             android:scaleType="fitXY"
-                            android:src="@drawable/img_heart_win_number_false" />
+                            android:src="@drawable/img_heart_win_number_true_play2" />
 
                         <ImageView
                             android:id="@+id/imgWin2_2"
@@ -219,7 +219,7 @@
                             android:layout_weight="1"
                             android:adjustViewBounds="true"
                             android:scaleType="fitXY"
-                            android:src="@drawable/img_heart_win_number_false" />
+                            android:src="@drawable/img_heart_win_number_true_play2" />
 
                         <ImageView
                             android:id="@+id/imgWin2_3"
@@ -228,7 +228,7 @@
                             android:layout_weight="1"
                             android:adjustViewBounds="true"
                             android:scaleType="fitXY"
-                            android:src="@drawable/img_heart_win_number_false" />
+                            android:src="@drawable/img_heart_win_number_true_play2" />
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -313,7 +313,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/carter_one_regular"
-                        android:gravity="center"
+                        android:gravity="start"
                         android:includeFontPadding="false"
                         android:lineSpacingExtra="0dp"
                         android:lineSpacingMultiplier="1.0"
@@ -330,8 +330,8 @@
                         android:layout_height="0dp"
                         android:orientation="horizontal"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="@+id/txtPlayer1"
+                        app:layout_constraintStart_toStartOf="@+id/txtPlayer1"
                         app:layout_constraintTop_toBottomOf="@+id/txtPlayer1">
 
                         <ImageView
@@ -342,7 +342,7 @@
                             android:layout_weight="1"
                             android:adjustViewBounds="true"
                             android:scaleType="fitXY"
-                            android:src="@drawable/img_heart_win_number_false" />
+                            android:src="@drawable/img_heart_win_number_true_play1" />
 
                         <ImageView
                             android:id="@+id/imgWin1_2"
@@ -352,7 +352,7 @@
                             android:layout_weight="1"
                             android:adjustViewBounds="true"
                             android:scaleType="fitXY"
-                            android:src="@drawable/img_heart_win_number_false" />
+                            android:src="@drawable/img_heart_win_number_true_play1" />
 
                         <ImageView
                             android:id="@+id/imgWin1_3"
@@ -361,7 +361,7 @@
                             android:layout_weight="1"
                             android:adjustViewBounds="true"
                             android:scaleType="fitXY"
-                            android:src="@drawable/img_heart_win_number_false" />
+                            android:src="@drawable/img_heart_win_number_true_play1" />
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>

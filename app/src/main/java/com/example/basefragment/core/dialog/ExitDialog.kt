@@ -1,53 +1,35 @@
 package com.example.basefragment.core.dialog
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BaseDialog
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.databinding.DialogbaseBinding
 
-class ExitDialog : DialogFragment() {
-
-    private var _binding: DialogbaseBinding? = null
-    private val binding get() = _binding!!
+class ExitDialog : BaseDialog<DialogbaseBinding>() {
 
     var onExitClick: (() -> Unit)? = null
     var onCancelClick: (() -> Unit)? = null
 
-    override fun onCreateView(
+
+    override fun createBinding(
         inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = DialogbaseBinding.inflate(inflater, container, false)
-        return binding.root
+        container: ViewGroup?
+    ): DialogbaseBinding {
+        return DialogbaseBinding.inflate(inflater, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        isCancelable = true
-
-        initView()
-        initAction()
-    }
-
-    private fun initView() {
+    override fun initView() {
         binding.apply {
             txtTitle.text = getString(R.string.exit)
             txtDesception.text = getString(R.string.do_you_want_to_exit)
-            txtTitle.isSelected=true
-
+            txtTitle.isSelected = true  // giữ hiệu ứng marquee nếu cần
         }
     }
 
-    private fun initAction() {
+    override fun initAction() {
         binding.apply {
             btnExit.onClick(requireContext()) {
                 onExitClick?.invoke()
@@ -61,8 +43,4 @@ class ExitDialog : DialogFragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 }

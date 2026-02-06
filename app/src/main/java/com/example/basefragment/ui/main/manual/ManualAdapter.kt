@@ -62,4 +62,5 @@ class ManualAdapter(
         items
     fun getSelectItems(): List<ManualModel> =
         items.filter { it.bomb }
+
 }

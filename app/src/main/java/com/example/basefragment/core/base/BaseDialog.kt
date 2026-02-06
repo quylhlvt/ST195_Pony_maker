@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.viewbinding.ViewBinding
 
@@ -19,6 +20,8 @@ abstract class BaseDialog<VB : ViewBinding> : DialogFragment() {
     abstract fun initAction()
 
     open val isCancelableDialog: Boolean = true
+    open val maxWidth: Boolean = true
+    open val maxHeight: Boolean = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,9 +36,17 @@ abstract class BaseDialog<VB : ViewBinding> : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Set background transparent
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.apply {
+            val width = if (maxWidth) WindowManager.LayoutParams.MATCH_PARENT
+            else WindowManager.LayoutParams.WRAP_CONTENT
+            val height = if (maxHeight) WindowManager.LayoutParams.MATCH_PARENT
+            else WindowManager.LayoutParams.WRAP_CONTENT
+            setLayout(width, height)
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
 
         isCancelable = isCancelableDialog
+
 
         initView()
         initAction()

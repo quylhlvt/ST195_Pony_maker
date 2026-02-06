@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">baseFragment</string>
+    <string name="app_name">Bomb ChipBomb</string>
     <string name="next">Next</string>
     <string name="language">Language</string>
-    <string name="title_1">Make Character</string>
-    <string name="title_2">Character Diversity</string>
-    <string name="title_3">Variety Items</string>
+    <string name="title_1">Challenge your friends to join in.</string>
+    <string name="title_2">Flipping the cards is full of suspense</string>
+    <string name="title_3">It\'s more fun with the multi-player mode.</string>
     <string name="not_select_lang">Please select a language</string>
     <string name="pony_maker">Manual\nMode</string>
     <string name="trending_custom">Auto\nMode</string>

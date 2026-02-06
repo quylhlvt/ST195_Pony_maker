@@ -42,5 +42,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "baseFragment"
+rootProject.name = "Bomb ChipBomb"
 include ':app'

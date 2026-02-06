@@ -12,23 +12,21 @@ import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.*
 import com.example.basefragment.data.model.manual.ManualModel
-import com.example.basefragment.databinding.FragmentManualBinding
+import com.example.basefragment.databinding.FragmentManual2Binding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
-    FragmentManualBinding::inflate,
+class ManualFragment2 : BaseFragment<FragmentManual2Binding, ManualViewModel>(
+    FragmentManual2Binding::inflate,
     ManualViewModel::class.java
 ) {
-    // ✅ Sử dụng activityViewModels để share ViewModel
     private val sharedViewModel: ManualViewModel by activityViewModels()
 
     private val manualAdapter by lazy {
         ManualAdapter(requireContext(), true).apply {
             onSelectionChanged = {
-                // Update real-time khi user chọn
                 sharedViewModel.updatePlayer2List(getItems())
             }
         }
@@ -38,7 +36,7 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): FragmentManualBinding = FragmentManualBinding.inflate(inflater, container, false)
+    ): FragmentManual2Binding = FragmentManual2Binding.inflate(inflater, container, false)
 
     override fun initView() {
         binding.apply {
@@ -49,14 +47,14 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
         }
     }
 
-    private fun FragmentManualBinding.setupActionBar() {
+    private fun FragmentManual2Binding.setupActionBar() {
         actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
             setImageActionBar(btnActionBarRight, R.drawable.guide)
         }
     }
 
-    private fun FragmentManualBinding.setupRecyclerView() {
+    private fun FragmentManual2Binding.setupRecyclerView() {
         recycleChoose.apply {
             adapter = manualAdapter
             setHasFixedSize(true)
@@ -76,15 +74,14 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
         }
     }
 
-    private fun FragmentManualBinding.setupActionBarListeners() {
+    private fun FragmentManual2Binding.setupActionBarListeners() {
         actionBar.apply {
             btnActionBarLeft.onClick(requireContext()) {
                 lifecycleScope.launch {
                     popBack()
-                    delay(100)
-                    sharedViewModel.resetList2()
+                    sharedViewModel.reset2()
+                    // ✅ KHÔNG RESET - GIỮ NGUYÊN LỰA CHỌN CỦA CẢ 2 PLAYER
                 }
-
             }
             btnActionBarRight.onClick(requireContext()) {
                 toGuideFromManual()
@@ -92,8 +89,11 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
         }
     }
 
-    private fun FragmentManualBinding.setupNextButton() {
+    private fun FragmentManual2Binding.setupNextButton() {
         tvNext.onClick(requireContext()) {
+
+
+
             val selectedItems = manualAdapter.getSelectItems()
 
             if (selectedItems.size < 3) {
@@ -101,25 +101,27 @@ class ManualFragment2 : BaseFragment<FragmentManualBinding, ManualViewModel>(
                 return@onClick
             }
 
-            // ✅ Lưu selection vào ViewModel
+            // Lưu selection vào ViewModel
             sharedViewModel.updatePlayer2List(manualAdapter.getItems())
 
-            // ✅ Truyền data qua Bundle cho PlayFragment
+            // Lấy data để truyền sang PlayFragment
             val bundle = Bundle().apply {
                 putParcelableArray("player1List", sharedViewModel.getPlayer1List().toTypedArray())
                 putParcelableArray("player2List", sharedViewModel.getPlayer2List().toTypedArray())
             }
-            if (!sharedPreferences.isRotate())
-            findNavController().navigate(R.id.action_manual_to_play, bundle)
-            else
+
+            // ✅ CHỈ RESET KHI ẤN NEXT - SAU KHI ĐÃ LẤY DATA
+
+            // Navigate sang PlayFragment
+            if (!sharedPreferences.isRotate()) {
+                findNavController().navigate(R.id.action_manual_to_play, bundle)
+            } else {
                 findNavController().navigate(R.id.action_manual_to_play_Ver, bundle)
+            }
+
+            sharedViewModel.resetAll()
 
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        sharedViewModel.resetAll()
     }
 
     override fun observeData() {

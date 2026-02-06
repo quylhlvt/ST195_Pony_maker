@@ -44,7 +44,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     private val handler = Handler(Looper.getMainLooper())
     override fun onBackPressed(): Boolean {
         if (isAnimationRunning) return true
-        showLoading()
+        showDialogExit()
         return true
     }
     private val player1Adapter by lazy {
@@ -63,28 +63,19 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         }
     }
     // PlayFragment
-
+    private fun showDialogExit() {
+        showConfirmDialog(
+            onYes = {
+                finishGame()
+            }
+        )
+    }
 
     override fun viewListener() {
         binding.apply {
             imgBack.onClick(requireContext()) {
                 if (!isAnimationRunning) {
-                    showLoading()
-//                    showRateDialog(requireActivity(), sharedPreferences) { state ->
-//                        if (state != RateState.CANCEL) {
-//                            showToast(R.string.have_rated)
-//                        }
-//                       finishGame()
-//
-//                        // User cancel -> Không làm gì (ở lại app)
-//                    }
-//                    showExitDialogHor(requireActivity()) { state ->
-//                        if (state != ExitState.EXIT) {
-//                            finishGame()
-//                        }
-//                        // User cancel -> Không làm gì (ở lại app)
-//                    }
-                //                    showExitDialog()
+                    showDialogExit()
                 }
             }
         }
@@ -443,6 +434,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         lifecycleScope.launch {
             var win = false
             if (player1Wins >= 3) {
+                delay(300)
                 isGameOver = true
                 player1Adapter.setEnabled(false)
                 player2Adapter.setEnabled(false)
@@ -456,9 +448,11 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
                 }
                 findNavController().navigate(R.id.action_play_to_success, bundle)
             } else if (player2Wins >= 3) {
+                delay(300)
                 isGameOver = true
                 player1Adapter.setEnabled(false)
                 player2Adapter.setEnabled(false)
+
                 binding.recyclePlay.setForegroundColor(null)
                 binding.recyclePlay2.setForegroundColor(null)
                 win = false
@@ -478,9 +472,9 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
             winImages1.forEachIndexed { index, imageView ->
                 imageView.setImageResource(
                     if (index < player1Wins) {
-                        R.drawable.img_heart_win_number_true_play1
-                    } else {
                         R.drawable.img_heart_win_number_false
+                    } else {
+                        R.drawable.img_heart_win_number_true_play1
                     }
                 )
             }
@@ -489,9 +483,9 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
             winImages2.forEachIndexed { index, imageView ->
                 imageView.setImageResource(
                     if (index < player2Wins) {
-                        R.drawable.img_heart_win_number_true_play2
-                    } else {
                         R.drawable.img_heart_win_number_false
+                    } else {
+                        R.drawable.img_heart_win_number_true_play2
                     }
                 )
             }

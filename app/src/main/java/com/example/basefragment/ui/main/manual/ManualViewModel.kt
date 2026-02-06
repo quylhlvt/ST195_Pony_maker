@@ -44,16 +44,15 @@ class ManualViewModel @Inject constructor() : ViewModel() {
     fun getPlayer2List(): List<ManualModel> = _player2List.value
 
     /**
-     * Reset all lists (call when finish game or start new game)
+     * Reset all lists - CHỈ GỌI KHI ẤN NEXT Ở MÀN 2
      */
+
     fun resetAll() {
         _player1List.value = List(9) { ManualModel(false) }
         _player2List.value = List(9) { ManualModel(false) }
     }
-    fun resetList1(){
-        _player1List.value = List(9) { ManualModel(false) }
-    }
-    fun resetList2(){
+    fun reset2() {
+
         _player2List.value = List(9) { ManualModel(false) }
     }
 }

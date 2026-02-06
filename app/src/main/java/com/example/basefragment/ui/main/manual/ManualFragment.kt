@@ -28,15 +28,13 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
     FragmentManualBinding::inflate,
     ManualViewModel::class.java
 ) {
-    // ✅ Sử dụng activityViewModels để share ViewModel
+    private var isSuccess= false
     private val sharedViewModel: ManualViewModel by activityViewModels()
 
     private val manualAdapter by lazy {
         ManualAdapter(requireContext()).apply {
             onSelectionChanged = {
                 binding.howtoclick.visibility = View.GONE
-                setHowToClickFirst(true)
-                // Update real-time khi user chọn
                 sharedViewModel.updatePlayer1List(getItems())
             }
         }
@@ -44,14 +42,16 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
 
     override fun setupPreViews() {
         super.setupPreViews()
-
         screenRotation()
+        isSuccess = arguments?.getBoolean("isSuccess", false) ?: false
+
     }
 
     override fun onResume() {
         super.onResume()
         screenRotation()
     }
+
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -59,15 +59,12 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
     ): FragmentManualBinding = FragmentManualBinding.inflate(inflater, container, false)
 
     override fun initView() {
-
         binding.apply {
-//            recycleChoose.setBackgroundResource(R.drawable.img_bg_choose_manual2)
-
             Glide.with(requireContext())
                 .asGif()
-                .load(R.raw.touch) // hoặc R.drawable.hand_tap_fixed
+                .load(R.raw.touch)
                 .into(handTapAnimation)
-            howtoclick.visibility = if (!isHowToClickFirst()) View.VISIBLE else View.GONE
+            howtoclick.visibility = if (!isHowToClickFirst()&&!isSuccess) View.VISIBLE else View.GONE
             setupActionBar()
             setupRecyclerView()
             txtPlayer.text = getString(R.string.player_1)
@@ -107,8 +104,8 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
             btnActionBarLeft.onClick(requireContext()) {
                 lifecycleScope.launch {
                     popBack()
-                    delay(100)
-                    sharedViewModel.resetList1()
+                    sharedViewModel.resetAll()
+                    // ✅ XÓA DÒNG resetList1() - GIỮ NGUYÊN LỰA CHỌN
                 }
             }
             btnActionBarRight.onClick(requireContext()) {
@@ -126,10 +123,7 @@ class ManualFragment : BaseFragment<FragmentManualBinding, ManualViewModel>(
                 return@onClick
             }
 
-            // ✅ Lưu selection vào ViewModel
             sharedViewModel.updatePlayer1List(manualAdapter.getItems())
-
-            // ✅ Navigate sang Player 2 (KHÔNG cần truyền data qua Bundle)
             findNavController().navigate(R.id.action_manualFragment_to_manualFragment2)
         }
     }

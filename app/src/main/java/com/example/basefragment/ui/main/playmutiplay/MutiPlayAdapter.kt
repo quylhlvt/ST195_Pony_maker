@@ -14,6 +14,7 @@ import com.example.basefragment.databinding.ItemBombPlay1UnchooseBinding
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.basefragment.utils.music.SoundEffect.playClick
 
 class MutiPlayAdapter(
     private val context: Context,
@@ -91,7 +92,7 @@ class MutiPlayAdapter(
             val scale = imageView.context.resources.displayMetrics.density
             imageView.cameraDistance = 8000 * scale
             imageViewGif.cameraDistance = 8000 * scale
-
+            playClick(context, R.raw.flip)
             // ✅ Đồng bộ animation cho CẢ 2 ImageView
             imageView.animate()
                 .rotationY(90f)
@@ -109,6 +110,8 @@ class MutiPlayAdapter(
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     if (item.bomb) {
+                        playClick(context, R.raw.bomb)
+                        playClick(context, R.raw.bomb)
                         // ✅ Hiển thị ảnh tĩnh bomb_die ở layer chính
                         imageView.setImageResource(R.drawable.img_play1_choose_bomb_die)
 

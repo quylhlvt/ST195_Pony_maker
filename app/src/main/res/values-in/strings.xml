@@ -1,52 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">baseFragment</string>
-    <string name="next">Berikutnya</string>
+    <string name="app_name">Bomb ChipBomb</string>
+    <string name="next">Lanjut</string>
     <string name="language">Bahasa</string>
-    <string name="title_1">Buat Karakter</string>
-    <string name="title_2">Keberagaman Karakter</string>
-    <string name="title_3">Beragam Item</string>
+    <string name="title_1">Tantang teman-temanmu untuk bergabung.</string>
+    <string name="title_2">Membalik kartu penuh ketegangan</string>
+    <string name="title_3">Lebih seru dengan mode multi-pemain.</string>
     <string name="not_select_lang">Silakan pilih bahasa</string>
     <string name="pony_maker">Mode\nManual</string>
     <string name="trending_custom">Mode\nOtomatis</string>
-    <string name="my_work">Mode\nMultiplayer</string>
+    <string name="my_work">Mode\nMultipemain</string>
 
     <string name="continue_per">Lanjutkan</string>
     <string name="allow">Izinkan</string>
     <string name="text">Teks</string>
     <string name="loading">Memuat</string>
-    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Belum disimpan, apakah ingin keluar?</string>
+    <string name="do_you_want_to_exit">Permainan belum selesai, apakah kamu masih akan pergi?</string>
     <string name="no">Tidak</string>
     <string name="yes">Ya</string>
-    <string name="null_edt">Silakan masukkan teks</string>
     <string name="done">Selesai</string>
-    <string name="do_you_want_to_reset_all">Apakah ingin mengatur ulang semuanya?</string>
+    <string name="do_you_want_to_play_again">Apakah kamu ingin bermain lagi?</string>
     <string name="reset">Atur Ulang</string>
     <string name="exit">Keluar</string>
     <string name="rate_us">Beri Nilai</string>
     <string name="share_app">Bagikan Aplikasi</string>
     <string name="rate">Nilai</string>
-    <string name="privacy_policy">Privasi &amp; Kebijakan</string>
+    <string name="privacy_policy"><![CDATA[Privasi & Kebijakan]]></string>
 
-    <string name="zero_star_title">Apakah Anda menyukai aplikasi ini?</string>
-    <string name="zero_star">Beri tahu kami pengalaman Anda</string>
+    <string name="zero_star_title">Apakah kamu suka aplikasi ini?</string>
+    <string name="zero_star">Beri tahu kami pengalamanmu</string>
 
-    <string name="one_star_title">Oh tidak!</string>
-    <string name="one_star">Mohon berikan masukan</string>
+    <string name="one_star_title">Oh, tidak!</string>
+    <string name="one_star">Mohon beri kami masukan</string>
 
-    <string name="two_star_title">Oh tidak!</string>
-    <string name="two_star">Mohon berikan masukan</string>
+    <string name="two_star_title">Oh, tidak!</string>
+    <string name="two_star">Mohon beri kami masukan</string>
 
-    <string name="three_star_title">Oh tidak!</string>
-    <string name="three_star">Mohon berikan masukan</string>
+    <string name="three_star_title">Oh, tidak!</string>
+    <string name="three_star">Mohon beri kami masukan</string>
 
     <string name="four_star_title">Kami juga mencintaimu!</string>
-    <string name="four_star">Terima kasih atas masukan Anda</string>
+    <string name="four_star">Terima kasih atas masukanmu</string>
 
     <string name="five_star_title">Kami juga mencintaimu!</string>
-    <string name="five_star">Terima kasih atas masukan Anda</string>
+    <string name="five_star">Terima kasih atas masukanmu</string>
 
-    <string name="rate_us_0">Anda belum memberi penilaian!</string>
+    <string name="rate_us_0">Kamu belum memberi nilai!</string>
     <string name="have_rated">Terima kasih telah menilai aplikasi kami</string>
     <string name="hello_blank_fragment">Halo fragmen kosong</string>
+    <string name="settings">Pengaturan</string>
+    <string name="title_splash">Tindakan ini dapat berisi iklan</string>
+    <string name="screen_mode">Mode layar</string>
+    <string name="music">Musik</string>
+    <string name="sound">Suara</string>
+    <string name="player_1">Pemain 1</string>
+    <string name="player_2">Pemain 2</string>
+    <string name="place_the_bombs_in_the_opponent_s_nplaying_field">Tempatkan bom di\narea permainan lawan.</string>
+    <string name="play_again">Main lagi</string>
+    <string name="play">Main</string>
+    <string name="home">Beranda</string>
+    <string name="_1_how_to_start">1. Cara memulai?</string>
+    <string name="_2_set_bombs">2. Pasang bom</string>
+    <string name="_3_let_s_play">3. Ayo main</string>
+    <string name="_4_who_is_winner">4. Siapa pemenangnya?</string>
+    <string name="this_mode_is_for_two_players_to_compete_against_each_other">Mode ini untuk dua pemain yang berkompetisi satu sama lain.</string>
+    <string name="one_person_wears_a_yellow_team_and_one_person_wears_a_blue_team">Satu orang memakai tim kuning dan satu orang memakai tim biru.</string>
+    <string name="the_two_players_take_turns_placing_three_bombs_in_their_opponent_s_playing_area">Kedua pemain bergantian menempatkan tiga bom di area permainan lawan mereka.</string>
+    <string name="remember_not_to_let_your_enemy_know_the_location_of_the_bomb_you_planted">Ingat untuk tidak membiarkan musuhmu mengetahui lokasi bom yang kamu pasang.</string>
+    <string name="in_this_mode_each_player_will_have_3_lives">Dalam mode ini, setiap pemain akan memiliki 3 nyawa.</string>
+    <string name="the_two_players_take_turns_flipping_cards_on_their_respective_sides_of_the_field">Kedua pemain bergantian membalik kartu di sisi masing-masing lapangan.</string>
+    <string name="whoever_flips_the_bomb_card_loses_a_life_flipping_the_french_fries_card_leaves_them_safe">Siapa pun yang membalik kartu bom kehilangan satu nyawa. Membalik kartu kentang goreng membuat mereka aman.</string>
+    <string name="the_last_person_remaining_will_be_the_winner_congratulations">Orang terakhir yang tersisa akan menjadi pemenang, selamat!</string>
+    <string name="please_select_3_items">Silakan pilih 3 item</string>
+    <string name="set_bombs">Pasang bom</string>
+    <string name="choose_the_number_of_bombs_to_place_in_the_trap">Pilih jumlah bom yang akan ditempatkan di jebakan.</string>
+    <string name="_1">1</string>
+    <string name="cancel">Batal</string>
+    <string name="best_player">Pemain terbaik</string>
+    <string name="rules">Aturan</string>
+    <string name="this_mode_is_for_large_groups_of_friends_so_gather_your_friends_and_play_together">Mode ini untuk kelompok besar teman, jadi kumpulkan teman-temanmu dan bermain bersama!</string>
+    <string name="people_sit_together_in_a_circle_or_around_a_table">Orang-orang duduk bersama dalam lingkaran atau di sekitar meja.</string>
+    <string name="choose_the_appropriate_number_of_bombs_based_on_the_number_of_participants">Pilih jumlah bom yang sesuai berdasarkan jumlah peserta.</string>
+    <string name="one_by_one_each_person_flips_their_card_when_it_s_their_turn">Satu per satu, setiap orang membalik kartunya saat giliran mereka.</string>
+    <string name="whoever_flips_the_bomb_card_is_eliminated_from_the_round_flipping_the_french_fries_card_is_safe">Siapa pun yang membalik kartu bom tersingkir dari ronde. Membalik kartu kentang goreng aman.</string>
 </resources>

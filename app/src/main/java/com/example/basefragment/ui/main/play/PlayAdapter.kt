@@ -15,6 +15,7 @@ import com.example.basefragment.databinding.ItemBombPlay2UnchooseBinding
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.basefragment.utils.music.SoundEffect.playClick
 
 class PlayAdapter(
     private val context: Context,
@@ -71,6 +72,7 @@ class PlayAdapter(
                 imvGif.visibility = View.INVISIBLE
 
                 if (clickedPositions.contains(position)) {
+
                     if (item.bomb) {
                         imv.setImageResource(R.drawable.img_play1_choose_died)
                     } else {
@@ -99,6 +101,7 @@ class PlayAdapter(
                     }
 
                     isProcessing = true
+                    playClick(context, R.raw.flip)
                     flipCardRealistic(imv, imvGif, item)
                     onItemClick?.invoke(item, position)
                 }
@@ -127,6 +130,7 @@ class PlayAdapter(
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     if (item.bomb) {
+                        playClick(context, R.raw.bomb)
                         imageView.setImageResource(R.drawable.img_play1_choose_bomb_die)
 
                         imageViewGif.postDelayed({
@@ -225,7 +229,7 @@ class PlayAdapter(
             val scale = imageView.context.resources.displayMetrics.density
             imageView.cameraDistance = 8000 * scale
             imageViewGif.cameraDistance = 8000 * scale
-
+            playClick(context, R.raw.flip)
             imageView.animate()
                 .rotationY(90f)
                 .scaleX(0.9f)
@@ -242,6 +246,7 @@ class PlayAdapter(
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .withEndAction {
                     if (item.bomb) {
+                        playClick(context, R.raw.bomb)
                         imageView.setImageResource(R.drawable.img_play2_choose_bomb_die)
 
                         imageViewGif.postDelayed({

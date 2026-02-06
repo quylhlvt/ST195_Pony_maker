@@ -67,6 +67,10 @@
         android:label="Manual"
         tools:layout="@layout/fragment_manual">
 
+        <argument
+            android:name="isSuccess"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
             android:id="@+id/action_manual_to_home"
             app:destination="@id/homeFragment"

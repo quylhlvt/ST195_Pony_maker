@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 
 class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMultiplayeViewModel>(FragmentPlayMutiplayBinding::inflate,
     PlayMultiplayeViewModel::class.java
-) {
+), BackPressHandler  {
     private var playerWins = 0
     private var isGameOver = false
     private var isProcessingClick = false
@@ -39,9 +40,17 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
     override fun viewListener() {
         binding.apply {
             actionBar.btnActionBarLeft.onClick(requireContext()) {
-                    finishGame()
+                    showDialogExit()
             }
         }
+    }
+    private fun showDialogExit() {
+        showConfirmDialog(
+            onYes = {
+                handler.removeCallbacksAndMessages(null)
+                popBack()
+            }
+        )
     }
     private val playerAdapter by lazy {
         MutiPlayAdapter(requireContext()).apply {
@@ -66,6 +75,8 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
         }
         playerWins++
         if (playerWins >= count) {
+            lifecycleScope.launch {
+            delay(400)
             isGameOver = true
             playerAdapter.setEnabled(false)
 
@@ -75,7 +86,7 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
                     putBoolean("playmulti", true)
                 }
                 findNavController().navigate(R.id.action_playMultiplayer_to_success, bundle)
-            }, 2000)
+            }, 2000)}
         } else {
             // ✅ Reset processing để cho phép click tiếp
             handler.postDelayed({
@@ -149,16 +160,13 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                        finishGame()
+                        showDialogExit()
 
                 }
             }
         )
     }
-    private fun finishGame() {
-        handler.removeCallbacksAndMessages(null)
-        popBack()
-    }
+
     override fun observeData() {
 //        viewModel.data.observe(viewLifecycleOwner) { text ->
 //            binding.textView.text = text
@@ -171,6 +179,11 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
 //            viewModel.loadLocalData()
 //
 //        }
+    }
+
+    override fun onBackPressed(): Boolean {
+        showDialogExit()
+        return true
     }
 
 }

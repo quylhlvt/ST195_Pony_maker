@@ -71,8 +71,5 @@ class IntroViewModel @Inject constructor( private val sharedPreferences: SharedP
         }
     }
 
-     companion object {
-        const val NEXT = "Continue"
-        const val GET_STARED = "Start"
-    }
+
 }

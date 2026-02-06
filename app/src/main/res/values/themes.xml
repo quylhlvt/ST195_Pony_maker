@@ -4,8 +4,18 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowFullscreen">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
+
+        <!-- Cho phép vẽ vào vùng tai thỏ/notch (Android 9+) -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+
+        <!-- Tắt tương phản tự động (Android 10+) -->
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="q">false</item>
     </style>
 
     <style name="single_marquee">

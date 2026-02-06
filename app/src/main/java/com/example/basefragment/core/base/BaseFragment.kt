@@ -21,9 +21,11 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewbinding.ViewBinding
 import com.example.basefragment.R
+import com.example.basefragment.core.dialog.ExitDialog
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
@@ -65,6 +67,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         savedInstanceState: Bundle?
     ): View? {
         Log.v(TAG, "onCreateView: $this")
+        requireActivity().hideNavigation(true)
         _navController = findNavController()
         _binding = inflateBinding(inflater, container, savedInstanceState)
         setupPredViews()
@@ -99,6 +102,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
 
     override fun onResume() {
+        requireActivity().hideNavigation(true)
         super.onResume()
         Log.v(TAG, "onResume: $this")
         view?.invalidate()
@@ -157,50 +161,20 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         cancelable: Boolean = false,
         select: Boolean = true,  // true = confirm dialog, false = loading
         title: String? = null,
-        message: String? = getString(R.string.loading),
+        muti: Boolean=false
     ) {
         hideLoading()
 
         dialog = Dialog(requireContext(),R.style.BaseDialog).apply {
-            if (sharedPreferences.isRotate()){
-                val binding = DialogbaseBinding.inflate(layoutInflater)
-                setContentView(binding.root)
-                confirmDialogBinding = binding
-
-                // Cập nhật text
-                title?.let { binding.txtTitle.text = it } // nếu có TextView title
-//                binding.txtDesception.text = message ?: ""
-                title?.let { binding.txtDesception.text = it } // nếu có TextView title
-
-                if (select) {
-                    // Hiện nút Yes/No
-                    binding.btnCancel.visible()
-                    binding.btnExit.visible()
-                    binding.btnCancel.onClick(requireContext()) {
-                        onNoClick?.invoke()
-                        dismiss()
+            if (sharedPreferences.isRotate() || muti){
+                ExitDialog().apply {
+                    onExitClick = {
+                        popBack()
+                        requireActivity().hideNavigation(true)
                     }
-                    binding.btnExit.onClick(requireContext()) {
-                        onYesClick?.invoke()
-                        dismiss()
+                    onCancelClick = {
                     }
-                } else {
-                    // Ẩn nút Yes/No (chỉ loading)
-                    binding.btnCancel.gone()
-                    binding.btnExit.gone()
-                }
-
-                setCancelable(cancelable)
-                window?.apply {
-                    setBackgroundDrawableResource(android.R.color.transparent)
-                    // Đặt layout MATCH_PARENT cho cả width và height
-                    setLayout(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT
-                    )
-                    setGravity(Gravity.CENTER)
-                }
-                show()
+                }.show(parentFragmentManager, "ExitDialog")
             }else{
                 val binding = DialogbasehorBinding.inflate(layoutInflater)
                 setContentView(binding.root)
@@ -216,12 +190,11 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
                     binding.btnCancel.visible()
                     binding.btnExit.visible()
                     binding.btnCancel.onClick(requireContext()) {
-                        onNoClick?.invoke()
                         dismiss()
                     }
                     binding.btnExit.onClick(requireContext()) {
-                        onYesClick?.invoke()
                         dismiss()
+                        onYesClick?.invoke()
                     }
                 } else {
                     // Ẩn nút Yes/No (chỉ loading)
@@ -267,9 +240,8 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
 
     // Hàm tiện ích để show confirm (dễ dùng)
     fun showConfirmDialog(
-        message: String,
         title: String? = null,
-
+        muti: Boolean =false,
         onYes: () -> Unit,
         onNo: (() -> Unit)? = null
     ) {
@@ -280,8 +252,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
             cancelable = true,
             select = true,
             title = title,
-            message = message
-
+            muti = muti
         )
     }
 

@@ -11,7 +11,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.invisible
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.toHomeFromLanguage
@@ -29,47 +32,61 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel>(
     FragmentLanguageBinding::inflate, LanguageViewModel::class.java
-) {
+), BackPressHandler {
     private val languageAdapter by lazy { LanguageAdapter(requireContext()) }
     private var isFromSetting = false
 
+    override fun onBackPressed(): Boolean {
+        Log.d("LANG_BACK", "onBackPressed called")
+        Log.d("LANG_BACK", "isFromSetting: $isFromSetting")
+        Log.d("LANG_BACK", "isLanuageScreen(): ${isLanuageScreen()}")
+
+        when {
+            isFromSetting -> {
+                Log.d("LANG_BACK", "Action: toSettingFromLang")
+                toSettingFromLang()
+            }
+            isLanuageScreen() -> {
+                Log.d("LANG_BACK", "Action: popBack")
+                popBack()
+            }
+            else -> {
+                Log.d("LANG_BACK", "Action: finish activity")
+                requireActivity().finish()
+            }
+        }
+        return true
+    }
+
     override fun viewListener() {
         binding.apply {
-
             actionBar.btnActionBarRight.onClick(requireContext()) {
                 handleDone()
             }
-            actionBar.btnActionBarLeft.onClick(requireContext(),500) {
-                when {
-                isFromSetting -> {
-                    // Từ Setting -> Back về Setting
-                    toSettingFromLang()
-                }
-                else -> {
-                    // Từ Onboarding -> Back về Splash/Language
-                    popBack()
-                }
-            }}
+            actionBar.btnActionBarLeft.onClick(requireContext(), 500) {
+                // Dùng chung logic với onBackPressed
+                onBackPressed()
+            }
         }
         handleRcv()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            toSettingFromLang()
-        }
-    }
     override fun inflateBinding(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        // Set isFromSetting trước khi dùng
         isFromSetting = (findNavController().currentDestination?.id == R.id.languageInSetting)
 
-        binding.actionBar.apply {
-            btnActionBarLeft.setImageResource(R.drawable.back_app)
+        Log.d("LANG_INIT", "isFromSetting: $isFromSetting")
+        Log.d("LANG_INIT", "currentDestination: ${findNavController().currentDestination?.id}")
+
+        binding.apply {
+            actionBar.btnActionBarRight.gone()
+            actionBar.apply {
+                btnActionBarLeft.setImageResource(R.drawable.back_app)
+            }
         }
         initRcv()
 
@@ -79,50 +96,31 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
 
         viewModel.setFirstLanguage(isFirst = !checkFirst)
         viewModel.loadLanguages(currentLang)
-//            btnActionBarRight.apply {
-//                visible()
-//                setImageResource(R.drawable.select_language)
-//            }
-//            if (!isLanuageScreen()) {
-//                tvStart.visible()
-//                return
-//            }
-//            tvCenter.visible()
-
-
-//        binding.textView.text = "Home Fragment"
-//        binding.btnTest.setOnClickListener {
-//            showSnackbar("Xin chào từ Home!")
-//
     }
 
     override fun observeData() {
-
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-
                 launch {
                     viewModel.isFirstLanguage.collect { isFirst ->
                         if (isFirst) {
                             binding.actionBar.apply {
                                 tvStart.visible()
-                                btnActionBarRight.visible()
+                                btnActionBarRight.invisible()
                                 btnActionBarRight.setImageResource(R.drawable.select_language)
-
                             }
                         } else {
                             binding.actionBar.apply {
-                            btnActionBarLeft.visible()
-                             tvCenter.visible()
-                            btnActionBarRight.setImageResource(R.drawable.select_language)}
-
+                                btnActionBarLeft.visible()
+                                tvCenter.visible()
+                                btnActionBarRight.setImageResource(R.drawable.select_language2)
+                            }
                         }
                     }
                 }
                 launch {
                     viewModel.languageList.collect { list ->
-                        Log.d("LANG", "Updating adapter with list size=${list.size}") // check log
+                        Log.d("LANG", "Updating adapter with list size=${list.size}")
                         languageAdapter.submitList(list)
                     }
                 }
@@ -135,14 +133,9 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
                 }
             }
         }
-//        viewModel.data.observe(viewLifecycleOwner) { text ->
-//            binding.textView.text = text
-//        }
     }
 
     override fun bindViewModel() {
-
-
     }
 
     private fun initRcv() {
@@ -168,19 +161,15 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             return
         }
 
-        // Save language
         sharedPreferences.setLanguageKey(code)
-
-        // QUAN TRỌNG: Update ngôn ngữ ngay lập tức
         LanguageHelper.setLocale(requireContext(), code)
         LanguageManager.updateLanguage(code)
+
         if (viewModel.isFirstLanguage.value) {
-            // Onboarding flow
             sharedPreferences.setLanuageScreen(true)
             Log.d("LANG", "Navigating to Intro")
             toIntroFromLanguage()
         } else {
-            // Setting flow - Navigate về Home
             Log.d("LANG", "Navigating to Home")
             toHomeFromLanguage()
         }

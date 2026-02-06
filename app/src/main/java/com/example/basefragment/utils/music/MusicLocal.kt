@@ -13,7 +13,6 @@ object MusicLocal {
     var isInSplashOrTutorial = false
     var home = false
 
-
     // 2. Lưu trạng thái
 
     // 3. Chạy nhạc
@@ -27,14 +26,15 @@ object MusicLocal {
             try {
                 music = MediaPlayer.create(context.applicationContext, R.raw.theme)?.apply {
                     isLooping = true
+                    setVolume(0.3f, 0.3f)
                 }
             } catch (e: Exception) {
                 music = null
             }
         }
-
         try {
             if (music?.isPlaying == false) {
+                music?.setVolume(0.3f, 0.3f)
                 music?.start()
             }
         } catch (e: Exception) {

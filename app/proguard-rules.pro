@@ -81,8 +81,8 @@
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }
 
--keep class com.pfp.ocmaker.create.maker.ui.splash.SplashActivity.** {*; }
--keep class com.pfp.ocmaker.create.maker.data.** {*; }
+-keep class ccom.example.basefragment.ui.onboarding.** {*; }
+-keep class com.example.basefragment.data.** {*; }
 -keep public class com.google.android.gms.** { public protected *; }
 -keep class * extends androidx.fragment.app.Fragment { *; }
 -keep class **.*Fragment { *; }

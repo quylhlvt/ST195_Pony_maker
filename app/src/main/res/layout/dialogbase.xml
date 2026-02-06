@@ -1,131 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black2"
-        android:weightSum="800"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:id="@+id/linearSetBomb"
-            android:layout_weight="172"
-            app:layout_constraintDimensionRatio="2.96:1.72"
-            app:layout_constraintTop_toBottomOf="@+id/layoutActionBar">
+            android:layout_height="match_parent"
+            android:background="@color/black2"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="32dp"
+            android:weightSum="800">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/txtTitle"
-                android:freezesText="true"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="54dp"
-                android:background="@drawable/img_bg_multiplay_title"
-                android:elevation="2dp"
-                android:fontFamily="@font/carter_one_regular"
-                android:gravity="center"
-                android:text="@string/exit"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                app:layout_constraintDimensionRatio="1.88:0.4"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <Space
-                android:id="@+id/view"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/linearSetBomb"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="2.69:0.2"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_weight="172"
+                app:layout_constraintDimensionRatio="2.96:1.72"
+                app:layout_constraintTop_toBottomOf="@+id/layoutActionBar">
 
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:background="@drawable/img_bg_multiplay_desception"
-                android:orientation="vertical"
-                android:weightSum="152"
-                android:paddingHorizontal="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view">
-
-                <Space
-                    android:id="@+id/space1"
-                    android:layout_width="match_parent"
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/txtTitle"
+                    android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_weight="36" />
-
-                <TextView
-                    android:paddingHorizontal="10dp"
-                    android:id="@+id/txtDesception"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="44"
-                    android:letterSpacing="0.01"
-                    android:lineSpacingExtra="-3dp"
+                    android:layout_marginHorizontal="54dp"
+                    android:background="@drawable/img_bg_multiplay_title"
+                    android:elevation="2dp"
                     android:fontFamily="@font/carter_one_regular"
-                    android:textSize="14sp"
-                    android:textColor="@color/color_content_manual"
+                    android:freezesText="true"
                     android:gravity="center"
-                    android:text="@string/do_you_want_to_exit"
-                    />
+                    android:text="@string/exit"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    app:layout_constraintDimensionRatio="1.88:0.4"
+                    app:layout_constraintEnd_toEndOf="@+id/linearDerection"
+                    app:layout_constraintStart_toStartOf="@+id/linearDerection"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <Space
-                    android:id="@+id/space2"
+                    android:id="@+id/view"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="12" />
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
+                    app:layout_constraintDimensionRatio="2.69:0.2"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:id="@+id/linearDerection"
+                    android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_weight="40"
-                    android:orientation="horizontal"
-                    android:layout_gravity="center">
+                    android:background="@drawable/img_bg_multiplay_desception"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="20dp"
+                    android:weightSum="152"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view">
+
+                    <Space
+                        android:id="@+id/space1"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="36" />
 
                     <TextView
-                        android:id="@+id/btnExit"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/img_success_home"
+                        android:id="@+id/txtDesception"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="44"
                         android:fontFamily="@font/carter_one_regular"
                         android:gravity="center"
-                        android:text="@string/exit"
-                        android:textColor="@color/white"
-                        android:textSize="20sp"
-                        app:layout_constraintEnd_toStartOf="@+id/btnCancel"
-                        app:layout_constraintDimensionRatio="1.22:0.4"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        android:letterSpacing="0.01"
+                        android:lineSpacingExtra="-3dp"
+                        android:paddingHorizontal="10dp"
+                        android:text="@string/do_you_want_to_exit"
+                        android:textColor="@color/color_content_manual"
+                        android:textSize="14sp" />
 
-                    <TextView
-                        android:id="@+id/btnCancel"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/img_success_restart"
-                        android:fontFamily="@font/carter_one_regular"
-                        android:gravity="center"
-                        android:text="@string/cancel"
-                        android:textColor="@color/white"
-                        android:textSize="20sp"
-                        app:layout_constraintDimensionRatio="1.22:0.4"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/btnExit" />
+                    <Space
+                        android:id="@+id/space2"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="12" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-                <Space
-                    android:id="@+id/space3"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="20"
-                    />
-            </LinearLayout>
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="40"
+                        android:orientation="horizontal">
 
+                        <TextView
+                            android:id="@+id/btnExit"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/img_success_home"
+                            android:fontFamily="@font/carter_one_regular"
+                            android:gravity="center"
+                            android:text="@string/exit"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            app:layout_constraintDimensionRatio="1.22:0.4"
+                            app:layout_constraintEnd_toStartOf="@+id/btnCancel"
+                            app:layout_constraintStart_toStartOf="parent" />
 
+                        <TextView
+                            android:id="@+id/btnCancel"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/img_success_restart"
+                            android:fontFamily="@font/carter_one_regular"
+                            android:gravity="center"
+                            android:text="@string/cancel"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            app:layout_constraintDimensionRatio="1.22:0.4"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/btnExit" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <Space
+                        android:id="@+id/space3"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="20" />
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </FrameLayout>
+</layout>

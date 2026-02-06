@@ -56,9 +56,11 @@ class SuccessFragment : BaseFragment<FragmentSuccessBinding, SuccessViewModel>(
                     }
 
                     else -> {
-                        findNavController().navigate(
-                            R.id.action_success_to_manual
-                        )
+                        val bundle = Bundle().apply {
+                            putBoolean("isSuccess", true)
+
+                        }
+                        findNavController().navigate(R.id.action_success_to_manual, bundle)
                     }
                 }
             }
