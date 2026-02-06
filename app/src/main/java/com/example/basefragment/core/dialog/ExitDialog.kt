@@ -42,6 +42,8 @@ class ExitDialog : DialogFragment() {
         binding.apply {
             txtTitle.text = getString(R.string.exit)
             txtDesception.text = getString(R.string.do_you_want_to_exit)
+            txtTitle.isSelected=true
+
         }
     }
 

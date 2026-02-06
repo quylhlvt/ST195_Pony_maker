@@ -41,20 +41,19 @@ class ExitDialogHor : DialogFragment() {
 
     private fun initView() {
         binding.apply {
-            txtTitle.text = getString(R.string.exit)
-            txtDesception.text = getString(R.string.do_you_want_to_exit)
+//            txtTitle.text = getString(R.string.exit)
+//            txtDesception.text = getString(R.string.do_you_want_to_exit)
         }
     }
 
     private fun initAction() {
         binding.apply {
-            btnExit.onClick(requireContext()) {
-                onExitClick?.invoke()
-                dismiss()
-            }
+//            btnExit.onClick(requireContext()) {
+//                onExitClick?.invoke()
+//                dismiss()
+//            }
 
             btnCancel.onClick(requireContext()) {
-                onCancelClick?.invoke()
                 dismiss()
             }
         }

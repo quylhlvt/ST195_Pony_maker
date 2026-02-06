@@ -27,6 +27,7 @@ import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
+import com.example.basefragment.databinding.DialogbasehorBinding
 import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 import kotlin.getValue
@@ -38,6 +39,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     protected val binding: VB get() = _binding
     private var dialog: Dialog? = null
     private var confirmDialogBinding: DialogbaseBinding? = null
+    private var confirmDialogHorrBinding: DialogbasehorBinding? = null
     var onYesClick: (() -> Unit)? = null
     var onNoClick: (() -> Unit)? = null
     protected val viewModel: VM by lazy {
@@ -153,50 +155,93 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
     fun showLoading(
         cancelable: Boolean = false,
-        select: Boolean = false,  // true = confirm dialog, false = loading
+        select: Boolean = true,  // true = confirm dialog, false = loading
         title: String? = null,
         message: String? = getString(R.string.loading),
     ) {
         hideLoading()
 
         dialog = Dialog(requireContext(),R.style.BaseDialog).apply {
-            val binding = DialogbaseBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-            confirmDialogBinding = binding
+            if (sharedPreferences.isRotate()){
+                val binding = DialogbaseBinding.inflate(layoutInflater)
+                setContentView(binding.root)
+                confirmDialogBinding = binding
 
-            // Cập nhật text
-            title?.let { binding.txtTitle.text = it } // nếu có TextView title
-            binding.txtDesception.text = message ?: ""
+                // Cập nhật text
+                title?.let { binding.txtTitle.text = it } // nếu có TextView title
+//                binding.txtDesception.text = message ?: ""
+                title?.let { binding.txtDesception.text = it } // nếu có TextView title
 
-            if (select) {
-                // Hiện nút Yes/No
-                binding.btnCancel.visible()
-                binding.btnExit.visible()
-                binding.btnCancel.onClick(requireContext()) {
-                    onNoClick?.invoke()
-                    dismiss()
+                if (select) {
+                    // Hiện nút Yes/No
+                    binding.btnCancel.visible()
+                    binding.btnExit.visible()
+                    binding.btnCancel.onClick(requireContext()) {
+                        onNoClick?.invoke()
+                        dismiss()
+                    }
+                    binding.btnExit.onClick(requireContext()) {
+                        onYesClick?.invoke()
+                        dismiss()
+                    }
+                } else {
+                    // Ẩn nút Yes/No (chỉ loading)
+                    binding.btnCancel.gone()
+                    binding.btnExit.gone()
                 }
-                binding.btnExit.onClick(requireContext()) {
-                    onYesClick?.invoke()
-                    dismiss()
+
+                setCancelable(cancelable)
+                window?.apply {
+                    setBackgroundDrawableResource(android.R.color.transparent)
+                    // Đặt layout MATCH_PARENT cho cả width và height
+                    setLayout(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT
+                    )
+                    setGravity(Gravity.CENTER)
                 }
-            } else {
-                // Ẩn nút Yes/No (chỉ loading)
-                binding.btnCancel.gone()
-                binding.btnExit.gone()
+                show()
+            }else{
+                val binding = DialogbasehorBinding.inflate(layoutInflater)
+                setContentView(binding.root)
+                confirmDialogHorrBinding = binding
+
+                // Cập nhật text
+                title?.let { binding.txtTitle.text = it } // nếu có TextView title
+//                binding.txtDesception.text = message ?: ""
+                title?.let { binding.txtDesception.text = it } // nếu có TextView title
+
+                if (select) {
+                    // Hiện nút Yes/No
+                    binding.btnCancel.visible()
+                    binding.btnExit.visible()
+                    binding.btnCancel.onClick(requireContext()) {
+                        onNoClick?.invoke()
+                        dismiss()
+                    }
+                    binding.btnExit.onClick(requireContext()) {
+                        onYesClick?.invoke()
+                        dismiss()
+                    }
+                } else {
+                    // Ẩn nút Yes/No (chỉ loading)
+                    binding.btnCancel.gone()
+                    binding.btnExit.gone()
+                }
+
+                setCancelable(cancelable)
+                window?.apply {
+                    setBackgroundDrawableResource(android.R.color.transparent)
+                    // Đặt layout MATCH_PARENT cho cả width và height
+                    setLayout(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT
+                    )
+                    setGravity(Gravity.CENTER)
+                }
+                show()
             }
 
-            setCancelable(cancelable)
-            window?.apply {
-                setBackgroundDrawableResource(android.R.color.transparent)
-                // Đặt layout MATCH_PARENT cho cả width và height
-                setLayout(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.MATCH_PARENT
-                )
-                setGravity(Gravity.CENTER)
-            }
-            show()
         }
     }
     fun hideLoading() {

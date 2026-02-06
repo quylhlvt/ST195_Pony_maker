@@ -4,35 +4,25 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.activityViewModels
-import com.example.basefragment.R
-import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.extention.onClick
-import com.example.basefragment.core.extention.popBack
-import com.example.basefragment.data.model.manual.ManualModel
-import com.example.basefragment.databinding.FragmentPlayBinding
-import com.example.basefragment.ui.main.manual.ManualViewModel
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.basefragment.R
 import com.example.basefragment.core.base.BackPressHandler
-import com.example.basefragment.core.dialog.ExitDialog
-import com.example.basefragment.core.dialog.ExitDialogHor
+import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.core.extention.setForegroundColor
 import com.example.basefragment.core.extention.visible
-import com.example.basefragment.core.helper.RateHelper
-import com.example.basefragment.core.helper.RateHelper.showExitDialogHor
-import com.example.basefragment.core.helper.RateHelper.showRateDialog
-import com.example.basefragment.utils.state.ExitState
-import com.example.basefragment.utils.state.RateState
+import com.example.basefragment.data.model.manual.ManualModel
+import com.example.basefragment.databinding.FragmentPlayBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -54,7 +44,7 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
     private val handler = Handler(Looper.getMainLooper())
     override fun onBackPressed(): Boolean {
         if (isAnimationRunning) return true
-        showExitDialog()
+        showLoading()
         return true
     }
     private val player1Adapter by lazy {
@@ -73,38 +63,27 @@ class PlayFragment : BaseFragment<FragmentPlayBinding, PlayViewModel>(
         }
     }
     // PlayFragment
-    private fun showExitDialog() {
-        val dialogExit = ExitDialogHor()
-        dialogExit.show(childFragmentManager, "ExitDialogHor")
 
-        dialogExit.onExitClick = {
-            finishGame()
-        }
-
-        dialogExit.onCancelClick = {
-            // Optional: do something on cancel
-        }
-    }
 
     override fun viewListener() {
         binding.apply {
             imgBack.onClick(requireContext()) {
                 if (!isAnimationRunning) {
+                    showLoading()
 //                    showRateDialog(requireActivity(), sharedPreferences) { state ->
 //                        if (state != RateState.CANCEL) {
 //                            showToast(R.string.have_rated)
 //                        }
-//                        requireActivity().finish()
+//                       finishGame()
 //
 //                        // User cancel -> Không làm gì (ở lại app)
 //                    }
-                    showExitDialogHor(requireActivity()) { state ->
-                        if (state != ExitState.EXIT) {
-
-                            requireActivity().finish()
-                        }
-                        // User cancel -> Không làm gì (ở lại app)
-                    }
+//                    showExitDialogHor(requireActivity()) { state ->
+//                        if (state != ExitState.EXIT) {
+//                            finishGame()
+//                        }
+//                        // User cancel -> Không làm gì (ở lại app)
+//                    }
                 //                    showExitDialog()
                 }
             }

@@ -14,15 +14,12 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.dialog.ExitDialog
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.core.extention.setForegroundColor
 import com.example.basefragment.core.extention.visible
-import com.example.basefragment.core.helper.RateHelper.showExitDialogHor
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentPrePlayBinding
-import com.example.basefragment.utils.state.ExitState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,19 +59,11 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
 
     override fun onBackPressed(): Boolean {
         if (isAnimationRunning) return true
-        showExitDialog()
+        showLoading()
         return true
     }
 
-    // PrePlayFragment
-    private fun showExitDialog() {
-        showExitDialogHor(requireActivity()) { state ->
-            if (state != ExitState.EXIT) {
-                requireActivity().finish()
-            }
-            // User cancel -> Không làm gì (ở lại app)
-        }
-    }
+
 
     override fun viewListener() {
         binding.apply {
