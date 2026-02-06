@@ -8,15 +8,21 @@ import androidx.annotation.RawRes
 import com.example.basefragment.R
 import com.example.basefragment.core.helper.SharedPreferencesManager
 
+
 object SoundEffect {
 
     private var soundPool: SoundPool? = null
     private var soundCache = HashMap<Int, Int>()
     private var loadedSounds = mutableSetOf<Int>()
     private var audioManager: AudioManager? = null
+    private var onSoundCompleteListener: ((Int) -> Unit)? = null
+
+    private val activeStreams = mutableMapOf<Int, Int>()
+    private val streamHandlers = mutableMapOf<Int, Runnable>()
 
     private const val DEFAULT_VOLUME = 1.0f
 
+    // ... existing init() and setMediaVolumeToMax() ...
     fun init(context: Context) {
         if (soundPool != null) return
 
@@ -39,37 +45,18 @@ object SoundEffect {
         }
 
         // Tăng volume Media stream lên max khi phát sound effect
-        setMediaVolumeToMax(context)
     }
-
-    private fun setMediaVolumeToMax(context: Context) {
-        try {
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-            val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-
-            // Tăng lên 80-90% để không quá ồn
-            val targetVolume = (maxVolume * 0.9).toInt()
-
-            if (currentVolume < targetVolume) {
-                audioManager.setStreamVolume(
-                    AudioManager.STREAM_MUSIC,
-                    targetVolume,
-                    0
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
     fun playClick(
         context: Context,
         @RawRes resId: Int = R.raw.click,
         checkSettings: Boolean = true,
-        volume: Float = DEFAULT_VOLUME
+        volume: Float = DEFAULT_VOLUME,
+        onComplete: (() -> Unit)? = null
     ) {
-        if (checkSettings && !SharedPreferencesManager.isSound()) return
+        if (checkSettings && !SharedPreferencesManager.isSound()){
+            onComplete?.invoke()
+            return
+        }
 
         if (soundPool == null) init(context)
 
@@ -81,14 +68,125 @@ object SoundEffect {
             soundPool?.setOnLoadCompleteListener { _, sampleId, status ->
                 if (status == 0 && sampleId == soundId) {
                     loadedSounds.add(sampleId)
-                    soundPool?.play(sampleId, volume, volume, 1, 0, 1f)
+                    val streamId = soundPool?.play(sampleId, volume, volume, 1, 0, 1f)
+                    streamId?.let {
+                        activeStreams[resId] = it
+                        calculateSoundDuration(context, resId, onComplete)
+                    }
                 }
             }
         } else {
             if (loadedSounds.contains(soundId)) {
-                soundPool?.play(soundId, volume, volume, 1, 0, 1f)
+                val streamId = soundPool?.play(soundId, volume, volume, 1, 0, 1f)
+
+                streamId?.let {
+                    activeStreams[resId] = it
+                    calculateSoundDuration(context, resId, onComplete)
+                }
             }
         }
+    }
+
+    private fun calculateSoundDuration(
+        context: Context,
+        @RawRes resId: Int,
+        onComplete: (() -> Unit)?
+    ) {
+        try {
+            streamHandlers[resId]?.let {
+                android.os.Handler(android.os.Looper.getMainLooper()).removeCallbacks(it)
+            }
+
+            val mediaPlayer = android.media.MediaPlayer.create(context, resId)
+            val duration = mediaPlayer?.duration?.toLong() ?: 0L
+            mediaPlayer?.release()
+
+            if (duration > 0 && onComplete != null) {
+                val runnable = Runnable {
+                    onComplete.invoke()
+                    activeStreams.remove(resId)
+                    streamHandlers.remove(resId)
+                }
+
+                streamHandlers[resId] = runnable
+
+                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                    runnable,
+                    duration
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            onComplete?.invoke()
+            activeStreams.remove(resId)
+            streamHandlers.remove(resId)
+        }
+    }
+
+    // ✅ Stop và XÓA HẲN sound cụ thể
+    fun removeSound(@RawRes resId: Int) {
+        // Stop stream nếu đang chạy
+        activeStreams[resId]?.let { streamId ->
+            soundPool?.stop(streamId)
+        }
+
+        // Hủy handler callback
+        streamHandlers[resId]?.let { runnable ->
+            android.os.Handler(android.os.Looper.getMainLooper()).removeCallbacks(runnable)
+        }
+
+        // ✅ Unload sound khỏi SoundPool
+        soundCache[resId]?.let { soundId ->
+            soundPool?.unload(soundId)
+            loadedSounds.remove(soundId)
+        }
+
+        // ✅ Xóa khỏi cache
+        soundCache.remove(resId)
+        activeStreams.remove(resId)
+        streamHandlers.remove(resId)
+    }
+
+    // ✅ Stop sound nhưng GIỮ trong cache (dùng lại được)
+    fun stopSound(@RawRes resId: Int) {
+        activeStreams[resId]?.let { streamId ->
+            soundPool?.stop(streamId)
+        }
+
+        streamHandlers[resId]?.let { runnable ->
+            android.os.Handler(android.os.Looper.getMainLooper()).removeCallbacks(runnable)
+        }
+
+        activeStreams.remove(resId)
+        streamHandlers.remove(resId)
+    }
+
+    // ✅ Stop tất cả nhưng GIỮ cache
+    fun stopAllSounds() {
+        activeStreams.forEach { (_, streamId) ->
+            soundPool?.stop(streamId)
+        }
+
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        streamHandlers.forEach { (_, runnable) ->
+            handler.removeCallbacks(runnable)
+        }
+
+        activeStreams.clear()
+        streamHandlers.clear()
+    }
+
+    // ✅ Xóa HẲN tất cả sounds
+    fun removeAllSounds() {
+        stopAllSounds()
+
+        // Unload tất cả sounds
+        soundCache.values.forEach { soundId ->
+            soundPool?.unload(soundId)
+        }
+
+        soundCache.clear()
+        loadedSounds.clear()
     }
 
     fun playSound(
@@ -111,12 +209,18 @@ object SoundEffect {
             soundPool?.setOnLoadCompleteListener { _, sampleId, status ->
                 if (status == 0 && sampleId == soundId) {
                     loadedSounds.add(sampleId)
-                    soundPool?.play(sampleId, volume, volume, 1, loop, rate)
+                    val streamId = soundPool?.play(sampleId, volume, volume, 1, loop, rate)
+                    streamId?.let {
+                        activeStreams[resId] = it
+                    }
                 }
             }
         } else {
             if (loadedSounds.contains(soundId)) {
-                soundPool?.play(soundId, volume, volume, 1, loop, rate)
+                val streamId = soundPool?.play(soundId, volume, volume, 1, loop, rate)
+                streamId?.let {
+                    activeStreams[resId] = it
+                }
             }
         }
     }
@@ -126,10 +230,9 @@ object SoundEffect {
     }
 
     fun release() {
+        removeAllSounds() // ✅ Xóa hết trước khi release
         soundPool?.release()
         soundPool = null
-        soundCache.clear()
-        loadedSounds.clear()
         audioManager = null
     }
 }

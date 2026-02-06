@@ -14,6 +14,7 @@ import com.example.basefragment.R
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.strings
 import com.example.basefragment.databinding.DialogRateBinding
+import androidx.core.graphics.drawable.toDrawable
 
 class RateDialog() : DialogFragment() {
 
@@ -33,7 +34,7 @@ class RateDialog() : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
 
         isCancelable = false
 
@@ -63,6 +64,7 @@ class RateDialog() : DialogFragment() {
             }
 
             if (rating <= 3) {
+                Toast.makeText(requireContext(), requireContext().getText(R.string.rate_us_0), Toast.LENGTH_SHORT).show()
                 onRateLess3?.invoke()
             } else {
                 onRateGreater3?.invoke()

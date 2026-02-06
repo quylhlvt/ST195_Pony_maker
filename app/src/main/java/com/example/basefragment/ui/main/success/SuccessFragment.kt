@@ -9,6 +9,10 @@ import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.screenRotation
 import com.example.basefragment.databinding.FragmentSuccessBinding
+import com.example.basefragment.utils.music.MusicLocal.pause
+import com.example.basefragment.utils.music.MusicLocal.play
+import com.example.basefragment.utils.music.SoundEffect.playClick
+import com.example.basefragment.utils.music.SoundEffect.removeAllSounds
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -76,12 +80,12 @@ class SuccessFragment : BaseFragment<FragmentSuccessBinding, SuccessViewModel>(
         isWin = arguments?.getBoolean("win", false) ?: false
         isAuto = arguments?.getBoolean("auto", false) ?: false
         isplaymulti = arguments?.getBoolean("playmulti", false) ?: false
-
         screenRotation()
     }
 
     override fun initView() {
         binding.apply {
+
             val (imageRes, playerText) = when {
                 isWin -> R.drawable.img_success_play2 to getString(R.string.player_2)
                 isplaymulti -> R.drawable.img_success_mutial to getString(R.string.best_player)

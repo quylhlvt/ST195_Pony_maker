@@ -2,6 +2,7 @@ package com.example.basefragment.ui.main.home
 
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.screenRotation
@@ -31,7 +33,7 @@ import kotlin.system.exitProcess
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     FragmentHomeBinding::inflate, HomeViewModel::class.java
-) {
+), BackPressHandler {
     private var countRate =0
 
     override fun viewListener() {
@@ -84,9 +86,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
         }
         binding.apply {
             tv1.isSelected = true
-
             tv2.isSelected = true
-            tv3.isSelected = true
+//            tv3.isSelected = true
         }
         sharedPreferences.setBackRequest(sharedPreferences.isBackRequest() + 1)
         deleteTempFolder()
@@ -132,25 +133,27 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 //            }
         }
     }
+    override fun onBackPressed(): Boolean {
+        countRate++
+        sharedPreferences.setRateCountRequest(countRate)
+        if (!sharedPreferences.isRateRequest()&& countRate % 2==0) {
+            // Chưa rate -> Show dialog
+            RateHelper.showRateDialog(requireActivity(), sharedPreferences) { state ->
+                if (state != RateState.CANCEL) {
+                    showToast(R.string.have_rated)
+                }
+                requireActivity().moveTaskToBack(true)
+            }
+        } else {
+        requireActivity().moveTaskToBack(true)
+        }
+        return true
+
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            countRate++
-            sharedPreferences.setRateCountRequest(countRate)
-            if (!sharedPreferences.isRateRequest()&& countRate % 2==0) {
-                // Chưa rate -> Show dialog
-                RateHelper.showRateDialog(requireActivity(), sharedPreferences) { state ->
-                    if (state != RateState.CANCEL) {
-                        showToast(R.string.have_rated)
-                    }
-                    requireActivity().finish()
-                    // User cancel -> Không làm gì (ở lại app)
-                }
-            } else {
-                requireActivity().finish()
-            }
-        }
+
     }
     override fun onResume() {
         super.onResume()

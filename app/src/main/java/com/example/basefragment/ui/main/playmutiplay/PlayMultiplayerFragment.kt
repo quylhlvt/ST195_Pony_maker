@@ -21,6 +21,10 @@ import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentMultiplayerBinding
 import com.example.basefragment.databinding.FragmentPlayMutiplayBinding
 import com.example.basefragment.ui.main.play.PlayAdapter
+import com.example.basefragment.utils.music.MusicLocal.pause
+import com.example.basefragment.utils.music.MusicLocal.play
+import com.example.basefragment.utils.music.SoundEffect.playClick
+import com.example.basefragment.utils.music.SoundEffect.removeAllSounds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,12 +50,15 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
     }
     private fun showDialogExit() {
         showConfirmDialog(
+            muti = true,
             onYes = {
-                handler.removeCallbacksAndMessages(null)
                 popBack()
+                handler.removeCallbacksAndMessages(null)
+                removeAllSounds()
             }
         )
     }
+
     private val playerAdapter by lazy {
         MutiPlayAdapter(requireContext()).apply {
             onItemClick = { item, position ->
@@ -76,9 +83,11 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
         playerWins++
         if (playerWins >= count) {
             lifecycleScope.launch {
-            delay(400)
-            isGameOver = true
-            playerAdapter.setEnabled(false)
+                pause()
+                playClick(requireContext(), R.raw.votay )
+                isGameOver = true
+                playerAdapter.setEnabled(false)
+                delay(5000)
 
             // ✅ Navigate sau delay
             handler.postDelayed({
@@ -86,6 +95,8 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
                     putBoolean("playmulti", true)
                 }
                 findNavController().navigate(R.id.action_playMultiplayer_to_success, bundle)
+                removeAllSounds()
+                play(requireContext())
             }, 2000)}
         } else {
             // ✅ Reset processing để cho phép click tiếp
@@ -161,7 +172,6 @@ class PlayMultiplayerFragment : BaseFragment<FragmentPlayMutiplayBinding,PlayMul
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                         showDialogExit()
-
                 }
             }
         )

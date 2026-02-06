@@ -1,14 +1,19 @@
 package com.example.basefragment.ui.onboarding.intro
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.toHome
+import com.example.basefragment.core.extention.toSettingFromLang
+import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
 import com.example.basefragment.databinding.FragmentIntroBinding
 import com.example.basefragment.utils.music.MusicLocal.isInSplashOrTutorial
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,7 +24,7 @@ import javax.inject.Inject
 class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
     FragmentIntroBinding::inflate,
     IntroViewModel::class.java
-) {
+), BackPressHandler {
     @Inject
     lateinit var introAdapter: IntroAdapter
 
@@ -41,7 +46,10 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
 //        })
     }
 
-
+    override fun onBackPressed(): Boolean {
+                requireActivity().moveTaskToBack(true)
+        return true
+    }
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -50,10 +58,6 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
 
     override fun initView() {
         isInSplashOrTutorial = true
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            requireActivity().finish()
-        }
-
         binding.viewPager2.adapter = introAdapter
         binding.dotsIndicator.attachTo(binding.viewPager2)
         setOnChangeViewPager2()

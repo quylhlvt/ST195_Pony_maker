@@ -37,22 +37,16 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     private var isFromSetting = false
 
     override fun onBackPressed(): Boolean {
-        Log.d("LANG_BACK", "onBackPressed called")
-        Log.d("LANG_BACK", "isFromSetting: $isFromSetting")
-        Log.d("LANG_BACK", "isLanuageScreen(): ${isLanuageScreen()}")
 
         when {
             isFromSetting -> {
-                Log.d("LANG_BACK", "Action: toSettingFromLang")
                 toSettingFromLang()
             }
             isLanuageScreen() -> {
-                Log.d("LANG_BACK", "Action: popBack")
                 popBack()
             }
             else -> {
-                Log.d("LANG_BACK", "Action: finish activity")
-                requireActivity().finish()
+                requireActivity().moveTaskToBack(true)
             }
         }
         return true
@@ -78,9 +72,6 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     override fun initView() {
         // Set isFromSetting trước khi dùng
         isFromSetting = (findNavController().currentDestination?.id == R.id.languageInSetting)
-
-        Log.d("LANG_INIT", "isFromSetting: $isFromSetting")
-        Log.d("LANG_INIT", "currentDestination: ${findNavController().currentDestination?.id}")
 
         binding.apply {
             actionBar.btnActionBarRight.gone()

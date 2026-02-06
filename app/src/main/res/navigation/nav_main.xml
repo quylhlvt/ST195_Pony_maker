@@ -12,15 +12,13 @@
         android:label="Home"
         tools:layout="@layout/fragment_home">
 
-        <!-- QUAN TRỌNG: Các action này PHẢI nằm trong cùng graph -->
         <action
             android:id="@+id/action_home_to_manual"
             app:destination="@id/manualFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_home_to_auto"
@@ -29,17 +27,16 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
- <action
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
             android:id="@+id/action_home_to_auto_Ver"
             app:destination="@id/prePlayFragment"
             app:popUpTo="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_home_to_multiplayer"
@@ -47,10 +44,8 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
 
-        <!-- Navigate sang graph khác -->
         <action
             android:id="@+id/action_home_to_setting"
             app:destination="@id/nav_setting"
@@ -71,12 +66,17 @@
             android:name="isSuccess"
             app:argType="boolean"
             android:defaultValue="false" />
+
+        <!-- ✅ SỬA: Thêm animation khi back về home -->
         <action
             android:id="@+id/action_manual_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
-
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_manual_to_guide"
@@ -85,8 +85,8 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
+
         <action
             android:id="@+id/action_manualFragment_to_manualFragment2"
             app:destination="@id/manualFragment2"
@@ -94,11 +94,8 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
-
-
 
     <!-- ==================== MULTIPLAYER ==================== -->
     <fragment
@@ -107,27 +104,34 @@
         android:label="Multiplayer"
         tools:layout="@layout/fragment_multiplayer">
 
+        <!-- ✅ SỬA: Thêm animation -->
         <action
             android:id="@+id/action_multiplayer_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_multiplayer_to_playMultiplayer"
             app:destination="@id/playMultiplayerFragment"
-            app:popUpTo="@id/multiplayerFragment"
+            app:popUpTo="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_multiplayer_to_guide"
             app:destination="@id/guideFragment"
             app:popUpTo="@id/multiplayerFragment"
-            />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <!-- ==================== PLAY ==================== -->
@@ -136,11 +140,18 @@
         android:name="com.example.basefragment.ui.main.play.PlayFragment"
         android:label="Play"
         tools:layout="@layout/fragment_play">
+
+        <!-- ✅ SỬA: Thêm animation -->
         <action
             android:id="@+id/action_auto_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
         <action
             android:id="@+id/action_play_to_success"
             app:destination="@id/successFragment"
@@ -148,20 +159,21 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
-
-
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_play_to_manual"
             app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
         <argument
             android:name="isAutoMode"
             app:argType="boolean"
             android:defaultValue="false" />
-
         <argument
             app:nullable="true"
             android:defaultValue="@null"
@@ -180,20 +192,22 @@
         android:name="com.example.basefragment.ui.main.playmutiplay.PlayMultiplayerFragment"
         android:label="Play Multiplayer"
         tools:layout="@layout/fragment_play_mutiplay">
+
         <argument
             android:name="count"
             app:argType="integer"
             android:defaultValue="1" />
 
+        <!-- ✅ SỬA: Thêm animation -->
         <action
             android:id="@+id/action_play_mutiplay_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_out_left"
+            app:popExitAnim="@anim/slide_in_right" />
 
         <action
             android:id="@+id/action_playMultiplayer_to_success"
@@ -202,8 +216,7 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right"  />
     </fragment>
 
     <!-- ==================== SUCCESS ==================== -->
@@ -213,36 +226,57 @@
         android:label="Success"
         tools:layout="@layout/fragment_success">
 
+        <!-- ✅ SỬA ĐÚNG: animation back về home -->
         <action
             android:id="@+id/action_success_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"   />
 
+        <!-- ✅ SỬA: Thêm animation -->
         <action
             android:id="@+id/action_success_to_manual"
             app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment" />
-        <action
-            android:id="@+id/action_success_to_mutial"
-            app:destination="@id/multiplayerFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
 
         <action
             android:id="@+id/action_success_to_auto"
             app:destination="@id/playFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="false"/>
-  <action
+            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
+        <action
             android:id="@+id/action_success_to_auto_Ver"
             app:destination="@id/prePlayFragment"
             app:popUpTo="@id/homeFragment"
-      app:popUpToInclusive="false"/>
+            app:popUpToInclusive="false"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_success_to_multiplayer"
             app:destination="@id/multiplayerFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
         <argument
             android:name="win"
             app:argType="boolean"
@@ -264,26 +298,36 @@
         android:label="Guide"
         tools:layout="@layout/fragment_guide">
 
-
         <argument
             android:name="isMuti"
             app:argType="boolean"
             android:defaultValue="false" />
 
+        <!-- ✅ SỬA: Thêm animation -->
         <action
             android:id="@+id/action_guide_to_manual"
             app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
 
         <action
             android:id="@+id/action_guide_to_home_multiplayer"
             app:destination="@id/multiplayerFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+
+    <!-- ==================== MANUAL 2 ==================== -->
     <fragment
         android:id="@+id/manualFragment2"
         android:name="com.example.basefragment.ui.main.manual.ManualFragment2"
-        android:label="ManualFragment2" >
+        android:label="ManualFragment2">
 
         <action
             android:id="@+id/action_manual_to_play"
@@ -292,8 +336,8 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
+
         <action
             android:id="@+id/action_manual_to_play_Ver"
             app:destination="@id/prePlayFragment"
@@ -301,20 +345,27 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
-
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+
+    <!-- ==================== PRE PLAY ==================== -->
     <fragment
         android:id="@+id/prePlayFragment"
         android:name="com.example.basefragment.ui.main.play.PrePlayFragment"
         android:label="fragment_pre_play"
-        tools:layout="@layout/fragment_pre_play" >
+        tools:layout="@layout/fragment_pre_play">
+
+        <!-- ✅ SỬA: Thêm animation -->
         <action
             android:id="@+id/action_autoprePlay_to_home"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
         <action
             android:id="@+id/action_prePlay_to_success"
             app:destination="@id/successFragment"
@@ -322,17 +373,21 @@
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"
-            />
+            app:popExitAnim="@anim/slide_out_right" />
+
         <action
             android:id="@+id/action_prePlay_to_manual"
             app:destination="@id/manualFragment"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+
         <argument
             android:name="isAutoMode"
             app:argType="boolean"
             android:defaultValue="false" />
-
         <argument
             app:nullable="true"
             android:defaultValue="@null"

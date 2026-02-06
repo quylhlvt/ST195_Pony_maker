@@ -43,6 +43,7 @@ class PagerIntroViewHolder(
     fun bind(pager: IntroModel) {
         binding.run {
             tvContent.text = root.context.strings(pager.content)
+            tvContent.isSelected =true
             loadImage(root, pager.image, imvImage, false)
 
 //            imvImage.loadImage(pager.image)

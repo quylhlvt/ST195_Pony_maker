@@ -20,6 +20,10 @@ import com.example.basefragment.core.extention.setForegroundColor
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.manual.ManualModel
 import com.example.basefragment.databinding.FragmentPrePlayBinding
+import com.example.basefragment.utils.music.MusicLocal.pause
+import com.example.basefragment.utils.music.MusicLocal.play
+import com.example.basefragment.utils.music.SoundEffect.playClick
+import com.example.basefragment.utils.music.SoundEffect.removeAllSounds
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -56,6 +60,7 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             }
         }
     }
+
     private fun showDialogExit() {
         showConfirmDialog(
             onYes = {
@@ -63,12 +68,12 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
             }
         )
     }
+
     override fun onBackPressed(): Boolean {
         if (isAnimationRunning) return true
         showDialogExit()
         return true
     }
-
 
 
     override fun viewListener() {
@@ -400,16 +405,26 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
 
     private fun updateTurnState() {
         binding.apply {
-            if (currentPlayer == 1) {
-                player1Adapter.setEnabled(true)
-                player2Adapter.setEnabled(false)
-                recyclePlay2.setForegroundColor(R.color.black2)
-                recyclePlay.setForegroundColor(null)
-            } else {
+            if (player2Wins >= 3 || player1Wins >= 3) {
                 player1Adapter.setEnabled(false)
-                player2Adapter.setEnabled(true)
+                player2Adapter.setEnabled(false)
                 recyclePlay.setForegroundColor(R.color.black2)
-                recyclePlay2.setForegroundColor(null)
+                recyclePlay2.setForegroundColor(R.color.black2)
+            } else {
+                if (currentPlayer == 1) {
+
+                    player1Adapter.setEnabled(true)
+                    player2Adapter.setEnabled(false)
+                    recyclePlay2.setForegroundColor(R.color.black2)
+                    recyclePlay.setForegroundColor(null)
+
+                } else {
+
+                    player1Adapter.setEnabled(false)
+                    player2Adapter.setEnabled(true)
+                    recyclePlay.setForegroundColor(R.color.black2)
+                    recyclePlay2.setForegroundColor(null)
+                }
             }
         }
     }
@@ -418,31 +433,34 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
         lifecycleScope.launch {
             var win = false
             if (player1Wins >= 3) {
+                pause()
+                playClick(requireContext(), R.raw.votay )
+                delay(300)
                 isGameOver = true
-                player1Adapter.setEnabled(false)
-                player2Adapter.setEnabled(false)
-                binding.recyclePlay.setForegroundColor(null)
-                binding.recyclePlay2.setForegroundColor(null)
                 win = true
-                delay(2000)
+                delay(5000)
                 val bundle = Bundle().apply {
                     putBoolean("win", win)
                     putBoolean("auto", isAutoMode)
                 }
                 findNavController().navigate(R.id.action_prePlay_to_success, bundle)
+                removeAllSounds()
+                play(requireContext())
             } else if (player2Wins >= 3) {
+                pause()
+                playClick(requireContext(), R.raw.votay )
+                delay(300)
                 isGameOver = true
-                player1Adapter.setEnabled(false)
-                player2Adapter.setEnabled(false)
-                binding.recyclePlay.setForegroundColor(null)
-                binding.recyclePlay2.setForegroundColor(null)
+
                 win = false
-                delay(2000)
+                delay(5000)
                 val bundle = Bundle().apply {
                     putBoolean("win", win)
                     putBoolean("auto", isAutoMode)
                 }
                 findNavController().navigate(R.id.action_prePlay_to_success, bundle)
+                removeAllSounds()
+                play(requireContext())
             }
         }
     }
@@ -479,11 +497,12 @@ class PrePlayFragment : BaseFragment<FragmentPrePlayBinding, PlayViewModel>(
     private fun finishGame() {
         handler.removeCallbacksAndMessages(null)
         popBack()
+        removeAllSounds()
     }
 
     override fun onDestroyView() {
         handler.removeCallbacksAndMessages(null)
-
+        removeAllSounds()
         super.onDestroyView()
         screenRotation()
     }
